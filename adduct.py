@@ -2,28 +2,55 @@
 import argparse
 import sys
 import csv
+import os
 
 
 def adduct_calculation(args):
     print("<--Begin Calculations-->")
+    list_of_all_adduct = []
+    total_set=[]
     for i in range(int(args.hrepeat)):
         print("\nNumber of Hydro: %s" % (i + 1))
-        adduct_hydro(args,(i + 1))
+        list_of_all_adduct.append(adduct_hydro(args,(i + 1)))
+    
+    
+        for each_case in list_of_all_adduct:
+            if each_case == None:
+                pass
+            else:
+                for each_set in each_case:
+                    each_set_csv_str = str(each_set["element_set"]) + ";" + str("{:.5f}".format(each_set["sum_of_element_set"])) + ";" + str(each_set["mass_M"])
+                    print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
+                    total_set.append(each_set_csv_str)
+                    #reduct the duplicate answers
+                    total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
+    
+
+
+    print("<<--Write to csv-->>")
+    if os.path.exists("report_adduct.csv"):
+        os.remove("report_adduct.csv")
+
+    with open("report_adduct.csv","w") as f:
+        write = csv.writer(f)
+        for each_line in total_set:
+            write.writerow([each_line])
+
+    print("<--Calculation completed-->")
 
 def adduct_hydro(args,number_of_hydro):
     raw_file = open(args.file, "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
     low_limit   = float(args.exact_mass) - float(args.mass_error) + float(number_of_hydro) * float(args.hexact)
     high_limit  = float(args.exact_mass) + float(args.mass_error) + float(number_of_hydro) * float(args.hexact)
-    print("Low  limit after %s Hydro: %s" % (number_of_hydro,low_limit))
-    print("High limit after %s Hydro: %s" % (number_of_hydro,high_limit))
+    print("Low  limit after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
+    print("High limit after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
 
     list_exact_mass_of_each_element = []
     for j in range(int(args.repeat)):
         for i in rawdata:   
             list_exact_mass_of_each_element.append(float(i[1]))
 
-    #print(list_exact_mass_of_each_element)
     list_add = []
     subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
     
@@ -34,13 +61,36 @@ def adduct_hydro(args,number_of_hydro):
                 if i[0][k] == float(j[1]):
                     i[0][k] = j[0]
 
-
+    element_list = []
     for i in list_add:
+        element_set_dict = {
+            "element_set": "",
+            "sum_of_element_set":"",
+            "mass_M":""
+        }
+        plus = 0
+        minus = 0
         for k in i[0]:
-            plus    = k.count("+")
-            minus   = k.count("-")
-            if plus + minus - number_of_hydro == -1:
-                print( "%s,%s" % (i[0],float(i[1])))             
+            if "+" in k:
+                plus +=1
+            if "-" in k:
+                minus +=1
+        if plus - minus - number_of_hydro == -1:
+            #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
+            element_set_dict["element_set"]         = i[0]
+            element_set_dict["sum_of_element_set"]  = float(i[1])
+            element_set_dict["mass_M"]              = float("{:.5f}".format(float(args.unifi) - float(i[1])))
+            element_list.append(element_set_dict)          
+    
+    for i in element_list:
+        i["element_set"].sort()
+        i["element_set"] = i["element_set"]
+    
+    #reduct the duplicate answers
+    element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
+    #for i in element_list:
+    #    print("%s\tsum:%s\tM:%s" % (i["element_set"],i["sum_of_element_set"],i["mass_M"]))
+    return element_list
 
 
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
@@ -73,6 +123,7 @@ if __name__ == "__main__":
     parser_adduct_val.add_argument("repeat", help="times of repeat elements")
     parser_adduct_val.add_argument("hrepeat", help="number of Hydro repeat")
     parser_adduct_val.add_argument("hexact",  help="exact mass number of Hydro")
+    parser_adduct_val.add_argument("unifi", help="M/Z from Unifi")
     args = main_parser.parse_args(sys.argv[1:])
     
     if args.command == "adduct":
