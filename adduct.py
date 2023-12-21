@@ -7,34 +7,35 @@ import os
 
 def adduct_calculation(args):
     print("<--Begin Calculations-->")
-    list_of_all_adduct = []
-    total_set=[]
+    if os.path.exists("report_adduct.csv"):
+        os.remove("report_adduct.csv")
+
     for i in range(int(args.hrepeat)):
+        total_set=[]
+        list_of_all_adduct = []
         print("\nNumber of Hydro: %s" % (i + 1))
         list_of_all_adduct.append(adduct_hydro(args,(i + 1)))
-    
-    
+            
         for each_case in list_of_all_adduct:
             if each_case == None:
                 pass
             else:
                 for each_set in each_case:
                     each_set_csv_str = str(each_set["element_set"]) + ";" + str("{:.5f}".format(each_set["sum_of_element_set"])) + ";" + str(each_set["mass_M"])
-                    print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
+                    #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
                     total_set.append(each_set_csv_str)
                     #reduct the duplicate answers
                     total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
-    
+        print("Found: %s set(s)" % len(total_set))
 
 
-    print("<<--Write to csv-->>")
-    if os.path.exists("report_adduct.csv"):
-        os.remove("report_adduct.csv")
+        print("\n<<--Write to csv-->>")
 
-    with open("report_adduct.csv","w") as f:
-        write = csv.writer(f)
-        for each_line in total_set:
-            write.writerow([each_line])
+        with open("report_adduct.csv","a") as f:
+            write = csv.writer(f)
+            write.writerow(["Number of Hydro: %s;Element_set;Sum;Mass_after_subtract" % (i + 1)])
+            for each_line in total_set:
+                write.writerow([each_line])
 
     print("<--Calculation completed-->")
 
@@ -79,7 +80,7 @@ def adduct_hydro(args,number_of_hydro):
             #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
             element_set_dict["element_set"]         = i[0]
             element_set_dict["sum_of_element_set"]  = float(i[1])
-            element_set_dict["mass_M"]              = float("{:.5f}".format(float(args.unifi) - float(i[1])))
+            element_set_dict["mass_M"]              = float("{:.5f}".format(float(args.unifi_number) - float(i[1])))
             element_list.append(element_set_dict)          
     
     for i in element_list:
@@ -117,13 +118,13 @@ if __name__ == "__main__":
     subparsers = main_parser.add_subparsers(help = "command help", dest = "command")
 
     parser_adduct_val = subparsers.add_parser("adduct", help = "")
-    parser_adduct_val.add_argument("file", help= "find the X")
-    parser_adduct_val.add_argument("exact_mass", help="exact mass")
-    parser_adduct_val.add_argument("mass_error", help="mass error")
-    parser_adduct_val.add_argument("repeat", help="times of repeat elements")
-    parser_adduct_val.add_argument("hrepeat", help="number of Hydro repeat")
-    parser_adduct_val.add_argument("hexact",  help="exact mass number of Hydro")
-    parser_adduct_val.add_argument("unifi", help="M/Z from Unifi")
+    parser_adduct_val.add_argument("--file", help= "find the X")
+    parser_adduct_val.add_argument("--exact_mass", help="exact mass")
+    parser_adduct_val.add_argument("--mass_error", help="mass error")
+    parser_adduct_val.add_argument("--repeat", help="times of repeat elements")
+    parser_adduct_val.add_argument("--hrepeat", help="number of Hydro repeat")
+    parser_adduct_val.add_argument("--hexact",  help="exact mass number of Hydro")
+    parser_adduct_val.add_argument("--unifi_number", help="M/Z from Unifi")
     args = main_parser.parse_args(sys.argv[1:])
     
     if args.command == "adduct":
