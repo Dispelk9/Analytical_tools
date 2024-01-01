@@ -1,10 +1,8 @@
-Element_set with Number of Hydro: 1;Sum;Mass_after_subtract
-"['HCOO-', 'HCOO-', 'Na+', 'Na+'];135.97485;618.43376"
-"['HCOONa', 'HCOONa'];135.97485;618.43376"
-"['HCOO-', 'HCOONa', 'Na+'];135.97485;618.43376"
-Element_set with Number of Hydro: 2;Sum;Mass_after_subtract
-"['CH3COO-', 'K+', 'K+'];136.94070;618.4682"
-"['CH3COOK', 'K+'];136.94071;618.46819"
-Element_set with Number of Hydro: 3;Sum;Mass_after_subtract
-"['Br-', 'NH4+', 'NH4+', 'Na+'];137.97685;618.43235"
-Element_set with Number of Hydro: 4;Sum;Mass_after_subtract
+"['M', {'CH3COO-': 1, 'HCOO-': 1, 'K+': 1, 'Na+': 1}, '1H'];165.96443;678.50439"
+"['M', {'CH3COOK': 1, 'HCOO-': 1, 'Na+': 1}, '1H'];165.96444;678.50438"
+"['M', {'CH3COO-': 1, 'HCOOK': 1, 'Na+': 1}, '1H'];165.96444;678.50438"
+"['M', {'CH3COONa': 1, 'HCOO-': 1, 'K+': 1}, '1H'];165.96443;678.50439"
+"['M', {'CH3COO-': 1, 'HCOONa': 1, 'K+': 1}, '1H'];165.96443;678.50439"
+"['M', {'CH3COOK': 1, 'HCOONa': 1}, '1H'];165.96444;678.50438"
+"['M', {'CH3COONa': 1, 'HCOOK': 1}, '1H'];165.96444;678.50438"
+"['M', {'Cl-': 2, 'K+': 1, 'NH4+': 2, 'Na+': 1}, '3H'];167.96102;678.52345"

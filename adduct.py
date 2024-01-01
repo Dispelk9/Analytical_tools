@@ -33,7 +33,6 @@ def adduct_calculation(args):
 
         with open("report_adduct.csv","a") as f:
             write = csv.writer(f)
-            write.writerow(["Element_set with Number of Hydro: %s;Sum;Mass_after_subtract" % (i + 1)])
             for each_line in total_set:
                 write.writerow([each_line])
 
@@ -67,7 +66,6 @@ def m_calculation(args):
 
         with open("report_m.csv","a") as f:
             write = csv.writer(f)
-            write.writerow(["Element_set with Number of Hydro: %s;Sum" % (i + 1)])
             for each_line in total_set:
                 write.writerow([each_line])
 
@@ -114,13 +112,17 @@ def adduct_using_m(args,number_of_hydro):
                 minus +=1
         if plus - minus - number_of_hydro == -1:
             #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
-            element_set_dict["element_set"]         = i[0]
+            combi = {element:i[0].count(element) for element in i[0]}
+            combi = dict(sorted(combi.items()))
+            element_set_dict["element_set"]         = ["M",combi,str(number_of_hydro) + "H"]
+            
+            #element_set_dict["element_set"]         = i[0]
             element_set_dict["sum_of_element_set"]  = float(i[1])
             element_list.append(element_set_dict)          
     
-    for i in element_list:
-        i["element_set"].sort()
-        i["element_set"] = i["element_set"]
+    #for i in element_list:
+    #    i["element_set"].sort()
+    #    i["element_set"] = i["element_set"]
     
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
@@ -167,14 +169,16 @@ def adduct_hydro(args,number_of_hydro):
                 minus +=1
         if plus - minus - number_of_hydro == -1:
             #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
-            element_set_dict["element_set"]         = i[0]
+            combi = {element:i[0].count(element) for element in i[0]}
+            combi = dict(sorted(combi.items()))
+            element_set_dict["element_set"]         = ["M",combi,str(number_of_hydro) + "H"]
             element_set_dict["sum_of_element_set"]  = float(i[1])
             element_set_dict["mass_M"]              = float("{:.5f}".format(float(args.unifi_number) - float(i[1]) + float(number_of_hydro) * float(args.hexact)))
             element_list.append(element_set_dict)          
     
-    for i in element_list:
-        i["element_set"].sort()
-        i["element_set"] = i["element_set"]
+    #for i in element_list:
+    #    i["element_set"].sort()
+    #    i["element_set"] = i["element_set"]
     
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    

@@ -1,5 +1,6 @@
-Element_set with Number of Hydro: 1;Sum
-Element_set with Number of Hydro: 2;Sum
-Element_set with Number of Hydro: 3;Sum
-"['K+', 'K+'];77.92740;"
-Element_set with Number of Hydro: 4;Sum
+"['M', {'HCOO-': 2, 'Na+': 2}, '1H'];135.97485;"
+"['M', {'HCOONa': 2}, '1H'];135.97485;"
+"['M', {'HCOO-': 1, 'HCOONa': 1, 'Na+': 1}, '1H'];135.97485;"
+"['M', {'CH3COO-': 1, 'K+': 2}, '2H'];136.94070;"
+"['M', {'CH3COOK': 1, 'K+': 1}, '2H'];136.94071;"
+"['M', {'Br-': 1, 'NH4+': 2, 'Na+': 1}, '3H'];137.97685;"
