@@ -21,7 +21,7 @@ def adduct_calculation(args):
                 pass
             else:
                 for each_set in each_case:
-                    each_set_csv_str = str(each_set["element_set"]) + ";" + str("{:.5f}".format(each_set["sum_of_element_set"])) + ";" + str(each_set["mass_M"])
+                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
                     #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
                     total_set.append(each_set_csv_str)
                     #reduct the duplicate answers
@@ -29,7 +29,7 @@ def adduct_calculation(args):
         print("Found: %s set(s)" % len(total_set))
 
 
-        print("\n<<--Write to csv-->>")
+        print("\n<<--Write to report_adduct-->>")
 
         with open("report_adduct.csv","a") as f:
             write = csv.writer(f)
@@ -54,7 +54,7 @@ def m_calculation(args):
                 pass
             else:
                 for each_set in each_case:
-                    each_set_csv_str = str(each_set["element_set"]) + ";" + str("{:.5f}".format(each_set["sum_of_element_set"])) + ";" + str(each_set["mass_M"])
+                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
                     #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
                     total_set.append(each_set_csv_str)
                     #reduct the duplicate answers
@@ -62,7 +62,7 @@ def m_calculation(args):
         print("Found: %s set(s)" % len(total_set))
 
 
-        print("\n<<--Write to csv-->>")
+        print("\n<<--Write to report_m-->>")
 
         with open("report_m.csv","a") as f:
             write = csv.writer(f)
@@ -103,7 +103,7 @@ def adduct_using_m(args,number_of_hydro):
             "sum_of_element_set":"",
             "mass_M":""
         }
-        plus = 0
+        plus = 0 
         minus = 0
         for k in i[0]:
             if "+" in k:
@@ -114,10 +114,10 @@ def adduct_using_m(args,number_of_hydro):
             #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
             combi = {element:i[0].count(element) for element in i[0]}
             combi = dict(sorted(combi.items()))
-            element_set_dict["element_set"]         = ["M",combi,str(number_of_hydro) + "H"]
-            
+            inv_combi = {v: k for k, v in combi.items()}
+            element_set_dict["element_set"]         = ["M",inv_combi,str(number_of_hydro) + "H-"]
             #element_set_dict["element_set"]         = i[0]
-            element_set_dict["sum_of_element_set"]  = float(i[1])
+            element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
             element_list.append(element_set_dict)          
     
     #for i in element_list:
@@ -171,9 +171,10 @@ def adduct_hydro(args,number_of_hydro):
             #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
             combi = {element:i[0].count(element) for element in i[0]}
             combi = dict(sorted(combi.items()))
-            element_set_dict["element_set"]         = ["M",combi,str(number_of_hydro) + "H"]
-            element_set_dict["sum_of_element_set"]  = float(i[1])
-            element_set_dict["mass_M"]              = float("{:.5f}".format(float(args.unifi_number) - float(i[1]) + float(number_of_hydro) * float(args.hexact)))
+            inv_combi = {v: k for k, v in combi.items()}
+            element_set_dict["element_set"]         = ["M",inv_combi,str(number_of_hydro) + "H"]
+            element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+            element_set_dict["mass_M"]              = ["M: " + str(float("{:.5f}".format(float(args.unifi_number) - float(i[1]) + float(number_of_hydro) * float(args.hexact))))]
             element_list.append(element_set_dict)          
     
     #for i in element_list:
@@ -193,7 +194,7 @@ def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
     # check if the partial sum is equals to target
     if s > low_limit and s < high_limit:
         #print("%s" % (partial))
-        list_with_sum = [partial,s]
+        list_with_sum = [partial,float("{:.5f}".format(float(s)))]
         list_add.append(list_with_sum)
     if s >= high_limit:
         return  # if we reach the number why bother to continue
