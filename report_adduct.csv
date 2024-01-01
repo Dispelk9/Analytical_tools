@@ -1,12 +1,10 @@
 Element_set with Number of Hydro: 1;Sum;Mass_after_subtract
-"['CH3COO-', 'HCOO-', 'K+', 'Na+'];165.96443;678.50439"
-"['CH3COOK', 'HCOO-', 'Na+'];165.96444;678.50438"
-"['CH3COO-', 'HCOOK', 'Na+'];165.96444;678.50438"
-"['CH3COONa', 'HCOO-', 'K+'];165.96443;678.50439"
-"['CH3COO-', 'HCOONa', 'K+'];165.96443;678.50439"
-"['CH3COOK', 'HCOONa'];165.96444;678.50438"
-"['CH3COONa', 'HCOOK'];165.96444;678.50438"
+"['HCOO-', 'HCOO-', 'Na+', 'Na+'];135.97485;618.43376"
+"['HCOONa', 'HCOONa'];135.97485;618.43376"
+"['HCOO-', 'HCOONa', 'Na+'];135.97485;618.43376"
 Element_set with Number of Hydro: 2;Sum;Mass_after_subtract
+"['CH3COO-', 'K+', 'K+'];136.94070;618.4682"
+"['CH3COOK', 'K+'];136.94071;618.46819"
 Element_set with Number of Hydro: 3;Sum;Mass_after_subtract
-"['Cl-', 'Cl-', 'K+', 'NH4+', 'NH4+', 'Na+'];167.96102;678.52345"
+"['Br-', 'NH4+', 'NH4+', 'Na+'];137.97685;618.43235"
 Element_set with Number of Hydro: 4;Sum;Mass_after_subtract
