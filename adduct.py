@@ -47,7 +47,7 @@ def m_calculation(args):
         total_set=[]
         list_of_all_adduct = []
         print("\nNumber of Hydro: %s" % (i + 1))
-        list_of_all_adduct.append(adduct_using_m(args,(i + 1)))
+        list_of_all_adduct.append(adduct_using_mass(args,(i + 1)))
             
         for each_case in list_of_all_adduct:
             if each_case == None:
@@ -71,15 +71,18 @@ def m_calculation(args):
 
     print("<--Calculation completed-->")
 
-def adduct_using_m(args,number_of_hydro):
+def adduct_using_mass(args,number_of_hydro):
+    delta_m_min = -0.00001
+    delta_m_max = 0.00001
     raw_file = open(args.file, "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
-    m_min = float(args.exactmass) - float(args.mass_error)
-    m_max = float(args.exactmass) + float(args.mass_error)
-    high_limit  = float(args.unifi_number) - m_min + float(number_of_hydro) * float(args.hexact)
-    low_limit   = float(args.unifi_number) - m_max + float(number_of_hydro) * float(args.hexact)
-    print("Low  limit after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
-    print("High limit after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
+
+    high_limit = float(args.unifi_number) + float(args.hexact)*int(number_of_hydro) - float(args.neutralmass) - ((delta_m_min*float(args.neutralmass)))
+    #high_limit = low_limit + 0.00001
+    low_limit = float(args.unifi_number) + float(args.hexact)*int(number_of_hydro) - float(args.neutralmass) - ((delta_m_max*float(args.neutralmass))) 
+    
+    print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
+    print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
 
     list_exact_mass_of_each_element = []
     for j in range(int(args.repeat)):
@@ -110,25 +113,19 @@ def adduct_using_m(args,number_of_hydro):
                 plus +=1
             if "-" in k:
                 minus +=1
+
         if plus - minus - number_of_hydro == -1:
-            #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
             combi = {element:i[0].count(element) for element in i[0]}
             combi = dict(sorted(combi.items()))
-            inv_combi = {v: k for k, v in combi.items()}
-            element_set_dict["element_set"]         = ["M",inv_combi,str(number_of_hydro) + "H-"]
-            #element_set_dict["element_set"]         = i[0]
+            element_set_dict["element_set"]         = [combi,str(number_of_hydro) + "H-"]
             element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
             element_list.append(element_set_dict)          
-    
-    #for i in element_list:
-    #    i["element_set"].sort()
-    #    i["element_set"] = i["element_set"]
-    
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
-    #for i in element_list:
-    #    print("%s\tsum:%s\tM:%s" % (i["element_set"],i["sum_of_element_set"],i["mass_M"]))
+    for i in element_list:
+       print("%s\nsum:%s" % (i["element_set"],i["sum_of_element_set"]))
     return element_list
+
 
 def adduct_hydro(args,number_of_hydro):
     raw_file = open(args.file, "r")
@@ -177,9 +174,6 @@ def adduct_hydro(args,number_of_hydro):
             element_set_dict["mass_M"]              = ["M: " + str(float("{:.5f}".format(float(args.unifi_number) - float(i[1]) + float(number_of_hydro) * float(args.hexact))))]
             element_list.append(element_set_dict)          
     
-    #for i in element_list:
-    #    i["element_set"].sort()
-    #    i["element_set"] = i["element_set"]
     
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
@@ -190,7 +184,7 @@ def adduct_hydro(args,number_of_hydro):
 
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
     s = sum(partial)
-
+    #print(s)
     # check if the partial sum is equals to target
     if s > low_limit and s < high_limit:
         #print("%s" % (partial))
@@ -222,8 +216,8 @@ if __name__ == "__main__":
 
     parser_M_val = subparsers.add_parser("exactmass", help = "know M find adduct")
     parser_M_val.add_argument("--file", help= "find the X")
-    parser_M_val.add_argument("--exactmass", help="exact mass")
-    parser_M_val.add_argument("--mass_error", help="mass error")
+    parser_M_val.add_argument("--neutralmass", help="neutral mass")
+    #parser_M_val.add_argument("--mass_error", help="mass error")
     parser_M_val.add_argument("--repeat", help="times of repeat elements")
     parser_M_val.add_argument("--hrepeat", help="number of Hydro repeat")
     parser_M_val.add_argument("--hexact",  help="exact mass number of Hydro")
