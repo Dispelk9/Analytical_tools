@@ -1,0 +1,34 @@
+man pages for adduct.py
+01.01.2024
+it has two functions:
+adduct: find M using adduct
+exactmass: find combinations of adduct using M
+
+Usage:
+each function need all input in order to run the script:
+all input begin with two minus sign: for example --file
+--file 				the file of each element with their masses, it should be the same folder as the script
+--adduct			random number of adduct, which is decided by the user
+--mass_error		delta error defined by user, e.g 0.1
+--repeat			number of time the elements in the  --file are duplicated
+--hrepeat			number of time the Hydro can be appears
+--hexact			number of H mass
+--unifi_number		number give by unifi software
+--exactmass		M mass
+
+Click right folder 'Analytical_tools' choose new terminal at folder copy paste 
+
+adduct
+copy the below code into the terminal to run the script
+
+./adduct.py adduct --file unifi.csv --adduct 135 --mass_error 0.1 --repeat 3 --hrepeat 4 --hexact 1.00030 --unifi_number 753.408305
+
+exactmass
+
+copy the below code into the terminal to run the script 
+
+./adduct.py exactmass --file unifi.csv --exactmass 452.3363 --mass_error 0.1 --repeat 3 --hrepeat 4 --hexact 1.00030 --unifi_number 
+
+
+see Results at new created file report_m.csv (for exactmass) / file report_adduct.csv (for adduct)
+}
