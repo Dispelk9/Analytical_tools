@@ -4,95 +4,6 @@ import sys
 import csv
 import os
 
-
-# def adduct_calculation(args):
-#     print("<--Begin Calculations-->")
-#     if os.path.exists("report_adduct.csv"):
-#         os.remove("report_adduct.csv")
-
-#     for i in range(int(args.hrepeat)):
-#         total_set=[]
-#         list_of_all_adduct = []
-#         print("\nNumber of Hydro: %s" % (i + 1))
-#         list_of_all_adduct.append(adduct_hydro(args,(i + 1)))
-            
-#         for each_case in list_of_all_adduct:
-#             if each_case == None:
-#                 pass
-#             else:
-#                 for each_set in each_case:
-#                     each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
-#                     #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
-#                     total_set.append(each_set_csv_str)
-#                     #reduct the duplicate answers
-#                     total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
-#         print("Found: %s set(s)" % len(total_set))
-
-
-#         print("\n<<--Write to report_adduct-->>")
-
-#         with open("report_adduct.csv","a") as f:
-#             write = csv.writer(f)
-#             for each_line in total_set:
-#                 write.writerow([each_line])
-
-#     print("<--Calculation completed-->")
-
-# def adduct_hydro(args,number_of_hydro):
-#     raw_file = open(args.file, "r")
-#     rawdata = list(csv.reader(raw_file, delimiter=";"))
-#     high_limit  = float(args.adduct) + float(args.mass_error) + float(number_of_hydro) * float(args.hexact)
-#     low_limit   = float(args.adduct) - float(args.mass_error) + float(number_of_hydro) * float(args.hexact)
-#     print("Low  limit after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
-#     print("High limit after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
-
-#     list_exact_mass_of_each_element = []
-#     for j in range(int(args.repeat)):
-#         for i in rawdata:   
-#             list_exact_mass_of_each_element.append(float(i[1]))
-
-#     list_add = []
-#     subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
-    
-    
-#     for i in list_add:
-#         for k in range(len(i[0])):
-#             for j in rawdata:
-#                 if i[0][k] == float(j[1]):
-#                     i[0][k] = j[0]
-
-#     element_list = []
-#     for i in list_add:
-#         element_set_dict = {
-#             "element_set": "",
-#             "sum_of_element_set":"",
-#             "mass_M":""
-#         }
-#         plus = 0
-#         minus = 0
-#         for k in i[0]:
-#             if "+" in k:
-#                 plus +=1
-#             if "-" in k:
-#                 minus +=1
-#         if plus - minus - number_of_hydro == -1:
-#             #print(plus,minus,plus + minus - number_of_hydro, number_of_hydro)
-#             combi = {element:i[0].count(element) for element in i[0]}
-#             combi = dict(sorted(combi.items()))
-#             inv_combi = {v: k for k, v in combi.items()}
-#             element_set_dict["element_set"]         = ["M",inv_combi,str(number_of_hydro) + "H"]
-#             element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-#             element_set_dict["mass_M"]              = ["M: " + str(float("{:.5f}".format(float(args.unifi_number) - float(i[1]) + float(number_of_hydro) * float(args.hexact))))]
-#             element_list.append(element_set_dict)          
-    
-    
-#     #reduct the duplicate answers
-#     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
-#     #for i in element_list:
-#     #    print("%s\tsum:%s\tM:%s" % (i["element_set"],i["sum_of_element_set"],i["mass_M"]))
-#     return element_list
-
-
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
     s = sum(partial)
     #print(s)
@@ -150,10 +61,10 @@ def adduct_using_mass(args,number_of_hydro):
 
     if args.mode == "plus":
         Hydro_mode = -abs(int(number_of_hydro))
-        print(Hydro_mode)
+
     elif args.mode == "minus":
         Hydro_mode = int(number_of_hydro)
-        print(Hydro_mode)
+
 
     high_limit = float(args.unifi_number) + float(args.hexact)*Hydro_mode - float(args.neutralmass) - ((delta_m_min*float(args.neutralmass)))
     low_limit = float(args.unifi_number) + float(args.hexact)*Hydro_mode - float(args.neutralmass) - ((delta_m_max*float(args.neutralmass))) 
@@ -169,14 +80,18 @@ def adduct_using_mass(args,number_of_hydro):
     list_add = []
     subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
     
-    
+    #change each mass into element
+    # i combine of mass numbers and total number
+    # j combine of name and mass number
     for i in list_add:
+        print(i)
         for k in range(len(i[0])):
             for j in rawdata:
                 if i[0][k] == float(j[1]):
                     i[0][k] = j[0]
 
     element_list = []
+    #i[0] now contain element codes
     for i in list_add:
         element_set_dict = {
             "element_set": "",
@@ -190,13 +105,23 @@ def adduct_using_mass(args,number_of_hydro):
                 plus +=1
             if "-" in k:
                 minus +=1
-
+    if args.mode == "minus":
         if plus - minus - number_of_hydro == -1:
+            Hm = "H-"
             combi = {element:i[0].count(element) for element in i[0]}
             combi = dict(sorted(combi.items()))
-            element_set_dict["element_set"]         = [combi,str(number_of_hydro) + "H-"]
+            
+            element_set_dict["element_set"]         = [combi,str(number_of_hydro) + Hm]
             element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-            element_list.append(element_set_dict)          
+            element_list.append(element_set_dict)
+    elif args.mode == "plus":
+        Hm = "H+"
+        combi = {element:i[0].count(element) for element in i[0]}
+        combi = dict(sorted(combi.items()))
+    
+        element_set_dict["element_set"]         = [combi,str(number_of_hydro) + Hm]
+        element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+        element_list.append(element_set_dict)      
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
     for i in element_list:
@@ -210,15 +135,6 @@ if __name__ == "__main__":
 
     main_parser = argparse.ArgumentParser(prog = "Analytical Tools using for calculation in UPLC/HPLC")
     subparsers = main_parser.add_subparsers(help = "command help", dest = "command")
-
-    # parser_adduct_val = subparsers.add_parser("adduct", help = "know adduct find M")
-    # parser_adduct_val.add_argument("--file", help= "find the X")
-    # parser_adduct_val.add_argument("--adduct", help="adduct choose by someone")
-    # parser_adduct_val.add_argument("--mass_error", help="mass error")
-    # parser_adduct_val.add_argument("--repeat", help="times of repeat elements")
-    # parser_adduct_val.add_argument("--hrepeat", help="number of Hydro repeat")
-    # parser_adduct_val.add_argument("--hexact",  help="exact mass number of Hydro")
-    # parser_adduct_val.add_argument("--unifi_number", help="M/Z from Unifi")
 
     parser_M_val = subparsers.add_parser("exactmass", help = "know M find adduct")
     parser_M_val.add_argument("--file", help= "find the X")
@@ -234,7 +150,5 @@ if __name__ == "__main__":
 
     if args.command == "exactmass":
         m_calculation(args)
-    # elif args.command == "adduct":
-    #     adduct_calculation(args)
     else:
         main_parser.print_help()
