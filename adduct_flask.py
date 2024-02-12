@@ -31,22 +31,83 @@ def index():
         "mass_error":       float("".join(mass_error)),
         "mode":             "".join(mode)
     }
-    result = m_calculation(value_list)
-    all_info = {"Requested Parameters":value_list,"Results":result}
+    without_h   = without_hydro(value_list)
+    result      = m_calculation(value_list)
+    all_info = {"Requested Parameters":value_list,"Resuls without Hydro": without_h,"Results with Hydro":result}
     return( 
         jsonify(all_info)
     )
 
 
+def without_hydro(value_list):
+    delta_m_min = float(-abs(value_list["mass_error"]))
+    delta_m_max = value_list["mass_error"]
+    raw_file = open("".join(value_list["csvfile"]), "r")
+    rawdata = list(csv.reader(raw_file, delimiter=";"))
+
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"]) 
+    
+    list_exact_mass_of_each_element = []
+    for j in range(int(value_list["repeat"])):
+        for i in rawdata:   
+            list_exact_mass_of_each_element.append(float(i[1]))
+
+    list_add = []
+    subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
+    
+    #change each mass into element
+    # i combine of mass numbers and total number
+    # j combine of name and mass number
+    for i in list_add:
+        for k in range(len(i[0])):
+            for j in rawdata:
+                if i[0][k] == float(j[1]):
+                    i[0][k] = j[0]
+
+    element_list = []
+    #i[0] now contain element codes
+    for i in list_add:
+        element_set_dict = {
+            "Number of H(s)": 0,
+            "element_set": "",
+            "sum_of_element_set":""
+        }
+        plus = 0 
+        minus = 0
+        for k in i[0]:
+            if "+" in k:
+                plus +=1
+            if "-" in k:
+                minus +=1
+
+        if value_list["mode"] == "minus":
+            if plus - minus == -1:
+                Hm = "H-"
+                combi = {element:i[0].count(element) for element in i[0]}
+                combi = dict(sorted(combi.items()))
+                element_set_dict["element_set"]         = [combi]
+                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                element_list.append(element_set_dict)
+        elif value_list["mode"] == "plus":
+            if plus - minus == 1:
+                Hm = "H+"
+                combi = {element:i[0].count(element) for element in i[0]}
+                combi = dict(sorted(combi.items()))
+                element_set_dict["element_set"]         = [combi]
+                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                element_list.append(element_set_dict)      
+    #reduct the duplicate answers
+    element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
+
+    return element_list
+
 
 def m_calculation(value_list):
     print("<--Begin Calculations-->")
-    if os.path.exists("report_m.csv"):
-        os.remove("report_m.csv")
     all_results = []
     for i in range(int(value_list["hrepeat"])):
 
-        total_set=[]
         list_of_all_adduct = []
 
         each_hydro =  {
@@ -56,25 +117,6 @@ def m_calculation(value_list):
 
         print("\nNumber of Hydro: %s" % (i + 1))
         list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
-        for each_case in list_of_all_adduct:
-            if each_case == None:
-                pass
-            else:
-                for each_set in each_case:
-                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"])
-                    total_set.append(each_set_csv_str)
-                    #reduct the duplicate answers
-                    total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
-        print("Found: %s set(s)" % len(total_set))
-
-
-        print("\n<<--Write to report_m-->>")
-
-        with open("report_m.csv","a") as f:
-            write = csv.writer(f)
-            for each_line in total_set:
-                write.writerow([each_line])
-
 
         each_hydro["Adduct combinations"] = list_of_all_adduct
         all_results.append(each_hydro)
