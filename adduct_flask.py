@@ -141,8 +141,8 @@ def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
         subset_sum(remaining,low_limit,high_limit,list_add,partial + [n])
 
 def adduct_using_mass(value_list,number_of_hydro):
-    delta_m_min = -abs(float("".join(value_list["mass_error"])))
-    delta_m_max = float("".join(value_list["mass_error"]))
+    delta_m_min = -abs(value_list["mass_error"])
+    delta_m_max = value_list["mass_error"]
     raw_file = open("".join(value_list["file"]), "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
 
@@ -154,9 +154,8 @@ def adduct_using_mass(value_list,number_of_hydro):
     elif value_list["mode"] == "minus":
         Hydro_mode = int(number_of_hydro)
 
-    print(type(value_list["unifi_number"]))
-    high_limit  = float(value_list["unifi_number"]) + float(value_list["hexact"])*Hydro_mode - float(value_list["neutralmass"]) - ((delta_m_min*float(value_list["neutralmass"])))
-    low_limit   = float(value_list["unifi_number"]) + float(value_list["hexact"])*Hydro_mode - float(value_list["neutralmass"]) - ((delta_m_max*float(value_list["neutralmass"]))) 
+    high_limit  = value_list["unifi_number"] + value_list["hexact"]*Hydro_mode - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
+    low_limit   = value_list["unifi_number"] + value_list["hexact"]*Hydro_mode - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"]) 
     
     print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
     print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
