@@ -142,6 +142,8 @@ def adduct_using_mass(value_list,number_of_hydro):
     raw_file = open(" ".join(value_list["file"]), "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
 
+    Hydro_mode = ""
+
     if value_list["mode"] == "plus":
         Hydro_mode = -abs(int(number_of_hydro))
 
