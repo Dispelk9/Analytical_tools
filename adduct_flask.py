@@ -53,12 +53,12 @@ def m_calculation(value_list):
     if os.path.exists("report_m.csv"):
         os.remove("report_m.csv")
 
-    for i in range(int(value_list["hrepeat"])):
+    for i in range(int(str(value_list["hrepeat"]))):
         total_set=[]
         list_of_all_adduct = []    # if os.path.exists("report_m.csv"):
         os.remove("report_m.csv")
 
-    for i in range(int(value_list["hrepeat"])):
+    for i in range(int(str(value_list["hrepeat"]))):
         total_set=[]
         list_of_all_adduct = []
         print("\nNumber of Hydro: %s" % (i + 1))
@@ -124,8 +124,8 @@ def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
         subset_sum(remaining,low_limit,high_limit,list_add,partial + [n])
 
 def adduct_using_mass(value_list,number_of_hydro):
-    delta_m_min = -abs(float(value_list["mass_error"]))
-    delta_m_max = float(value_list["mass_error"])
+    delta_m_min = -abs(float(str(value_list["mass_error"])))
+    delta_m_max = float(str(value_list["mass_error"]))
     raw_file = open(value_list["file"], "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
 
