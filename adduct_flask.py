@@ -151,8 +151,8 @@ def adduct_using_mass(value_list,number_of_hydro):
         Hydro_mode = int(number_of_hydro)
 
 
-    high_limit = float(" ".join(value_list["unifi_number"])) + float(" ".join(value_list["hexact"]))*Hydro_mode - float(" ".join(value_list["neutralmass"])) - ((delta_m_min*float(" ".join(value_list["neutralmass"]))))
-    low_limit = float(" ".join(value_list["unifi_number"])) + float(" ".join(value_list["hexact"]))*Hydro_mode - float(" ".join(value_list["neutralmass"])) - ((delta_m_max*float(" ".join(value_list["neutralmass"])))) 
+    high_limit = float(" ".join(value_list["unifi_number"])) + float(" ".join(value_list["hexact"]))*float(Hydro_mode) - float(" ".join(value_list["neutralmass"])) - ((delta_m_min*float(" ".join(value_list["neutralmass"]))))
+    low_limit = float(" ".join(value_list["unifi_number"])) + float(" ".join(value_list["hexact"]))*float(Hydro_mode) - float(" ".join(value_list["neutralmass"])) - ((delta_m_max*float(" ".join(value_list["neutralmass"])))) 
     
     print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
     print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
