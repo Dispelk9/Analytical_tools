@@ -4,7 +4,6 @@ from flask import jsonify
 
 import os
 import csv
-import json
 app = Flask(__name__)
 
 
@@ -59,8 +58,7 @@ def index():
     result = m_calculation(value_list)
     return( 
 
-        jsonify(value_list),
-        jsonify(result)
+        jsonify(value_list)
     )
 
 
@@ -70,14 +68,12 @@ def m_calculation(value_list):
     if os.path.exists("report_m.csv"):
         os.remove("report_m.csv")
 
-    all_result = []
-
     for i in range(int(value_list["hrepeat"])):
         total_set=[]
         list_of_all_adduct = []
         print("\nNumber of Hydro: %s" % (i + 1))
         list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
-        all_result.append(list_of_all_adduct)
+            
         for each_case in list_of_all_adduct:
             if each_case == None:
                 pass
@@ -99,7 +95,6 @@ def m_calculation(value_list):
                 write.writerow([each_line])
 
     print("<--Calculation completed-->")
-    return(json.dumps(all_result))
 
 
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
