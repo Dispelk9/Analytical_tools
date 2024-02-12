@@ -9,30 +9,6 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    # celsius = query("celsius", "")
-    # if celsius:
-    #     fahrenheit = fahrenheit_from(celsius)
-    # else:
-    #     fahrenheit = ""
-    # return (
-    #     """<form action="" method="get">
-    #             Celsius temperature: <input type="text" name="celsius">
-    #             <input type="submit" value="Convert to Fahrenheit">
-    #         </form>"""
-    #     + "Fahrenheit: "
-    #     + fahrenheit
-    # )
-
-    # def fahrenheit_from(celsius):
-    #     """Convert Celsius to Fahrenheit degrees."""
-    #     try:
-    #         fahrenheit = float(celsius) * 9 / 5 + 32
-    #         fahrenheit = round(fahrenheit, 3)  # Round to three decimal places
-    #         return str(fahrenheit)
-    #     except ValueError:
-    #         return "invalid input"
-
-
     #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825    
     query = request.args.to_dict(flat=False)
 
@@ -46,7 +22,7 @@ def index():
     hexact          = query["hexact"]
 
     value_list = {
-        "file":             file,
+        "Csv file":         str(file),
         "neutralmass":      float("".join(neutralmass)),
         "unifi_number":     float("".join(unifi_number)),
         "hexact":           float("".join(hexact)),
@@ -56,7 +32,7 @@ def index():
         "mode":             "".join(mode)
     }
     result = m_calculation(value_list)
-    all_info = [value_list,result]
+    all_info = {"Requested Parameters":value_list,"Results":result}
     return( 
         jsonify(all_info)
     )
