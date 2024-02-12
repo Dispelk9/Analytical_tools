@@ -33,7 +33,7 @@ def index():
     #         return "invalid input"
 
 
-    #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus
+    #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825    
     query = request.args.to_dict(flat=False)
 
     file            = query["file"]
@@ -43,11 +43,13 @@ def index():
     repeat          = query["repeat"]
     mass_error      = query["mass_error"]
     mode            = query["mode"]
+    hexact          = query["hexact"]
 
     value_list = {
         "file":file,
         "neutralmass":neutralmass,
         "unifi_number":unifi_number,
+        "hexact": hexact,
         "hrepeat": hrepeat,
         "repeat":repeat,
         "mass_error":mass_error,
