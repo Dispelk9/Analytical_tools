@@ -50,10 +50,10 @@ def index():
         "neutralmass":      float("".join(neutralmass)),
         "unifi_number":     float("".join(unifi_number)),
         "hexact":           float("".join(hexact)),
-        "hrepeat":          int(hrepeat),
-        "repeat":           int(repeat),
+        "hrepeat":          int("".join(hrepeat)),
+        "repeat":           int("".join(repeat)),
         "mass_error":       float("".join(mass_error)),
-        "mode":             str(mode)
+        "mode":             "".join(mode)
     }
     result = m_calculation(value_list)
     return( 
@@ -71,11 +71,11 @@ def m_calculation(value_list):
     except FileNotFoundError:
         pass
 
-    for i in range(int("".join(value_list["hrepeat"]))):
+    for i in range(int(value_list["hrepeat"])):
         total_set=[]
         list_of_all_adduct = []    
 
-    for i in range(int("".join(value_list["hrepeat"]))):
+    for i in range(int(value_list["hrepeat"])):
         total_set=[]
         list_of_all_adduct = []
         print("\nNumber of Hydro: %s" % (i + 1))
