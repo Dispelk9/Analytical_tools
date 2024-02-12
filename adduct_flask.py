@@ -65,15 +65,8 @@ def index():
 
 def m_calculation(value_list):
     print("<--Begin Calculations-->")
-    try:
-        if os.path.exists("report_m.csv"):
-            os.remove("report_m.csv")
-    except FileNotFoundError:
-        pass
-
-    for i in range(int(value_list["hrepeat"])):
-        total_set=[]
-        list_of_all_adduct = []    
+    if os.path.exists("report_m.csv"):
+        os.remove("report_m.csv")
 
     for i in range(int(value_list["hrepeat"])):
         total_set=[]
@@ -100,30 +93,10 @@ def m_calculation(value_list):
             write = csv.writer(f)
             for each_line in total_set:
                 write.writerow([each_line])
-        print("\nNumber of Hydro: %s" % (i + 1))
-        list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
-            
-        for each_case in list_of_all_adduct:
-            if each_case == None:
-                pass
-            else:
-                for each_set in each_case:
-                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
-                    #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
-                    total_set.append(each_set_csv_str)
-                    #reduct the duplicate answers
-                    total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
-        print("Found: %s set(s)" % len(total_set))
-
-
-        print("\n<<--Write to report_m-->>")
-
-        with open("report_m.csv","a") as f:
-            write = csv.writer(f)
-            for each_line in total_set:
-                write.writerow([each_line])
 
     print("<--Calculation completed-->")
+
+
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
     s = sum(partial)
     #print(s)
@@ -153,13 +126,6 @@ def adduct_using_mass(value_list,number_of_hydro):
 
     elif value_list["mode"] == "minus":
         Hydro_mode = float(number_of_hydro)
-
-    for k, v in value_list.items():
-        print(k, v, type(v))
-    print(type(Hydro_mode))
-    print(Hydro_mode)
-    print(type(delta_m_max))
-    print(type(delta_m_min))
 
     high_limit  = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
     low_limit   = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"]) 
