@@ -47,7 +47,7 @@ def index():
 
     value_list = {
         "file":             file,
-        "neutralmass":      float(neutralmass),
+        "neutralmass":      float("".join(neutralmass)),
         "unifi_number":     float(unifi_number),
         "hexact":           float(hexact),
         "hrepeat":          hrepeat,
