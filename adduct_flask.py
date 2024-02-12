@@ -160,8 +160,8 @@ def adduct_using_mass(value_list,number_of_hydro):
     print(type(delta_m_max))
     print(type(delta_m_min))
 
-    high_limit  = value_list["unifi_number"] + value_list["hexact"]*Hydro_mode - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
-    low_limit   = value_list["unifi_number"] + value_list["hexact"]*Hydro_mode - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"]) 
+    high_limit  = float(value_list["unifi_number"]) + float(value_list["hexact"])*float(Hydro_mode) - float(value_list["neutralmass"]) - (delta_m_min*float(value_list["neutralmass"]))
+    low_limit   = float(value_list["unifi_number"]) + float(value_list["hexact"])*float(Hydro_mode) - float(value_list["neutralmass"]) - (delta_m_max*float(value_list["neutralmass"])) 
     
     print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
     print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
