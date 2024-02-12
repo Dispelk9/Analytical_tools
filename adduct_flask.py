@@ -58,8 +58,7 @@ def m_calculation(value_list):
 
     for i in range(int(" ".join(value_list["hrepeat"]))):
         total_set=[]
-        list_of_all_adduct = []    # if os.path.exists("report_m.csv"):
-        os.remove("report_m.csv")
+        list_of_all_adduct = []    
 
     for i in range(int(" ".join(value_list["hrepeat"]))):
         total_set=[]
