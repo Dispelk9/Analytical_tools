@@ -48,21 +48,21 @@ def index():
 
         jsonify(value_list)
     )
-def m_calculation(args):
+def m_calculation(value_list):
     print("<--Begin Calculations-->")
     if os.path.exists("report_m.csv"):
         os.remove("report_m.csv")
 
-    for i in range(int(args.hrepeat)):
+    for i in range(int(value_list["hrepeat"])):
         total_set=[]
         list_of_all_adduct = []    # if os.path.exists("report_m.csv"):
         os.remove("report_m.csv")
 
-    for i in range(int(args.hrepeat)):
+    for i in range(int(value_list["hrepeat"])):
         total_set=[]
         list_of_all_adduct = []
         print("\nNumber of Hydro: %s" % (i + 1))
-        list_of_all_adduct.append(adduct_using_mass(args,(i + 1)))
+        list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
             
         for each_case in list_of_all_adduct:
             if each_case == None:
@@ -84,7 +84,7 @@ def m_calculation(args):
             for each_line in total_set:
                 write.writerow([each_line])
         print("\nNumber of Hydro: %s" % (i + 1))
-        list_of_all_adduct.append(adduct_using_mass(args,(i + 1)))
+        list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
             
         for each_case in list_of_all_adduct:
             if each_case == None:
@@ -123,27 +123,27 @@ def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
         remaining = numbers[i + 1:]
         subset_sum(remaining,low_limit,high_limit,list_add,partial + [n])
 
-def adduct_using_mass(args,number_of_hydro):
-    delta_m_min = -abs(float(args.mass_error))
-    delta_m_max = float(args.mass_error)
-    raw_file = open(args.file, "r")
+def adduct_using_mass(value_list,number_of_hydro):
+    delta_m_min = -abs(float(value_list["mass_error"]))
+    delta_m_max = float(value_list["mass_error"])
+    raw_file = open(value_list["file"], "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
 
-    if args.mode == "plus":
+    if value_list["mode"] == "plus":
         Hydro_mode = -abs(int(number_of_hydro))
 
-    elif args.mode == "minus":
+    elif value_list["mode"] == "minus":
         Hydro_mode = int(number_of_hydro)
 
 
-    high_limit = float(args.unifi_number) + float(args.hexact)*Hydro_mode - float(args.neutralmass) - ((delta_m_min*float(args.neutralmass)))
-    low_limit = float(args.unifi_number) + float(args.hexact)*Hydro_mode - float(args.neutralmass) - ((delta_m_max*float(args.neutralmass))) 
+    high_limit = float(value_list["unifi_number"]) + float(value_list["hexact"])*Hydro_mode - float(value_list["neutralmass"]) - ((delta_m_min*float(value_list["neutralmass"])))
+    low_limit = float(value_list["unifi_number"]) + float(value_list["hexact"])*Hydro_mode - float(value_list["neutralmass"]) - ((delta_m_max*float(value_list["neutralmass"]))) 
     
     print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
     print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
 
     list_exact_mass_of_each_element = []
-    for j in range(int(args.repeat)):
+    for j in range(int(value_list["repeat"])):
         for i in rawdata:   
             list_exact_mass_of_each_element.append(float(i[1]))
 
@@ -175,7 +175,7 @@ def adduct_using_mass(args,number_of_hydro):
             if "-" in k:
                 minus +=1
 
-        if args.mode == "minus":
+        if value_list["mode"] == "minus":
             if plus - minus - number_of_hydro == -1:
                 Hm = "H-"
                 combi = {element:i[0].count(element) for element in i[0]}
@@ -184,7 +184,7 @@ def adduct_using_mass(args,number_of_hydro):
                 element_set_dict["element_set"]         = [combi,str(number_of_hydro) + Hm]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
-        elif args.mode == "plus":
+        elif value_list["mode"] == "plus":
             if plus - minus - number_of_hydro == 1:
                 Hm = "H+"
                 combi = {element:i[0].count(element) for element in i[0]}
