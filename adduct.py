@@ -84,7 +84,6 @@ def adduct_using_mass(args,number_of_hydro):
     # i combine of mass numbers and total number
     # j combine of name and mass number
     for i in list_add:
-        print(i)
         for k in range(len(i[0])):
             for j in rawdata:
                 if i[0][k] == float(j[1]):
@@ -105,23 +104,25 @@ def adduct_using_mass(args,number_of_hydro):
                 plus +=1
             if "-" in k:
                 minus +=1
-    if args.mode == "minus":
-        if plus - minus - number_of_hydro == -1:
-            Hm = "H-"
-            combi = {element:i[0].count(element) for element in i[0]}
-            combi = dict(sorted(combi.items()))
+
+        if args.mode == "minus":
+            if plus - minus - number_of_hydro == -1:
+                Hm = "H-"
+                combi = {element:i[0].count(element) for element in i[0]}
+                combi = dict(sorted(combi.items()))
+                
+                element_set_dict["element_set"]         = [combi,str(number_of_hydro) + Hm]
+                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                element_list.append(element_set_dict)
+        elif args.mode == "plus":
+            if plus - minus - number_of_hydro == 1:
+                Hm = "H+"
+                combi = {element:i[0].count(element) for element in i[0]}
+                combi = dict(sorted(combi.items()))
             
-            element_set_dict["element_set"]         = [combi,str(number_of_hydro) + Hm]
-            element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-            element_list.append(element_set_dict)
-    elif args.mode == "plus":
-        Hm = "H+"
-        combi = {element:i[0].count(element) for element in i[0]}
-        combi = dict(sorted(combi.items()))
-    
-        element_set_dict["element_set"]         = [combi,str(number_of_hydro) + Hm]
-        element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-        element_list.append(element_set_dict)      
+                element_set_dict["element_set"]         = [combi,str(number_of_hydro) + Hm]
+                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                element_list.append(element_set_dict)      
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
     for i in element_list:
