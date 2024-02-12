@@ -154,6 +154,12 @@ def adduct_using_mass(value_list,number_of_hydro):
     elif value_list["mode"] == "minus":
         Hydro_mode = int(number_of_hydro)
 
+    for k,v in value_list:
+        print (type(value_list[v]))
+    print(type(Hydro_mode))
+    print(type(delta_m_max))
+    print(type(delta_m_min))
+
     high_limit  = value_list["unifi_number"] + value_list["hexact"]*Hydro_mode - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
     low_limit   = value_list["unifi_number"] + value_list["hexact"]*Hydro_mode - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"]) 
     
