@@ -57,9 +57,9 @@ def index():
     }
     result = m_calculation(value_list)
 
-    json_result = {item['each_hydro']:item for item in result}
+    result
     return( 
-        jsonify(json_result)
+        jsonify(result)
     )
 
 
@@ -81,7 +81,6 @@ def m_calculation(value_list):
 
         print("\nNumber of Hydro: %s" % (i + 1))
         list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
-            
         for each_case in list_of_all_adduct:
             if each_case == None:
                 pass
@@ -101,6 +100,9 @@ def m_calculation(value_list):
             write = csv.writer(f)
             for each_line in total_set:
                 write.writerow([each_line])
+
+                
+        each_hydro["All Adduct"] = list_of_all_adduct
         all_results.append(each_hydro)
 
     print("<--Calculation completed-->")
