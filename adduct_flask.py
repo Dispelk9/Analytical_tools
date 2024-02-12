@@ -85,8 +85,7 @@ def m_calculation(value_list):
                 pass
             else:
                 for each_set in each_case:
-                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
-                    #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
+                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"])
                     total_set.append(each_set_csv_str)
                     #reduct the duplicate answers
                     total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
