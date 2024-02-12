@@ -43,7 +43,7 @@ def m_calculation(value_list):
     print("<--Begin Calculations-->")
     if os.path.exists("report_m.csv"):
         os.remove("report_m.csv")
-    all_results = {}
+    all_results = []
     for i in range(int(value_list["hrepeat"])):
 
         total_set=[]
@@ -77,7 +77,7 @@ def m_calculation(value_list):
 
 
         each_hydro["Adduct combinations"] = list_of_all_adduct
-        all_results.update(each_hydro)
+        all_results.append(each_hydro)
 
     print("<--Calculation completed-->")
     return all_results
