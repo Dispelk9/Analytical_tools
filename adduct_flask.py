@@ -24,7 +24,7 @@ def index():
     # )
 
 
-    #http://192.168.0.31:8080/?file=csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus
+    #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus
     query = request.args.to_dict(flat=False)
 
     file            = query["file"]
@@ -45,66 +45,66 @@ def index():
         "mode":mode}
     result = m_calculation(value_list)
     return( 
-           
+
         jsonify(value_list)
     )
 def m_calculation(args):
     print("<--Begin Calculations-->")
-    # if os.path.exists("report_m.csv"):
-    #     os.remove("report_m.csv")
+    if os.path.exists("report_m.csv"):
+        os.remove("report_m.csv")
 
-    # for i in range(int(args.hrepeat)):
-    #     total_set=[]
-    #     list_of_all_adduct = []    # if os.path.exists("report_m.csv"):
-    #     os.remove("report_m.csv")
+    for i in range(int(args.hrepeat)):
+        total_set=[]
+        list_of_all_adduct = []    # if os.path.exists("report_m.csv"):
+        os.remove("report_m.csv")
 
-    # for i in range(int(args.hrepeat)):
-    #     total_set=[]
-    #     list_of_all_adduct = []
-    #     print("\nNumber of Hydro: %s" % (i + 1))
-    #     list_of_all_adduct.append(adduct_using_mass(args,(i + 1)))
+    for i in range(int(args.hrepeat)):
+        total_set=[]
+        list_of_all_adduct = []
+        print("\nNumber of Hydro: %s" % (i + 1))
+        list_of_all_adduct.append(adduct_using_mass(args,(i + 1)))
             
-    #     for each_case in list_of_all_adduct:
-    #         if each_case == None:
-    #             pass
-    #         else:
-    #             for each_set in each_case:
-    #                 each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
-    #                 #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
-    #                 total_set.append(each_set_csv_str)
-    #                 #reduct the duplicate answers
-    #                 total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
-    #     print("Found: %s set(s)" % len(total_set))
+        for each_case in list_of_all_adduct:
+            if each_case == None:
+                pass
+            else:
+                for each_set in each_case:
+                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
+                    #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
+                    total_set.append(each_set_csv_str)
+                    #reduct the duplicate answers
+                    total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
+        print("Found: %s set(s)" % len(total_set))
 
 
-    #     print("\n<<--Write to report_m-->>")
+        print("\n<<--Write to report_m-->>")
 
-    #     with open("report_m.csv","a") as f:
-    #         write = csv.writer(f)
-    #         for each_line in total_set:
-    #             write.writerow([each_line])
-    #     print("\nNumber of Hydro: %s" % (i + 1))
-    #     list_of_all_adduct.append(adduct_using_mass(args,(i + 1)))
+        with open("report_m.csv","a") as f:
+            write = csv.writer(f)
+            for each_line in total_set:
+                write.writerow([each_line])
+        print("\nNumber of Hydro: %s" % (i + 1))
+        list_of_all_adduct.append(adduct_using_mass(args,(i + 1)))
             
-    #     for each_case in list_of_all_adduct:
-    #         if each_case == None:
-    #             pass
-    #         else:
-    #             for each_set in each_case:
-    #                 each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
-    #                 #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
-    #                 total_set.append(each_set_csv_str)
-    #                 #reduct the duplicate answers
-    #                 total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
-    #     print("Found: %s set(s)" % len(total_set))
+        for each_case in list_of_all_adduct:
+            if each_case == None:
+                pass
+            else:
+                for each_set in each_case:
+                    each_set_csv_str = str(each_set["element_set"]) + ";" + str(each_set["sum_of_element_set"]) + ";" + str(each_set["mass_M"])
+                    #print("%s\tsum:%s\tM:%s" % (each_set["element_set"],each_set["sum_of_element_set"],each_set["mass_M"]))
+                    total_set.append(each_set_csv_str)
+                    #reduct the duplicate answers
+                    total_set = [i for n, i in enumerate(total_set) if i not in total_set[n + 1:]]
+        print("Found: %s set(s)" % len(total_set))
 
 
-    #     print("\n<<--Write to report_m-->>")
+        print("\n<<--Write to report_m-->>")
 
-    #     with open("report_m.csv","a") as f:
-    #         write = csv.writer(f)
-    #         for each_line in total_set:
-    #             write.writerow([each_line])
+        with open("report_m.csv","a") as f:
+            write = csv.writer(f)
+            for each_line in total_set:
+                write.writerow([each_line])
 
     print("<--Calculation completed-->")
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
