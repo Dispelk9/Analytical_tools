@@ -47,12 +47,12 @@ def index():
 
     value_list = {
         "file":             file,
-        "neutralmass":      float("".join(neutralmass)),
-        "unifi_number":     float("".join(unifi_number)),
-        "hexact":           float("".join(hexact)),
+        "neutralmass":      neutralmass,
+        "unifi_number":     unifi_number,
+        "hexact":           hexact,
         "hrepeat":          hrepeat,
         "repeat":           repeat,
-        "mass_error":       float("".join(mass_error)),
+        "mass_error":       mass_error,
         "mode":             mode
     }
     result = m_calculation(value_list)
