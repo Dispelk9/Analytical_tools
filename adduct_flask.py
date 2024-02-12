@@ -154,8 +154,8 @@ def adduct_using_mass(value_list,number_of_hydro):
     elif value_list["mode"] == "minus":
         Hydro_mode = int(number_of_hydro)
 
-    for k,v in value_list:
-        print (type(value_list[v]))
+    types1 = [type(k) for k in value_list.keys()]
+    print(types1)
     print(type(Hydro_mode))
     print(type(delta_m_max))
     print(type(delta_m_min))
