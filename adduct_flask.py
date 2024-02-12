@@ -50,10 +50,10 @@ def index():
         "neutralmass":      float("".join(neutralmass)),
         "unifi_number":     float("".join(unifi_number)),
         "hexact":           float("".join(hexact)),
-        "hrepeat":          hrepeat,
-        "repeat":           repeat,
+        "hrepeat":          int(hrepeat),
+        "repeat":           int(repeat),
         "mass_error":       float("".join(mass_error)),
-        "mode":             mode
+        "mode":             str(mode)
     }
     result = m_calculation(value_list)
     return( 
@@ -157,6 +157,7 @@ def adduct_using_mass(value_list,number_of_hydro):
     for k, v in value_list.items():
         print(k, v, type(v))
     print(type(Hydro_mode))
+    print(Hydro_mode)
     print(type(delta_m_max))
     print(type(delta_m_min))
 
