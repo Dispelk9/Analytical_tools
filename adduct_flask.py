@@ -56,9 +56,10 @@ def index():
         "mode":             "".join(mode)
     }
     result = m_calculation(value_list)
-    return( 
 
-        jsonify(value_list)
+    json_result = {item['each_hydro']:item for item in result}
+    return( 
+        jsonify(json_result)
     )
 
 
@@ -67,10 +68,17 @@ def m_calculation(value_list):
     print("<--Begin Calculations-->")
     if os.path.exists("report_m.csv"):
         os.remove("report_m.csv")
-
+    all_results = []
     for i in range(int(value_list["hrepeat"])):
+
         total_set=[]
         list_of_all_adduct = []
+
+        each_hydro =  {
+            "Number of Hydro": i,
+            "All Adduct":  "",
+        }
+
         print("\nNumber of Hydro: %s" % (i + 1))
         list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
             
@@ -93,9 +101,10 @@ def m_calculation(value_list):
             write = csv.writer(f)
             for each_line in total_set:
                 write.writerow([each_line])
+        all_results.append(each_hydro)
 
     print("<--Calculation completed-->")
-
+    return all_results
 
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
     s = sum(partial)
