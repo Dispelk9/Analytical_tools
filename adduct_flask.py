@@ -46,19 +46,23 @@ def index():
     hexact          = query["hexact"]
 
     value_list = {
-        "file":file,
-        "neutralmass":neutralmass,
-        "unifi_number":unifi_number,
-        "hexact": hexact,
-        "hrepeat": hrepeat,
-        "repeat":repeat,
-        "mass_error":mass_error,
-        "mode":mode}
+        "file":             file,
+        "neutralmass":      float(neutralmass),
+        "unifi_number":     float(unifi_number),
+        "hexact":           float(hexact),
+        "hrepeat":          hrepeat,
+        "repeat":           repeat,
+        "mass_error":       float(mass_error),
+        "mode":             mode
+    }
     result = m_calculation(value_list)
     return( 
 
         jsonify(value_list)
     )
+
+
+
 def m_calculation(value_list):
     print("<--Begin Calculations-->")
     try:
