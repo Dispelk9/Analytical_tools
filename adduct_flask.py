@@ -50,8 +50,11 @@ def index():
     )
 def m_calculation(value_list):
     print("<--Begin Calculations-->")
-    if os.path.exists("report_m.csv"):
-        os.remove("report_m.csv")
+    try:
+        if os.path.exists("report_m.csv"):
+            os.remove("report_m.csv")
+    except FileNotFoundError:
+        pass
 
     for i in range(int(" ".join(value_list["hrepeat"]))):
         total_set=[]
