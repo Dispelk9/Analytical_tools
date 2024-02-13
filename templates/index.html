@@ -14,50 +14,95 @@
         <nav class="navbar navbar-dark navbar-expand-lg bg-dark ">
             <div class="container-fluid">
                 <div class="mx-4">
-                    <a class="navbar-brand" href="./index">Analytical Tool</a>
+                    <a class="navbar-brand" href="./index">Analytical Chemistry Tool ver1.0</a>
                 </div>
             </div>
         </nav>
+        <div class="container my-4">
+            <div class="row justify-content-center">
+                <div class="section">
+                    <h2 align="center">
+                        <span>Adduct</span>
+                        <span>Calculation</span>
+                    </h2>
+                </div>
+            </div>
+        </div>
 
-        <form action="" method="get">
-            <table>
-                    <tr>
-                        <td align="right">File</td>          
-                        <td align="left"><input type="text" name="file"></td><br>
-                    </tr>
-                    <tr>
-                        <td align="right">Neutralmass</td>   
-                        <td align="left"><input type="text" name="neutralmass"></td><br>
-                    </tr>
-                    <tr>
-                        <td align="right">Unifi Number </td> 
-                        <td align="left"><input type="text" name="unifi_number"></td><br>
-                    </tr>
-                    <tr>
-                        <td align="right">Hydro(s)</td>      
-                        <td align="left"><input type="text" name="hrepeat"></td><br>
-                    </tr>
-                    <tr>
-                        <td align="right">Element(s)</td>    
-                        <td align="left"><input type="text" name="repeat"></td><br>
-                    </tr>
-                    <tr>
-                        <td align="right">Mass Error</td>    
-                        <td align="left"><input type="text" name="mass_error"></td><br>
-                    </tr>
-                    <tr>
-                        <td align="right">Mode</td>
-                        <td align="left"><input type="text" name="mode"></td><br>
-                    </tr>
-                    <tr>
-                        <td align="right">Hydroexact</td>  
-                        <td align="left"><input type="text" name="hexact"></td><br>
-                    </tr>
-                    <tr>
-                        <td><input type="submit" value="Convert"></td>
-                    </tr>
-            </table>
-        </form>
+        <div class="container my-4 ">
+            <div class="row justify-content-center">
+                <div class="col-lg mb-lg-4">
+                    <form action="" method="get">
+                        <table align="center">
+                            <tr>
+                                <td align="right">File</td>          
+                                <td align="left"><input type="text" name="file"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Neutralmass</td>   
+                                <td align="left"><input type="text" name="neutralmass"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Unifi Number </td> 
+                                <td align="left"><input type="text" name="unifi_number"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Hydro(s)</td>      
+                                <td align="left"><input type="text" name="hrepeat"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Element(s)</td>    
+                                <td align="left"><input type="text" name="repeat"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Mass Error</td>    
+                                <td align="left"><input type="text" name="mass_error"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Mode</td>
+                                <td align="left"><input type="text" name="mode"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Hydroexact</td>  
+                                <td align="left"><input type="text" name="hexact"></td><br>
+                            </tr>
+                        </table>
+                        <div align="center">
+                            <input type="submit" value="Convert">
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg mx-2 align-self-center">
+                    <div class="my-3">
+                        <p class="lineUp" align="justify">
+                            Used to find the combinations of adduct base on the neutralmass mass and mass from the unifi 
+                            devices.<br>
+                            How to use:<br>
+                            1. Fill all the blanks with parameters:<br>
+                            <strong>File:</strong><br>
+                            - negative_unifi.csv for the elements database of negative cases.<br>
+                            - positive_unifi.csv for the elements database of positive cases.<br>
+                            <strong>NeutralMass:</strong><br>
+                            - The paramenter should be float number xxx.xxxxx.<br> 
+                            <strong>Unifi_number:</strong><br>
+                            - Number from the unifi machine.<br>
+                            <strong>Hydro(s):</strong><br>
+                            - Number of Hydros can be in the combinations.<br>
+                            - The case that the addduct does not contain Hydro is always calculated.<br>
+                            <strong>Element(s):</strong><br>
+                            - The number of times the elements can be duplicated in the adduct combi.<br>
+                            <strong>Mass Error:</strong><br>
+                            - The acceptable error which can be approved, the smaller it get the more accurate the results.<br>
+                            - Normal paramter is: 0.00001<br>
+                            <strong>Hydro Exact:</strong><br>
+                            - should equal 1.007825 as standard value.<br>
+                            2. Click Convert.<br>
+                            3. The result will be shown as Json format.<br>
+                            </p>
+                    </div>
+                </div>
+            </div>
+        </div> 
         <!-- JavaScript: Above <body>  -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
@@ -73,7 +118,7 @@
             crossorigin="anonymous"></script>
     </body>
     <footer>
-        <div class="text-left mb-4">
+        <div class="text-center mb-4">
             &copy; Copyright 2023 Dispelk9(Ai Viet Hoang)
         </div>
     </footer>

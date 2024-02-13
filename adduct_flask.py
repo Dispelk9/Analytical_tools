@@ -2,7 +2,6 @@ from flask import Flask, redirect, url_for, render_template
 from flask import request
 from flask import jsonify
 
-import os
 import csv
 app = Flask(__name__)
 
@@ -10,81 +9,40 @@ app = Flask(__name__)
 @app.route("/index", methods=["GET"])
 def index():
 
-    # file = request.args.get("file")
-    # neutralmass = request.args.get("neutralmass")
-    # unifi_number = request.args.get("unifi_number")
-    # hrepeat = request.args.get("hrepeat")
-    # repeat = request.args.get("repeat")
-    # mass_error = request.args.get("mass_error")
-    # mode = request.args.get("mode")
-    # hexact = request.args.get("hexact")
+    try:
+        if request.method == "GET":
+            #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825    
+            query = request.args.to_dict(flat=False)
+            
+            file = query["file"]
+            neutralmass = query["neutralmass"]
+            unifi_number = query["unifi_number"]
+            hrepeat = query["hrepeat"]
+            repeat = query["repeat"]
+            mass_error = query["mass_error"]
+            mode = query["mode"]
+            hexact = query["hexact"]
 
-    # print(file,neutralmass,unifi_number,hrepeat,repeat,mass_error,mode,hexact)
+            value_list = {
+            "csvfile":          file,
+            "neutralmass":      float("".join(neutralmass)),
+            "unifi_number":     float("".join(unifi_number)),
+            "hexact":           float("".join(hexact)),
+            "hrepeat":          int("".join(hrepeat)),
+            "repeat":           int("".join(repeat)),
+            "mass_error":       float("".join(mass_error)),
+            "mode":             "".join(mode)
+            }
+            without_h   = without_hydro(value_list)
+            result      = m_calculation(value_list)
+            all_info = {"Requested Parameters":value_list,"Resuls without Hydro": without_h,"Results with Hydro":result}
+            return (
+                jsonify(all_info)
+            )
+    except:
+        return render_template("index.html")
 
-    # if request.method == "GET":
-    #     #query = request.args.to_dict(flat=False)
-    #     #print(query)
-    #     #return redirect("answers",query)
 
-    #     return redirect("/answers")
-
-    #else:
-        #if request.method == "GET":
-            # link = request.url
-            # print(link)
-            # prefix = "http://127.0.0.1:8080/index"
-            # if link.startswith(prefix):
-            #     strip_link = link[len(prefix):]
-            # print(strip_link)
-            #return redirect(url_for("answers",))
-        # return(
-        #     """<form action="" method="get">
-        #             <p>
-        #                 File\t          <input type="text" name="file"><br>
-        #                 Neutralmass\t   <input type="text" name="neutralmass"><br>
-        #                 Unifi Number\t  <input type="text" name="unifi_number"><br>
-        #                 Hydro(s)\t      <input type="text" name="hrepeat"><br>
-        #                 Element(s)\t    <input type="text" name="repeat"><br>
-        #                 Mass Error\t    <input type="text" name="mass_error"><br>
-        #                 Mode\t          <input type="text" name="mode"><br>
-        #                 Hydroexact\t    <input type="text" name="hexact"><br>
-        #                 <input type="submit" value="Convert">
-        #             </p>
-        #         </form>"""
-        # )
-    return render_template("index.html")
-
-#?<string:file>&<string:neutralmass>,<string:unifi_number>,<string:hrepeat>,<string:repeat>,<string:mass_error>,<string:mode>,<string:hexact>
-@app.route("/answers")
-def answers():
-    #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825    
-    query = request.args.to_dict(flat=False)
-    print(query)
-    file = query["file"]
-    neutralmass = query["neutralmass"]
-    unifi_number = query["unifi_number"]
-    hrepeat = query["hrepeat"]
-    repeat = query["repeat"]
-    mass_error = query["mass_error"]
-    mode = query["mode"]
-    hexact = query["hexact"]
-
-    value_list = {
-    "csvfile":          file,
-    "neutralmass":      float("".join(neutralmass)),
-    "unifi_number":     float("".join(unifi_number)),
-    "hexact":           float("".join(hexact)),
-    "hrepeat":          int("".join(hrepeat)),
-    "repeat":           int("".join(repeat)),
-    "mass_error":       float("".join(mass_error)),
-    "mode":             "".join(mode)
-    }
-    without_h   = without_hydro(value_list)
-    result      = m_calculation(value_list)
-    all_info = {"Requested Parameters":value_list,"Resuls without Hydro": without_h,"Results with Hydro":result}
-    return (
-        jsonify(all_info)
-    )
 
 def without_hydro(value_list):
     delta_m_min = float(-abs(value_list["mass_error"]))
