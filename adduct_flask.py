@@ -14,20 +14,17 @@ def index():
             #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825    
             query = request.args.to_dict(flat=False)
             
-            file = query["file"]
             neutralmass = query["neutralmass"]
             unifi_number = query["unifi_number"]
             hrepeat = query["hrepeat"]
             repeat = query["repeat"]
             mass_error = query["mass_error"]
             mode = query["mode"]
-            hexact = query["hexact"]
 
             value_list = {
-            "csvfile":          file,
             "neutralmass":      float("".join(neutralmass)),
             "unifi_number":     float("".join(unifi_number)),
-            "hexact":           float("".join(hexact)),
+            "hexact":           1.007825,
             "hrepeat":          int("".join(hrepeat)),
             "repeat":           int("".join(repeat)),
             "mass_error":       float("".join(mass_error)),
@@ -47,7 +44,12 @@ def index():
 def without_hydro(value_list):
     delta_m_min = float(-abs(value_list["mass_error"]))
     delta_m_max = value_list["mass_error"]
-    raw_file = open("".join(value_list["csvfile"]), "r")
+    if value_list["mode"] == "minus":
+        file_mode = "negative_unifi.csv"
+    elif value_list["mode"] == "plus":
+        file_mode = "positive_unifi.csv"
+    
+    raw_file = open(file_mode, "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
 
     high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
@@ -148,7 +150,12 @@ def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
 def adduct_using_mass(value_list,number_of_hydro):
     delta_m_min = float(-abs(value_list["mass_error"]))
     delta_m_max = value_list["mass_error"]
-    raw_file = open("".join(value_list["csvfile"]), "r")
+    if value_list["mode"] == "minus":
+        file_mode = "negative_unifi.csv"
+    elif value_list["mode"] == "plus":
+        file_mode = "positive_unifi.csv"
+    
+    raw_file = open(file_mode, "r")
     rawdata = list(csv.reader(raw_file, delimiter=";"))
 
     Hydro_mode = ""

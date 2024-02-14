@@ -35,10 +35,6 @@
                     <form action="" method="get">
                         <table align="center">
                             <tr>
-                                <td align="right">File</td>          
-                                <td align="left"><input type="text" name="file"></td><br>
-                            </tr>
-                            <tr>
                                 <td align="right">Neutralmass</td>   
                                 <td align="left"><input type="text" name="neutralmass"></td><br>
                             </tr>
@@ -62,13 +58,9 @@
                                 <td align="right">Mode</td>
                                 <td align="left"><input type="text" name="mode"></td><br>
                             </tr>
-                            <tr>
-                                <td align="right">Hydroexact</td>  
-                                <td align="left"><input type="text" name="hexact"></td><br>
-                            </tr>
                         </table>
                         <div align="center">
-                            <input type="submit" value="Convert">
+                            <input type="submit" value="Calculate">
                         </div>
                     </form>
                 </div>
@@ -79,9 +71,9 @@
                             devices.<br>
                             How to use:<br>
                             1. Fill all the blanks with parameters:<br>
-                            <strong>File:</strong><br>
-                            - negative_unifi.csv for the elements database of negative cases.<br>
-                            - positive_unifi.csv for the elements database of positive cases.<br>
+                            <strong>Mode:</strong><br>
+                            - minus: negative_unifi.csv for the elements database of negative cases.<br>
+                            - plus: positive_unifi.csv for the elements database of positive cases.<br>
                             <strong>NeutralMass:</strong><br>
                             - The paramenter should be float number xxx.xxxxx.<br> 
                             <strong>Unifi_number:</strong><br>
@@ -89,13 +81,12 @@
                             <strong>Hydro(s):</strong><br>
                             - Number of Hydros can be in the combinations.<br>
                             - The case that the addduct does not contain Hydro is always calculated.<br>
+                            - Hydro hould equal 1.007825 as standard value.<br>
                             <strong>Element(s):</strong><br>
                             - The number of times the elements can be duplicated in the adduct combi.<br>
                             <strong>Mass Error:</strong><br>
                             - The acceptable error which can be approved, the smaller it get the more accurate the results.<br>
-                            - Normal paramter is: 0.00001<br>
-                            <strong>Hydro Exact:</strong><br>
-                            - should equal 1.007825 as standard value.<br>
+                            - Normal parameter is: 0.00001<br>
                             2. Click Convert.<br>
                             3. The result will be shown as Json format.<br>
                             </p>
