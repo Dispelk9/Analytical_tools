@@ -17,4 +17,4 @@ jobs:
 
       - name: Deploy to server or Storage Box
         run: |
-          rsync -azP -e "ssh -i $HOME/.ssh/id_ed25519 -p 22" ./ ${{ secrets.ARTIFACT_USERNAME }}@${{ secrets.IP }}:~/root/anayltic_flask/Analytical_tools
+          rsync -azP -e "ssh -i $HOME/.ssh/id_ed25519 -p 22" ./ ${{ secrets.ARTIFACT_USERNAME }}@${{ secrets.IP }}:~/root/analytic_flask/Analytical_tools
