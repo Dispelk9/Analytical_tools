@@ -15,6 +15,6 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p 22 -t ed25519 ${{ secrets.IP}} >> ~/.ssh/known_hosts
 
-      - name: Deploy to server or Storage Box
+      - name: Deploy to server
         run: |
-          rsync -azP -e "ssh -i $HOME/.ssh/id_ed25519 -p 22" ./ ${{ secrets.ARTIFACT_USERNAME }}@${{ secrets.IP }}:~/tmp/
+          rsync -azP -e "ssh -i $HOME/.ssh/id_ed25519 -p 22" ./ ${{ secrets.ARTIFACT_USERNAME }}@${{ secrets.IP }}:~/analytic_flask/Analytical_tools/
