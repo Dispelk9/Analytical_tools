@@ -6,10 +6,6 @@ from flask import jsonify
 import csv
 app = Flask(__name__)
 
-@app.route("/about", methods=["GET"])
-def about():
-    if request.method == "GET":
-        render_template("about.html")
 @app.route("/index", methods=["GET"])
 def index():
 
