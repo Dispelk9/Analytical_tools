@@ -1,0 +1,35 @@
+name: Flask Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  updating-infrastructure:
+      name: Updating Infrastructure
+      runs-on: ubuntu-latest
+      env:
+          TF_LOG: DEBUG
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+        
+
+
+        - name: Git clone the Analytical Repos
+          run: |
+              echo "Prepare to clone the repo"
+              git@github.com:Dispelk9/Analytical_tools.git
+              echo "Installing the needed packages for Flask"
+              apt install python3.10-venv
+              apt install pip
+          working-directory: /root/
+
+        - name: Run the playbook to activate the website
+          uses: ./.github/actions/ansible
+          with: 
+            playbook: main.yml
+            inventory: localhost
+          
+      
