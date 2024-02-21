@@ -17,7 +17,7 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov
-          pytest addzct_flask.py
+          pytest adduct_flask.py
           pytest adduct.py
   Deploy:
     runs-on: ubuntu-latest
