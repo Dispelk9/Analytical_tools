@@ -20,8 +20,8 @@ jobs:
             mkdir -p ~/.ssh/
             echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github_terra
             echo "${{ secrets.SSH_PUB_KEY }}" > ~/.ssh/github_terra.pub
-            chmod 600 ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa.pub
+            chmod 600 ~/.ssh/github_terra
+            chmod 600 ~/.ssh/github_terra.pub
             ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
         
         - name: Git clone the Analytical Repos
