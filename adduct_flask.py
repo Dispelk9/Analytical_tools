@@ -2,6 +2,7 @@
 from flask import Flask, redirect, url_for, render_template
 from flask import request
 from flask import jsonify
+from OpenSSL import SSL
 
 import csv
 app = Flask(__name__)
@@ -231,5 +232,7 @@ def adduct_using_mass(value_list,number_of_hydro):
     return element_list
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    context = ('/etc/letsencrypt/live/analytical.dispelk9.de/cert.pem','/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem')
+    app.run(host="0.0.0.0", port=8080, debug=True, ssl_context=context, threaded=True)
+
 
