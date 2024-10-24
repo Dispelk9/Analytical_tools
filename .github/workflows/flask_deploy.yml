@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Ansible Playbook on Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << EOF
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
             ls -la
