@@ -29,23 +29,17 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run Initial Update on Server
+      - name: Run Gunicorn with ACT
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
-
-      - name: Remove the old Repository
-        run: |
-          sudo rm -rf /root/analytic_flask/Analytical_tools
-          # Start the SSH agent and add the key with the passphrase
-          sudo bash -c 'eval "$(ssh-agent -s)" && echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa'
-          cd /root/analytic_flask/Analytical_tools
-          sudo git clone git@github.com:Dispelk9/Analytical_tools.git
-
-      - name: Rerun Gunicorn Server
-        run: |
-          cd /root/analytic_flask/Analytical_tools
-          gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
+            sudo rm -rf /root/analytic_flask/Analytical_tools
+            # Start the SSH agent and add the key with the passphrase
+            sudo bash -c 'eval "$(ssh-agent -s)" && echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa'
+            cd /root/analytic_flask/
+            sudo git clone git@github.com:Dispelk9/Analytical_tools.git
+            cd /root/analytic_flask/Analytical_tools
+            gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
 
           
