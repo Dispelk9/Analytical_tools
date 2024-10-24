@@ -29,9 +29,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run Ansible Playbook on Server
+      - name: Run Initial Update on Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
-            ls -la
+
+      - name: Remove the old Repor
+        run: |
+          rm /root/analytic_flask/Analytical_tools
+          git clone git@github.com:Dispelk9/Analytical_tools.git
+
+      - name: Rerun Gunicorn Server
+        run: |
+          cd /root/analytic_flask/Analytical_tools
+          gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
+
+          
