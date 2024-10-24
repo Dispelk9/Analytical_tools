@@ -35,10 +35,10 @@ jobs:
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
 
-      - name: Remove the old Repor
+      - name: Remove the old Repository
         run: |
-          rm /root/analytic_flask/Analytical_tools
-          git clone git@github.com:Dispelk9/Analytical_tools.git
+          sudo rm -rf /root/analytic_flask/Analytical_tools
+          sudo git clone git@github.com:Dispelk9/Analytical_tools.git
 
       - name: Rerun Gunicorn Server
         run: |
