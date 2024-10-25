@@ -3,6 +3,7 @@
 #gunicorn --config gunicorn_config.py adduct_flask:app
 #for https
 #run this command after reboot
+#or pkill gunicorn
 #gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
 import os
 
