@@ -3,6 +3,8 @@ on: push
 jobs:
   Test:
     name: Prepare Deploy
+    env:
+      ACTIONS_STEP_DEBUG: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: Test
     name: Deploy Hetzner
+    env:
+      ACTIONS_STEP_DEBUG: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
