@@ -4,7 +4,9 @@ from flask import request
 from flask import jsonify
 from OpenSSL import SSL
 
+import psycopg2
 import csv
+import os
 app = Flask(__name__)
 
 @app.route("/index", methods=["GET"])
@@ -12,9 +14,9 @@ def index():
 
     try:
         if request.method == "GET":
-            #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825    
+            #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825
             query = request.args.to_dict(flat=False)
-            
+
             neutralmass = query["neutralmass"]
             unifi_number = query["unifi_number"]
             hrepeat = query["hrepeat"]
@@ -45,25 +47,50 @@ def index():
 def without_hydro(value_list):
     delta_m_min = float(-abs(value_list["mass_error"]))
     delta_m_max = value_list["mass_error"]
+    with open("/root/postgres.txt",'r')as file:
+     postgres_string = file.read().strip()
+#    if value_list["mode"] == "minus":
+#        file_mode = "negative_unifi.csv"
+#    elif value_list["mode"] == "plus":
+#        file_mode = "positive_unifi.csv"
+#
+#    raw_file = open(file_mode, "r")
+#    rawdata = list(csv.reader(raw_file, delimiter=";"))
     if value_list["mode"] == "minus":
-        file_mode = "negative_unifi.csv"
+        #file_mode = "negative_unifi.csv"
+        conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM negative;")
+        negative_postgres = cursor.fetchall()
+        print(negative_postgres)
+        rawdata = [list(item) for item in negative_postgres]
+        cursor.close()
+        conn.close()
     elif value_list["mode"] == "plus":
-        file_mode = "positive_unifi.csv"
-    
-    raw_file = open(file_mode, "r")
-    rawdata = list(csv.reader(raw_file, delimiter=";"))
+        #file_mode = "positive_unifi.csv"
+        conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM positive;")
+        postgres_postgres = cursor.fetchall()
+        print(positive_postgres)
+        rawdata = [list(item) for item in positive_postgres]
+        cursor.close()
+        conn.close()
+
 
     high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"]) 
-    
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"])
+
     list_exact_mass_of_each_element = []
     for j in range(int(value_list["repeat"])):
-        for i in rawdata:   
-            list_exact_mass_of_each_element.append(float(i[1]))
-
+        for i in rawdata:
+            #list_exact_mass_of_each_element.append(float(i[1]))
+            list_exact_mass_of_each_element.append(i[1])
     list_add = []
     subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
-    
+
     #change each mass into element
     # i combine of mass numbers and total number
     # j combine of name and mass number
@@ -81,7 +108,7 @@ def without_hydro(value_list):
             "element_set": "",
             "sum_of_element_set":""
         }
-        plus = 0 
+        plus = 0
         minus = 0
         for k in i[0]:
             if "+" in k:
@@ -104,9 +131,9 @@ def without_hydro(value_list):
                 combi = dict(sorted(combi.items()))
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)      
+                element_list.append(element_set_dict)
     #reduct the duplicate answers
-    element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
+    element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
 
     return element_list
 
@@ -151,13 +178,38 @@ def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
 def adduct_using_mass(value_list,number_of_hydro):
     delta_m_min = float(-abs(value_list["mass_error"]))
     delta_m_max = value_list["mass_error"]
+    with open("/root/postgres.txt",'r')as file:
+     postgres_string = file.read().strip()
+#    if value_list["mode"] == "minus":
+#        file_mode = "negative_unifi.csv"
+#    elif value_list["mode"] == "plus":
+#        file_mode = "positive_unifi.csv"
+#
+#    raw_file = open(file_mode, "r")
+#    rawdata = list(csv.reader(raw_file, delimiter=";"))
     if value_list["mode"] == "minus":
-        file_mode = "negative_unifi.csv"
+        #file_mode = "negative_unifi.csv"
+        conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM negative;")
+        negative_postgres = cursor.fetchall()
+        print(negative_postgres)
+        rawdata = [list(item) for item in negative_postgres]
+        cursor.close()
+        conn.close()
     elif value_list["mode"] == "plus":
-        file_mode = "positive_unifi.csv"
-    
-    raw_file = open(file_mode, "r")
-    rawdata = list(csv.reader(raw_file, delimiter=";"))
+        #file_mode = "positive_unifi.csv"
+        conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM positive;")
+        postgres_postgres = cursor.fetchall()
+        print(positive_postgres)
+        rawdata = [list(item) for item in positive_postgres]
+        cursor.close()
+        conn.close()
+
 
     Hydro_mode = ""
 
@@ -168,19 +220,19 @@ def adduct_using_mass(value_list,number_of_hydro):
         Hydro_mode = float(number_of_hydro)
 
     high_limit  = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
-    low_limit   = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"]) 
-    
+    low_limit   = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"])
+
     print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
     print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
 
     list_exact_mass_of_each_element = []
     for j in range(int(value_list["repeat"])):
-        for i in rawdata:   
-            list_exact_mass_of_each_element.append(float(i[1]))
-
+        for i in rawdata:
+            #list_exact_mass_of_each_element.append(float(i[1]))
+            list_exact_mass_of_each_element.append(i[1])
     list_add = []
     subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
-    
+
     #change each mass into element
     # i combine of mass numbers and total number
     # j combine of name and mass number
@@ -198,7 +250,7 @@ def adduct_using_mass(value_list,number_of_hydro):
             "element_set": "",
             "sum_of_element_set":""
         }
-        plus = 0 
+        plus = 0
         minus = 0
         for k in i[0]:
             if "+" in k:
@@ -223,9 +275,9 @@ def adduct_using_mass(value_list,number_of_hydro):
                 element_set_dict["Number of H(s)"]      = str(number_of_hydro) + Hm
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)      
+                element_list.append(element_set_dict)
     #reduct the duplicate answers
-    element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]    
+    element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
     for i in element_list:
        print("%s\nsum:%s" % (i["element_set"],i["sum_of_element_set"]))
     return element_list
@@ -233,5 +285,3 @@ def adduct_using_mass(value_list,number_of_hydro):
 if __name__ == "__main__":
     context = ('/etc/letsencrypt/live/analytical.dispelk9.de/cert.pem','/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem')
     app.run(host="0.0.0.0", port=8080, debug=True, ssl_context=context, threaded=True)
-
-
