@@ -6,6 +6,7 @@ jobs:
     env:
       ACTIONS_STEP_DEBUG: true
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
       - name: Test Website Online
@@ -20,7 +21,8 @@ jobs:
   Deploy:
     runs-on: ubuntu-latest
     needs: Test
-    name: Deploy Hetzner
+    if: github.ref == 'refs/heads/master'
+    name: Deploy On Hetzner
     env:
       ACTIONS_STEP_DEBUG: true
     steps:
