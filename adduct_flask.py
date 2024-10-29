@@ -49,7 +49,13 @@ def without_hydro(value_list):
     delta_m_max = value_list["mass_error"]
     with open("/root/postgres.txt",'r')as file:
      postgres_string = file.read().strip()
-
+#    if value_list["mode"] == "minus":
+#        file_mode = "negative_unifi.csv"
+#    elif value_list["mode"] == "plus":
+#        file_mode = "positive_unifi.csv"
+#
+#    raw_file = open(file_mode, "r")
+#    rawdata = list(csv.reader(raw_file, delimiter=";"))
     if value_list["mode"] == "minus":
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
@@ -167,26 +173,16 @@ def adduct_using_mass(value_list,number_of_hydro):
     delta_m_max = value_list["mass_error"]
     with open("/root/postgres.txt",'r')as file:
      postgres_string = file.read().strip()
-#    if value_list["mode"] == "minus":
-#        file_mode = "negative_unifi.csv"
-#    elif value_list["mode"] == "plus":
-#        file_mode = "positive_unifi.csv"
-#
-#    raw_file = open(file_mode, "r")
-#    rawdata = list(csv.reader(raw_file, delimiter=";"))
     if value_list["mode"] == "minus":
-        #file_mode = "negative_unifi.csv"
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM negative;")
         negative_postgres = cursor.fetchall()
-        print(negative_postgres)
         rawdata = [list(item) for item in negative_postgres]
         cursor.close()
         conn.close()
     elif value_list["mode"] == "plus":
-        #file_mode = "positive_unifi.csv"
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
