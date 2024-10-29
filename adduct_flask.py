@@ -57,24 +57,20 @@ def without_hydro(value_list):
 #    raw_file = open(file_mode, "r")
 #    rawdata = list(csv.reader(raw_file, delimiter=";"))
     if value_list["mode"] == "minus":
-        #file_mode = "negative_unifi.csv"
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM negative;")
         negative_postgres = cursor.fetchall()
-        print(negative_postgres)
         rawdata = [list(item) for item in negative_postgres]
         cursor.close()
         conn.close()
     elif value_list["mode"] == "plus":
-        #file_mode = "positive_unifi.csv"
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
-        postgres_postgres = cursor.fetchall()
-        print(positive_postgres)
+        positive_postgres = cursor.fetchall()
         rawdata = [list(item) for item in positive_postgres]
         cursor.close()
         conn.close()
@@ -86,7 +82,6 @@ def without_hydro(value_list):
     list_exact_mass_of_each_element = []
     for j in range(int(value_list["repeat"])):
         for i in rawdata:
-            #list_exact_mass_of_each_element.append(float(i[1]))
             list_exact_mass_of_each_element.append(i[1])
     list_add = []
     subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
@@ -161,10 +156,8 @@ def m_calculation(value_list):
 
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
     s = sum(partial)
-    #print(s)
     # check if the partial sum is equals to target
     if s > low_limit and s < high_limit:
-        #print("%s" % (partial))
         list_with_sum = [partial,float("{:.5f}".format(float(s)))]
         list_add.append(list_with_sum)
     if s >= high_limit:
@@ -180,31 +173,21 @@ def adduct_using_mass(value_list,number_of_hydro):
     delta_m_max = value_list["mass_error"]
     with open("/root/postgres.txt",'r')as file:
      postgres_string = file.read().strip()
-#    if value_list["mode"] == "minus":
-#        file_mode = "negative_unifi.csv"
-#    elif value_list["mode"] == "plus":
-#        file_mode = "positive_unifi.csv"
-#
-#    raw_file = open(file_mode, "r")
-#    rawdata = list(csv.reader(raw_file, delimiter=";"))
     if value_list["mode"] == "minus":
-        #file_mode = "negative_unifi.csv"
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM negative;")
         negative_postgres = cursor.fetchall()
-        print(negative_postgres)
         rawdata = [list(item) for item in negative_postgres]
         cursor.close()
         conn.close()
     elif value_list["mode"] == "plus":
-        #file_mode = "positive_unifi.csv"
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
-        postgres_postgres = cursor.fetchall()
+        positive_postgres = cursor.fetchall()
         print(positive_postgres)
         rawdata = [list(item) for item in positive_postgres]
         cursor.close()
