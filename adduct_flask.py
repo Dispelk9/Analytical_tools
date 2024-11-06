@@ -7,7 +7,6 @@ from OpenSSL import SSL
 import psycopg2
 import csv
 import os
-from prettytable import PrettyTable
 app = Flask(__name__)
 
 @app.route("/index", methods=["GET"])
@@ -40,12 +39,15 @@ def index():
             
             return (
                 #jsonify(all_info)
-                render_template('result.html', data=all_info)
+                all_info
             )
     except:
         return render_template("index.html")
 
-
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    data_result = index()
+    return render_template("result.html",data=data_result)
 
 def without_hydro(value_list):
     delta_m_min = float(-abs(value_list["mass_error"]))
