@@ -7,6 +7,7 @@ from OpenSSL import SSL
 import psycopg2
 import csv
 import os
+from prettytable import PrettyTable
 app = Flask(__name__)
 
 @app.route("/index", methods=["GET"])
@@ -36,8 +37,10 @@ def index():
             without_h   = without_hydro(value_list)
             result      = m_calculation(value_list)
             all_info = {"Requested Parameters":value_list,"Resuls without Hydro": without_h,"Results with Hydro":result}
+            
             return (
-                jsonify(all_info)
+                #jsonify(all_info)
+                render_template('result.html', data=all_info)
             )
     except:
         return render_template("index.html")
