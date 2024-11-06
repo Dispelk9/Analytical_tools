@@ -7,6 +7,7 @@ from OpenSSL import SSL
 import psycopg2
 import csv
 import os
+from prettytable import PrettyTable
 app = Flask(__name__)
 
 @app.route("/index", methods=["GET"])
