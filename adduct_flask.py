@@ -36,6 +36,7 @@ def index():
             }
             without_h   = without_hydro(value_list)
             result      = m_calculation(value_list)
+
             all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
             #return render_template("result.html",data=all_info)
 #            return (
@@ -46,6 +47,7 @@ def index():
         return render_template("index.html")
     print(all_info)
     return render_template("result.html",all_info=all_info)
+
 
 def without_hydro(value_list):
     delta_m_min = float(-abs(value_list["mass_error"]))
