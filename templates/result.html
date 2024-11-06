@@ -5,18 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Info</title>
     <style>
+        body{
+            background:url('../static/chemiebackground.jpg') no-repeat center center fixed;
+            -webkit-background-size:cover;
+            -moz-background-size:cover;
+            -o-background-size: cover;
+            background-size: cover;
+            backdrop-filter: blur(5px);
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            color: #fff;
         }
         h2 {
-            color: #333;
+            color: #fff;
         }
         table {
             width: 70%;
             margin-bottom: 20px;
             border-collapse: collapse;
             font-size: 16px;
+            color: #fff;
+            background-color: transparent;
+
         }
         th, td {
             border: 1px solid #ddd;
@@ -24,12 +37,12 @@
             text-align: left;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #333333;
             font-weight: bold;
         }
         .section-title {
             font-size: 1.2em;
-            color: #555;
+            color: #fff;
             margin-top: 30px;
         }
     </style>
@@ -37,26 +50,80 @@
 <body>
 
     <h1>All Information</h1>
-
-    {% for section, data in all_info.items() %}
-        <h2 class="section-title">{{ section }}</h2>
+    {% for section,info in all_info.items()  %}
+      {% if section == "Requested Parameters" %}
+      <h1>{{section}}</h1>
         <table>
-            <thead>
-                <tr>
-                    <th>Parameter</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for key, value in data.items() %}
-                <tr>
-                    <td>{{ key }}</td>
-                    <td>{{ value }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+          <tr>
+              <th>Parameter</th>
+              <th>Value</th>
+          </tr>
+          {% for key, value in info.items() %}
+              {% if value %}
+               <tr>
+                  <td>{{ key }}</td>
+                  <td>{{ value }}</td>
+               </tr>
+              {% endif %}
+          {% endfor %}
         </table>
+      {% elif section == "Results without Hydro" %}
+        <h1>{{section}}</h1>
+        <table>
+          <tr>
+              <th>Adducts</th>
+          </tr>
+          {% if info is mapping %}
+              {% for key, value in info.items() %}
+                <p>{{ key }}:
+                  {% if key %}
+                   <tr>
+                      <td>{{ key }}</td>
+                   </tr>
+                  {% else %}
+                  <tr>
+                     <td> No possible adduct</td>
+                  </tr>
+                  {% endif %}
+                </p>
+              {% endfor %}
+          {% elif info is iterable %}
+              {% for item in info %}
+                  <tr>
+                      <td>{{ item }}</td>
+                  </tr>
+              {% endfor %}
+          {% endif %}
+        </table>
+      {% elif section == "Results with Hydro" %}
+        <h1>{{section}}</h1>
+        <table>
+          <tr>
+              <th>Adducts</th>
+          </tr>
+          {% if info is mapping %}
+              {% for key, value in info.items() %}
+                <p>{{ key }}:
+                  {% if key %}
+                   <tr>
+                      <td>{{ key }}</td>
+                   </tr>
+                  {% else %}
+                  <tr>
+                     <td> No possible adduct</td>
+                  </tr>
+                  {% endif %}
+                </p>
+              {% endfor %}
+          {% elif info is iterable %}
+              {% for item in info %}
+                  <tr>
+                      <td>{{ item }}</td>
+                  </tr>
+              {% endfor %}
+          {% endif %}
+        </table>
+      {% endif %}
     {% endfor %}
-
 </body>
 </html>

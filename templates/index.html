@@ -9,10 +9,10 @@
         <!-- CSS: Inside head tag -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
             integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-	<link rel="apple-touch-icon" sizes="180x180" href="../static/favicon_io/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="../static/favicon_io/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="../static/favicon_io/favicon-16x16.png">
-	<link rel="manifest" href="../static/favicon_io/site.webmanifest">
+        <link rel="apple-touch-icon" sizes="180x180" href="../static/favicon_io/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon_io/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon_io/favicon-16x16.png">
+        <link rel="manifest" href="../static/favicon_io/site.webmanifest">
     </head>
     <style>
         body{
@@ -40,6 +40,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="https://dispelk9.github.io/">About</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://analytical.dispelk9.de:8080/result">Result</a>
+                    </li>
                 </ul>
                 </div>
             </div>
@@ -61,23 +64,23 @@
                     <form action="" method="get">
                         <table class="text-white" align="center">
                             <tr>
-                                <td align="right">Neutralmass</td>   
+                                <td align="right">Neutralmass</td>
                                 <td align="left"><input type="text" name="neutralmass"></td><br>
                             </tr>
                             <tr>
-                                <td align="right">Unifi Number </td> 
+                                <td align="right">Unifi Number </td>
                                 <td align="left"><input type="text" name="unifi_number"></td><br>
                             </tr>
                             <tr>
-                                <td align="right">Hydro(s)</td>      
+                                <td align="right">Hydro(s)</td>
                                 <td align="left"><input type="text" name="hrepeat"></td><br>
                             </tr>
                             <tr>
-                                <td align="right">Element(s)</td>    
+                                <td align="right">Element(s)</td>
                                 <td align="left"><input type="text" name="repeat"></td><br>
                             </tr>
                             <tr>
-                                <td align="right">Mass Error</td>    
+                                <td align="right">Mass Error</td>
                                 <td align="left"><input type="text" name="mass_error"></td><br>
                             </tr>
                             <tr>
@@ -85,7 +88,8 @@
                                 <td align="left"><input type="text" name="mode"></td><br>
                             </tr>
                         </table>
-                        <form action="/calculate" method="POST">
+                        <form action="/result" method="POST">
+
                             <div align="center">
                                 <input type="submit" value="Calculate">
                             </div>
@@ -95,7 +99,7 @@
                 <div class="col-lg mx-2 align-self-center ">
                     <div class="my-3">
                         <p class="text-white" class="lineUp" align="justify">
-                            Used to find the combinations of adduct base on the neutralmass mass and mass from the unifi 
+                            Used to find the combinations of adduct base on the neutralmass mass and mass from the unifi
                             devices.<br>
                             How to use:<br>
                             1. Fill all the blanks with parameters:<br>
@@ -103,7 +107,7 @@
                             - minus for the database of components for negative cases.<br>
                             - plus  for the database of components for positive cases.<br>
                             <strong>NeutralMass:</strong><br>
-                            - The paramenter should be float number xxx.xxxxx.<br> 
+                            - The paramenter should be float number xxx.xxxxx.<br>
                             <strong>Unifi_number:</strong><br>
                             - Number from the unifi machine.<br>
                             <strong>Hydro(s):</strong><br>
@@ -121,7 +125,7 @@
                     </div>
                 </div>
             </div>
-        </div> 
+        </div>
 
         <div class="container my-4 ">
             <!-- Timestamp -->
@@ -150,11 +154,11 @@
         <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
             integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
             crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" 
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
             crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" 
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" 
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
     </body>
     <footer>
