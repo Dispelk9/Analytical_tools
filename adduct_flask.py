@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 @app.route("/index", methods=["GET"])
 def index():
-
+    all_info = []
     try:
         if request.method == "GET":
             #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825
@@ -36,19 +36,16 @@ def index():
             }
             without_h   = without_hydro(value_list)
             result      = m_calculation(value_list)
-            all_info = {"Requested Parameters":value_list,"Resuls without Hydro": without_h,"Results with Hydro":result}
-            
-            return (
-                #jsonify(all_info)
-                all_info
-            )
+            all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
+            #return render_template("result.html",data=all_info)
+#            return (
+#                #jsonify(all_info)
+#                all_info
+#            )
     except:
         return render_template("index.html")
-
-@app.route("/calculate", methods=["POST"])
-def calculate():
-    data_result = index()
-    return render_template("result.html",data=data_result)
+    print(all_info)
+    return render_template("result.html",all_info=all_info)
 
 def without_hydro(value_list):
     delta_m_min = float(-abs(value_list["mass_error"]))
@@ -140,7 +137,7 @@ def without_hydro(value_list):
 
 
 def m_calculation(value_list):
-    print("<--Begin Calculations-->")
+    #print("<--Begin Calculations-->")
     all_results = []
     for i in range(int(value_list["hrepeat"])):
 
@@ -151,13 +148,13 @@ def m_calculation(value_list):
             "Adduct combinations":  "",
         }
 
-        print("\nNumber of Hydro: %s" % (i + 1))
+        #print("\nNumber of Hydro: %s" % (i + 1))
         list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
 
         each_hydro["Adduct combinations"] = list_of_all_adduct
         all_results.append(each_hydro)
 
-    print("<--Calculation completed-->")
+    #print("<--Calculation completed-->")
     return all_results
 
 def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
@@ -194,7 +191,7 @@ def adduct_using_mass(value_list,number_of_hydro):
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
         positive_postgres = cursor.fetchall()
-        print(positive_postgres)
+        #print(positive_postgres)
         rawdata = [list(item) for item in positive_postgres]
         cursor.close()
         conn.close()
@@ -211,8 +208,8 @@ def adduct_using_mass(value_list,number_of_hydro):
     high_limit  = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
     low_limit   = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"])
 
-    print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
-    print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
+    #print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
+    #print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
 
     list_exact_mass_of_each_element = []
     for j in range(int(value_list["repeat"])):
@@ -267,8 +264,8 @@ def adduct_using_mass(value_list,number_of_hydro):
                 element_list.append(element_set_dict)
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
-    for i in element_list:
-       print("%s\nsum:%s" % (i["element_set"],i["sum_of_element_set"]))
+    #for i in element_list:
+    #   print("%s\nsum:%s" % (i["element_set"],i["sum_of_element_set"]))
     return element_list
 
 if __name__ == "__main__":
