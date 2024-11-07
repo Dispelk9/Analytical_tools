@@ -73,27 +73,19 @@
           <tr>
               <th>Adducts</th>
           </tr>
-          {% if info is mapping %}
-              {% for key, value in info.items() %}
-                <p>{{ key }}:
-                  {% if key %}
-                   <tr>
-                      <td>{{ key }}</td>
-                   </tr>
-                  {% else %}
-                  <tr>
-                     <td> No possible adduct</td>
-                  </tr>
-                  {% endif %}
-                </p>
-              {% endfor %}
-          {% elif info is iterable %}
-              {% for item in info %}
-                  <tr>
-                      <td>{{ item }}</td>
-                  </tr>
-              {% endfor %}
-          {% endif %}
+            {% for item in info %}
+               {% if 'element_set' in item %}
+                   <ul>
+                       {% for element in item.element_set %}
+                         <tr>
+                         {% for key2, value2 in element.items() %}
+                           <td>{{ key2 }}: {{ value2 }}</td>
+                         {% endfor %}
+                         </tr>
+                       {% endfor %}
+                   </ul>
+               {% endif %}
+            {% endfor %}
         </table>
       {% elif section == "Results with Hydro" %}
         <h1>{{section}}</h1>
@@ -101,27 +93,31 @@
           <tr>
               <th>Adducts</th>
           </tr>
-          {% if info is mapping %}
-              {% for key, value in info.items() %}
-                <p>{{ key }}:
-                  {% if key %}
-                   <tr>
-                      <td>{{ key }}</td>
-                   </tr>
-                  {% else %}
+          {% for number_of_hydro in info %}
+            {% for key,value in number_of_hydro.items() %}
+                {% if key == "Adduct combinations"  %}
                   <tr>
-                     <td> No possible adduct</td>
+                    {% for sublist in value %}
+                      {% for item in sublist %}
+                          {% if 'element_set' in item %}
+                              <ul>
+                                  {% for element in item.element_set %}
+                                    <tr>
+                                    {% for key2, value2 in element.items() %}
+                                      <td>{{ key2 }}: {{ value2 }}</td>
+                                    {% endfor %}
+                                    </tr>
+                                  {% endfor %}
+                              </ul>
+                          {% endif %}
+                      {% endfor %}
+                  {% endfor %}
                   </tr>
-                  {% endif %}
-                </p>
-              {% endfor %}
-          {% elif info is iterable %}
-              {% for item in info %}
-                  <tr>
-                      <td>{{ item }}</td>
-                  </tr>
-              {% endfor %}
-          {% endif %}
+                {% else %}
+                  <th>{{ key }} {{ value }}</th>
+                {% endif %}
+            {% endfor %}
+          {% endfor %}
         </table>
       {% endif %}
     {% endfor %}
