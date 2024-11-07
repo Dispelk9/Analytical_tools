@@ -204,13 +204,12 @@ def adduct_using_mass(value_list,number_of_hydro):
         rawdata = [list(item) for item in negative_postgres]
         cursor.close()
         conn.close()
-    elif value_list["mode"] == "positve":
+    elif value_list["mode"] == "positive":
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
         positive_postgres = cursor.fetchall()
-        #print(positive_postgres)
         rawdata = [list(item) for item in positive_postgres]
         cursor.close()
         conn.close()
