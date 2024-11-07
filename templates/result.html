@@ -78,9 +78,7 @@
                    <ul>
                        {% for element in item.element_set %}
                          <tr>
-                         {% for key2, value2 in element.items() %}
-                           <td>{{ key2 }}: {{ value2 }}</td>
-                         {% endfor %}
+                            <td>{{ element }}</td>
                          </tr>
                        {% endfor %}
                    </ul>
@@ -103,9 +101,7 @@
                               <ul>
                                   {% for element in item.element_set %}
                                     <tr>
-                                    {% for key2, value2 in element.items() %}
-                                      <td>{{ key2 }}: {{ value2 }}</td>
-                                    {% endfor %}
+                                        <td>{{ element }}</td>
                                     </tr>
                                   {% endfor %}
                               </ul>
