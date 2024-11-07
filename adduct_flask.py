@@ -26,10 +26,8 @@ def index():
             mode = query["mode"]
 
             value_list = {
-            #Neutral mass (Da)
             "neutralmass":      float("".join(neutralmass)),
-            #Observed m/z 
-            "unifi number":     float("".join(unifi_number)),
+            "unifi_number":     float("".join(unifi_number)),
             "hexact":           1.007825,
             "hrepeat":          int("".join(hrepeat)),
             "repeat":           int("".join(repeat)),
@@ -38,8 +36,6 @@ def index():
             }
             without_h   = without_hydro(value_list)
             result      = m_calculation(value_list)
-
-            value_list = value_list.pop("hexact","repeat","hrepeat")
 
             all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
             #return render_template("result.html",data=all_info)
@@ -65,7 +61,7 @@ def without_hydro(value_list):
 #
 #    raw_file = open(file_mode, "r")
 #    rawdata = list(csv.reader(raw_file, delimiter=";"))
-    if value_list["mode"] == "negative":
+    if value_list["mode"] == "minus":
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
@@ -74,7 +70,7 @@ def without_hydro(value_list):
         rawdata = [list(item) for item in negative_postgres]
         cursor.close()
         conn.close()
-    elif value_list["mode"] == "positive":
+    elif value_list["mode"] == "plus":
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
@@ -120,7 +116,7 @@ def without_hydro(value_list):
             if "-" in k:
                 minus +=1
 
-        if value_list["mode"] == "negative":
+        if value_list["mode"] == "minus":
             if plus - minus == -1:
                 Hm = "H-"
                 combi = {element:i[0].count(element) for element in i[0]}
@@ -128,7 +124,7 @@ def without_hydro(value_list):
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
-        elif value_list["mode"] == "positive":
+        elif value_list["mode"] == "plus":
             if plus - minus == 1:
                 Hm = "H+"
                 combi = {element:i[0].count(element) for element in i[0]}
@@ -182,7 +178,7 @@ def adduct_using_mass(value_list,number_of_hydro):
     delta_m_max = value_list["mass_error"]
     with open("/root/postgres.txt",'r')as file:
      postgres_string = file.read().strip()
-    if value_list["mode"] == "negative":
+    if value_list["mode"] == "minus":
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
@@ -191,7 +187,7 @@ def adduct_using_mass(value_list,number_of_hydro):
         rawdata = [list(item) for item in negative_postgres]
         cursor.close()
         conn.close()
-    elif value_list["mode"] == "positve":
+    elif value_list["mode"] == "plus":
         conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
@@ -205,10 +201,10 @@ def adduct_using_mass(value_list,number_of_hydro):
 
     Hydro_mode = ""
 
-    if value_list["mode"] == "positive":
+    if value_list["mode"] == "plus":
         Hydro_mode = float(-abs(int(number_of_hydro)))
 
-    elif value_list["mode"] == "negative":
+    elif value_list["mode"] == "minus":
         Hydro_mode = float(number_of_hydro)
 
     high_limit  = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
@@ -250,7 +246,7 @@ def adduct_using_mass(value_list,number_of_hydro):
             if "-" in k:
                 minus +=1
 
-        if value_list["mode"] == "negative":
+        if value_list["mode"] == "minus":
             if plus - minus - number_of_hydro == -1:
                 Hm = "H-"
                 combi = {element:i[0].count(element) for element in i[0]}
@@ -259,7 +255,7 @@ def adduct_using_mass(value_list,number_of_hydro):
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
-        elif value_list["mode"] == "positive":
+        elif value_list["mode"] == "plus":
             if plus - minus - number_of_hydro == 1:
                 Hm = "H+"
                 combi = {element:i[0].count(element) for element in i[0]}
