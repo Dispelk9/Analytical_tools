@@ -7,7 +7,6 @@ from OpenSSL import SSL
 import psycopg2
 import csv
 import os
-from prettytable import PrettyTable
 app = Flask(__name__)
 
 @app.route("/index", methods=["GET"])
@@ -17,7 +16,7 @@ def index():
         if request.method == "GET":
             #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825
             query = request.args.to_dict(flat=False)
-
+            
             neutralmass = query["neutralmass"]
             unifi_number = query["unifi_number"]
             hrepeat = query["hrepeat"]
@@ -29,7 +28,7 @@ def index():
             #Neutral mass (Da)
             "neutralmass":      float("".join(neutralmass)),
             #Observed m/z 
-            "unifi number":     float("".join(unifi_number)),
+            "unifi_number":     float("".join(unifi_number)),
             "hexact":           1.007825,
             "hrepeat":          int("".join(hrepeat)),
             "repeat":           int("".join(repeat)),
@@ -39,7 +38,19 @@ def index():
             without_h   = without_hydro(value_list)
             result      = m_calculation(value_list)
 
-            value_list = value_list.pop("hexact","repeat","hrepeat")
+            keys_to_remove = ["hexact", "repeat", "hrepeat"]
+            for key in keys_to_remove:
+              value_list.pop(key, None)
+
+            rename_keys = {
+              "neutralmass": "Neutral mass (Da)",
+              "unifi_number": "Observed m/z",
+              "mass_error":  "Mass Error",
+            }
+
+            for old_key, new_key in rename_keys.items():
+              if old_key in value_list:
+                value_list[new_key] = value_list.pop(old_key)
 
             all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
             #return render_template("result.html",data=all_info)
@@ -47,10 +58,10 @@ def index():
 #                #jsonify(all_info)
 #                all_info
 #            )
+            return render_template("result.html",all_info=all_info)
     except:
         return render_template("index.html")
-    print(all_info)
-    return render_template("result.html",all_info=all_info)
+    
 
 
 def without_hydro(value_list):
