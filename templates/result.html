@@ -67,15 +67,20 @@
                 <li class="nav-item">
                     <a class="nav-link" href="https://dispelk9.github.io/">About</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="negative_unifi.csv">Negative DB</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="positive_unifi.csv">Positive DB</a>
+                </li>
             </ul>
             </div>
         </div>
     </nav>
 
-    <h1>All Information</h1>
     {% for section,info in all_info.items()  %}
       {% if section == "Requested Parameters" %}
-      <h1>{{section}}</h1>
+      <h1 class="text-white">{{section}}</h1>
         <table>
           <tr>
               <th>Parameter</th>
@@ -91,7 +96,7 @@
           {% endfor %}
         </table>
       {% elif section == "Results without Hydro" %}
-        <h1>{{section}}</h1>
+        <h1 class="text-white">{{section}}</h1>
         <table>
           <tr>
               <th>Adducts</th>
@@ -109,7 +114,7 @@
             {% endfor %}
         </table>
       {% elif section == "Results with Hydro" %}
-        <h1>{{section}}</h1>
+        <h1 class="text-white">{{section}}</h1>
         <table>
           <tr>
               <th>Adducts</th>

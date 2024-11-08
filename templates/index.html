@@ -40,6 +40,12 @@
                     <li class="nav-item">
                         <a class="nav-link" href="https://dispelk9.github.io/">About</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="negative_unifi.csv">Negative DB</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="positive_unifi.csv">Positive DB</a>
+                    </li>
                 </ul>
                 </div>
             </div>
@@ -62,11 +68,11 @@
                         <table class="text-white" align="center">
                             <tr>
                                 <td align="right">Neutral mass (Da)</td>
-                                <td align="left"><input type="text" name="neutralmass"></td><br>
+                                <td align="left"><input type="text" name="neutralmass" required></td><br>
                             </tr>
                             <tr>
                                 <td align="right">Observed m/z</td>
-                                <td align="left"><input type="text" name="unifi_number"></td><br>
+                                <td align="left"><input type="text" name="unifi_number" required></td><br>
                             </tr>
                             <!--tr>
                                 <td align="right">Hydro(s)</td>
@@ -78,7 +84,7 @@
                             </tr-->
                             <tr>
                                 <td align="right">Mass Error</td>
-                                <td align="left"><input type="text" name="mass_error"></td><br>
+                                <td align="left"><input type="text" name="mass_error" required></td><br>
                             </tr>
                             <tr>
                                 <td align="right">Mode</td>
@@ -106,23 +112,20 @@
                             How to use:<br>
                             1. Fill all the blanks with parameters:<br>
                             <strong>Mode:</strong><br>
-                            - minus for the database of components for negative cases.<br>
-                            - plus  for the database of components for positive cases.<br>
-                            <strong>NeutralMass:</strong><br>
-                            - The paramenter should be float number xxx.xxxxx.<br>
-                            <strong>Unifi_number:</strong><br>
+                            - positive for the database of components for negative cases.<br>
+                            - negative  for the database of components for positive cases.<br>
+                            <strong>Neutral mass (Da):</strong><br>
+                            - The paramenter should be float number xxx.xxxxx<br>
+                            <strong>Observed m/z:</strong><br>
                             - Number from the unifi machine.<br>
                             <strong>Hydro(s):</strong><br>
-                            - Number of Hydros can be in the combinations.<br>
+                            - Number of Hydros calculated:3<br>
                             - The case that the addduct does not contain Hydro is always calculated.<br>
                             - Hydro hould equal 1.007825 as standard value.<br>
-                            <strong>Element(s):</strong><br>
-                            - The number of times the elements can be duplicated in the adduct combi.<br>
                             <strong>Mass Error:</strong><br>
                             - The acceptable error which can be approved, the smaller it get the more accurate the results.<br>
                             - Normal parameter is: 0.00001<br>
                             2. Click Convert.<br>
-                            3. The result will be shown as Json format.<br>
                             </p>
                     </div>
                 </div>

@@ -1,12 +1,13 @@
 # Ai Viet Hoang Dispelk9@gmail.com
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, render_template
 from flask import request
-from flask import jsonify
+#from flask import jsonify
 from OpenSSL import SSL
+from flask import Response
 
 import psycopg2
-import csv
-import os
+#import csv
+#import os
 app = Flask(__name__)
 
 @app.route("/index", methods=["GET"])
@@ -296,6 +297,20 @@ def dict_to_formula(components):
         if count > 1:
             formula += str(count)
     return formula
+
+
+@app.route('/negative_unifi.csv')
+def serve_negative_db():
+    with open('negative_unifi.csv') as f:
+        csv_content = f.read()
+    return Response(csv_content, mimetype='text/plain')
+
+@app.route('/positive_unifi.csv')
+def serve_positive_db():
+    with open('positive_unifi.csv') as f:
+        csv_content = f.read()
+    return Response(csv_content, mimetype='text/plain')
+
 
 if __name__ == "__main__":
     context = ('/etc/letsencrypt/live/analytical.dispelk9.de/cert.pem','/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem')
