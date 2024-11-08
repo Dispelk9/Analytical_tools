@@ -98,50 +98,65 @@
       {% elif section == "Results without Hydro" %}
         <h1 class="text-white">{{section}}</h1>
         <table>
-          <tr>
-              <th>Adducts</th>
-          </tr>
-            {% for item in info %}
-               {% if 'element_set' in item %}
-                   <ul>
-                       {% for element in item.element_set %}
-                         <tr>
-                            <td>{{ element }}</td>
-                         </tr>
-                       {% endfor %}
-                   </ul>
-               {% endif %}
+            {% if info %}
+              <tr>
+                <th>Adducts</th>
+              </tr>
+              {% for item in info %}
+                 {% if 'element_set' in item %}
+                     <ul>
+                         {% for element in item.element_set %}
+                           <tr>
+                              <td>{{ element }}</td>
+                           </tr>
+                         {% endfor %}
+                     </ul>
+                 {% endif %}
             {% endfor %}
+            {% else %}
+              <tr>
+                <th>Adducts</th>
+              </tr>
+              <tr>
+                <td>Adducts Not Found</td>
+              </tr>
+            {% endif %}
         </table>
       {% elif section == "Results with Hydro" %}
         <h1 class="text-white">{{section}}</h1>
         <table>
-          <tr>
-              <th>Adducts</th>
-          </tr>
-          {% for number_of_hydro in info %}
-            {% for key,value in number_of_hydro.items() %}
-                {% if key == "Adduct combinations"  %}
-                  <tr>
-                    {% for sublist in value %}
-                      {% for item in sublist %}
-                          {% if 'element_set' in item %}
-                              <ul>
-                                  {% for element in item.element_set %}
-                                    <tr>
-                                        <td>{{ element }}</td>
-                                    </tr>
-                                  {% endfor %}
-                              </ul>
-                          {% endif %}
+            <tr>
+                <th>Adducts</th>
+            </tr>
+            {% for number_of_hydro in info %}
+              {% for key,value in number_of_hydro.items() %}
+                  {% if key == "Adduct combinations"  %}
+                    <tr>
+                      {% for sublist in value %}
+                        {% if sublist %}
+                          {% for item in sublist %}
+                                {% if 'element_set' in item %}
+                                    <ul>
+                                        {% for element in item.element_set %}
+                                          <tr>
+                                              <td>{{ element }}</td>
+                                          </tr>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                          {% endfor %}
+                        {% else %}
+                           <tr>
+                             <td>Adducts Not Found</td>
+                           </tr>
+                        {% endif %}
                       {% endfor %}
-                  {% endfor %}
-                  </tr>
-                {% else %}
-                  <th>{{ key }} {{ value }}</th>
-                {% endif %}
+                    </tr>
+                  {% else %}
+                    <th>{{ key }} {{ value }}</th>
+                  {% endif %}
+              {% endfor %}
             {% endfor %}
-          {% endfor %}
         </table>
       {% endif %}
     {% endfor %}
