@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!--link rel="stylesheet" href="styles.css"-->
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ACTool Ver1.0</title>
+        <!-- CSS: Inside head tag -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+        <link rel="apple-touch-icon" sizes="180x180" href="../static/favicon_io/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon_io/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon_io/favicon-16x16.png">
+        <link rel="manifest" href="../static/favicon_io/site.webmanifest">
+    </head>
+    <style>
+        body{
+            background:url('../static/chemiebackground.jpg') no-repeat center center fixed;
+            -webkit-background-size:cover;
+            -moz-background-size:cover;
+            -o-background-size: cover;
+            background-size: cover;
+            backdrop-filter: blur(5px);
+        }
+    </style>
+    <body>
+        <nav class="navbar navbar-dark navbar-expand-lg bg-dark ">
+            <div class="container-fluid">
+                <div class="mx-4">
+                    <a class="navbar-brand" href="./index">Analytical Chemistry Tool ver1.0</a>
+                </div>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://dispelk9.github.io/">About</a>
+                    </li>
+                </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="container my-4">
+            <div class="row justify-content-center">
+                <div class="section">
+                    <h2 class="text-white" align="center">
+                        <span>Adduct</span>
+                        <span>Calculation</span>
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="container my-4 ">
+            <div class="row justify-content-center">
+                <div class="col-lg mb-lg-4">
+                    <form action="" method="get">
+                        <table class="text-white" align="center">
+                            <tr>
+                                <td align="right">Neutral mass (Da)</td>
+                                <td align="left"><input type="text" name="neutralmass"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Observed m/z</td>
+                                <td align="left"><input type="text" name="unifi_number"></td><br>
+                            </tr>
+                            <!--tr>
+                                <td align="right">Hydro(s)</td>
+                                <td align="left"><input type="text" name="hrepeat"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Element(s)</td>
+                                <td align="left"><input type="text" name="repeat"></td><br>
+                            </tr-->
+                            <tr>
+                                <td align="right">Mass Error</td>
+                                <td align="left"><input type="text" name="mass_error"></td><br>
+                            </tr>
+                            <tr>
+                                <td align="right">Mode</td>
+                                <td align="left">
+                                    <select name="mode">
+                                        <option value="positive">positive</option>
+                                        <option value="negative">negative</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                        <form action="/result" method="POST">
+                            <p class="text-white" class="lineUp" align="justify">
+                                Parameters are not correct. Please try again.
+                            </p>
+                            
+                            <div align="center">
+                                <input type="submit" value="Calculate">
+                            </div>
+                        </form>
+                    </form>
+                </div>
+                <div class="col-lg mx-2 align-self-center ">
+                    <div class="my-3">
+                        <p class="text-white" class="lineUp" align="justify">
+                            Used to find the combinations of adduct base on the neutralmass mass and mass from the unifi
+                            devices.<br>
+                            How to use:<br>
+                            1. Fill all the blanks with parameters:<br>
+                            <strong>Mode:</strong><br>
+                            - minus for the database of components for negative cases.<br>
+                            - plus  for the database of components for positive cases.<br>
+                            <strong>NeutralMass:</strong><br>
+                            - The paramenter should be float number xxx.xxxxx.<br>
+                            <strong>Unifi_number:</strong><br>
+                            - Number from the unifi machine.<br>
+                            <strong>Hydro(s):</strong><br>
+                            - Number of Hydros can be in the combinations.<br>
+                            - The case that the addduct does not contain Hydro is always calculated.<br>
+                            - Hydro hould equal 1.007825 as standard value.<br>
+                            <strong>Element(s):</strong><br>
+                            - The number of times the elements can be duplicated in the adduct combi.<br>
+                            <strong>Mass Error:</strong><br>
+                            - The acceptable error which can be approved, the smaller it get the more accurate the results.<br>
+                            - Normal parameter is: 0.00001<br>
+                            2. Click Convert.<br>
+                            3. The result will be shown as Json format.<br>
+                            </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container my-4 ">
+            <!-- Timestamp -->
+            <div class="row justify-content-center">
+                <div class="col-lg mx-2 align-self-center">
+                    <div class="my-3 text-white">
+                        <h2 class="text-center" align="center">Adducts in Analytical Chemistry</h2>
+                        <p class="lineUp" align="justify">
+                            In analytical chemistry, an adduct refers to a product formed by the combination of two or more distinct chemical species, typically through a chemical reaction. This process often occurs when molecules interact with each other under specific conditions, leading to the formation of a new compound with unique properties compared to its individual components.<br>
+                            Adducts play a crucial role in various analytical techniques, including spectroscopy, chromatography, and mass spectrometry. They can provide valuable insights into the composition, structure, and reactivity of compounds, aiding in the identification and quantification of substances in complex samples.<br>
+                            For example, in mass spectrometry, adduct formation can occur when ions in the gas phase interact with molecules present in the sample matrix or solvent. These interactions can result in the attachment of additional atoms or molecules to the ion, leading to the formation of adduct ions with different mass-to-charge ratios compared to the original ion. By analyzing the mass spectra of these adduct ions, researchers can gain information about the composition and abundance of compounds in the sample.<br>
+                            In chromatography, adduct formation can affect the retention and elution behavior of analytes, impacting the separation efficiency and selectivity of the technique. Understanding the formation and behavior of adducts is essential for optimizing chromatographic methods and improving the accuracy and precision of analytical measurements.<br>
+                            Overall, adducts are important intermediates and products in analytical chemistry, serving as valuable tools for characterizing and quantifying substances in diverse samples, ranging from environmental and biological samples to pharmaceuticals and industrial materials. Understanding the principles underlying adduct formation and their implications for analytical techniques is essential for advancing research and solving real-world problems in various fields.<br>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg mb-lg-4" align="justify">
+                    <img src="../static/about.jpeg" class="img-fluid" alt="" srcset="">
+                </div>
+            </div>
+        </div>
+        <!-- JavaScript: Above <body>  -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+            crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    </body>
+    <footer>
+        <div class="text-center mb-4 text-white">
+            &copy; Copyright 2024 © Dispelk9/AiVietHoang All Rights Reserved
+        </div>
+    </footer>
