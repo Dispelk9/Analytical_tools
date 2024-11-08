@@ -60,7 +60,7 @@ def index():
 #            )
             return render_template("result.html",all_info=all_info)
     except:
-        return render_template("index.html")
+        return render_template("index_wrong.html")
     
 
 
