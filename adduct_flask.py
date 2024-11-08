@@ -4,11 +4,17 @@ from flask import request
 #from flask import jsonify
 from OpenSSL import SSL
 from flask import Response
+from compound_flask import compound_bp
 
 import psycopg2
 #import csv
 #import os
 app = Flask(__name__)
+
+
+app.register_blueprint(compound_bp)
+
+
 
 @app.route("/index", methods=["GET"])
 def index():
