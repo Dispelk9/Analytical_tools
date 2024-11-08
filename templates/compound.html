@@ -70,8 +70,8 @@
                     <form action="" method="get">
                         <table class="text-white" align="center">
                             <tr>
-                                <td align="right">Neutral mass (Da)</td>
-                                <td align="left"><input type="text" name="neutralmass" required></td><br>
+                                <td align="right">Adduct</td>
+                                <td align="left"><input type="text" name="adduct" required></td><br>
                             </tr>
                             <tr>
                                 <td align="right">Observed m/z</td>
@@ -81,22 +81,14 @@
                                 <td align="right">Mass Error</td>
                                 <td align="left"><input type="text" name="mass_error" required></td><br>
                             </tr>
-                            <tr>
-                                <td align="right">Mode</td>
-                                <td align="left">
-                                    <select name="mode">
-                                        <option value="positive">positive</option>
-                                        <option value="negative">negative</option>
-                                    </select>
-                                </td>
-                            </tr>
                         </table>
                         <form action="/compound_result" method="POST">
 
                             <div align="center">
-                                <input type="submit" value="Calculate">
+                                <input type="submit" value="Check">
                             </div>
                         </form>
+
                     </form>
                 </div>
                 <div class="col-lg mx-2 align-self-center ">
