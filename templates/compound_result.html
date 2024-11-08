@@ -82,87 +82,10 @@
     </nav>
 
     {% for section,info in all_info.items()  %}
-      {% if section == "Requested Parameters" %}
-      <h1 class="text-white">{{section}}</h1>
-        <table>
-          <tr>
-              <th>Parameter</th>
-              <th>Value</th>
-          </tr>
-          {% for key, value in info.items() %}
-              {% if value %}
-               <tr>
-                  <td>{{ key }}</td>
-                  <td>{{ value }}</td>
-               </tr>
-              {% endif %}
-          {% endfor %}
-        </table>
-      {% elif section == "Results without Hydro" %}
-        <h1 class="text-white">{{section}}</h1>
-        <table>
-            {% if info %}
-              <tr>
-                <th>Adducts</th>
-              </tr>
-              {% for item in info %}
-                 {% if 'element_set' in item %}
-                     <ul>
-                         {% for element in item.element_set %}
-                           <tr>
-                              <td>{{ element }}</td>
-                           </tr>
-                         {% endfor %}
-                     </ul>
-                 {% endif %}
-            {% endfor %}
-            {% else %}
-              <tr>
-                <th>Adducts</th>
-              </tr>
-              <tr>
-                <td>Adducts Not Found</td>
-              </tr>
-            {% endif %}
-        </table>
-      {% elif section == "Results with Hydro" %}
-        <h1 class="text-white">{{section}}</h1>
-        <table>
-            <tr>
-                <th>Adducts</th>
-            </tr>
-            {% for number_of_hydro in info %}
-              {% for key,value in number_of_hydro.items() %}
-                  {% if key == "Adduct combinations"  %}
-                    <tr>
-                      {% for sublist in value %}
-                        {% if sublist %}
-                          {% for item in sublist %}
-                                {% if 'element_set' in item %}
-                                    <ul>
-                                        {% for element in item.element_set %}
-                                          <tr>
-                                              <td>{{ element }}</td>
-                                          </tr>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
-                          {% endfor %}
-                        {% else %}
-                           <tr>
-                             <td>Adducts Not Found</td>
-                           </tr>
-                        {% endif %}
-                      {% endfor %}
-                    </tr>
-                  {% else %}
-                    <th>{{ key }} {{ value }}</th>
-                  {% endif %}
-              {% endfor %}
-            {% endfor %}
-        </table>
-      {% endif %}
+      {{section}} {{info}}
     {% endfor %}
+    <iframe class="pubchem-widget" src="https://pubchem.ncbi.nlm.nih.gov/compound/aspirin#section=2D-Structure&embed=true" style="width: 450px; max-width: 100%; height: 650px;"></iframe>
+
     <!-- JavaScript: Above <body>  -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"

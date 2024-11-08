@@ -57,8 +57,8 @@
             <div class="row justify-content-center">
                 <div class="section">
                     <h2 class="text-white" align="center">
-                        <span>Adduct</span>
-                        <span>Calculation</span>
+                        <span>Compound</span>
+                        <span>Structure</span>
                     </h2>
                 </div>
             </div>
@@ -77,14 +77,6 @@
                                 <td align="right">Observed m/z</td>
                                 <td align="left"><input type="text" name="unifi_number" required></td><br>
                             </tr>
-                            <!--tr>
-                                <td align="right">Hydro(s)</td>
-                                <td align="left"><input type="text" name="hrepeat"></td><br>
-                            </tr>
-                            <tr>
-                                <td align="right">Element(s)</td>
-                                <td align="left"><input type="text" name="repeat"></td><br>
-                            </tr-->
                             <tr>
                                 <td align="right">Mass Error</td>
                                 <td align="left"><input type="text" name="mass_error" required></td><br>
@@ -99,7 +91,7 @@
                                 </td>
                             </tr>
                         </table>
-                        <form action="/result" method="POST">
+                        <form action="/compound_result" method="POST">
 
                             <div align="center">
                                 <input type="submit" value="Calculate">
