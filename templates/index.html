@@ -82,7 +82,12 @@
                             </tr>
                             <tr>
                                 <td align="right">Mode</td>
-                                <td align="left"><input type="text" name="mode"></td><br>
+                                <td align="left">
+                                    <select name="mode">
+                                        <option value="positive">positive</option>
+                                        <option value="negative">negative</option>
+                                    </select>
+                                </td>
                             </tr>
                         </table>
                         <form action="/result" method="POST">
