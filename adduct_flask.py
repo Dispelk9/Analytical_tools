@@ -24,43 +24,42 @@ def index():
             mass_error = query["mass_error"]
             mode = query["mode"]
 
-            value_list = {
-            #Neutral mass (Da)
-            "neutralmass":      float("".join(neutralmass)),
-            #Observed m/z 
-            "unifi_number":     float("".join(unifi_number)),
-            "hexact":           1.007825,
-            "hrepeat":          3,
-            "repeat":           3,
-            "mass_error":       float("".join(mass_error)),
-            "mode":             "".join(mode)
-            }
-            without_h   = without_hydro(value_list)
-            result      = m_calculation(value_list)
+            if not query["neutralmass"] or not query["unifi_number"] or not query["mass_error"]:
+                return render_template("index_wrong.html")
 
-            keys_to_remove = ["hexact", "repeat", "hrepeat"]
-            for key in keys_to_remove:
-              value_list.pop(key, None)
+            else:
+                value_list = {
+                    #Neutral mass (Da)
+                    "neutralmass":      float("".join(neutralmass)),
+                    #Observed m/z 
+                    "unifi_number":     float("".join(unifi_number)),
+                    "hexact":           1.007825,
+                    "hrepeat":          3,
+                    "repeat":           3,
+                    "mass_error":       float("".join(mass_error)),
+                    "mode":             "".join(mode)
+                    }
+                without_h   = without_hydro(value_list)
+                result      = m_calculation(value_list)
 
-            rename_keys = {
-              "neutralmass": "Neutral mass (Da)",
-              "unifi_number": "Observed m/z",
-              "mass_error":  "Mass Error",
-            }
+                keys_to_remove = ["hexact", "repeat", "hrepeat"]
+                for key in keys_to_remove:
+                    value_list.pop(key, None)
 
-            for old_key, new_key in rename_keys.items():
-              if old_key in value_list:
-                value_list[new_key] = value_list.pop(old_key)
+                rename_keys = {
+                    "neutralmass": "Neutral mass (Da)",
+                    "unifi_number": "Observed m/z",
+                    "mass_error":  "Mass Error",
+                    }
 
-            all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
-            #return render_template("result.html",data=all_info)
-#            return (
-#                #jsonify(all_info)
-#                all_info
-#            )
-            return render_template("result.html",all_info=all_info)
+                for old_key, new_key in rename_keys.items():
+                    if old_key in value_list:
+                        value_list[new_key] = value_list.pop(old_key)
+
+                all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
+                return render_template("result.html",all_info=all_info)
     except:
-        return render_template("index_wrong.html")
+        return render_template("index.html")
     
 
 
