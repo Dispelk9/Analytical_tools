@@ -23,7 +23,7 @@ def index():
         if request.method == "GET":
             #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825
             query = request.args.to_dict(flat=False)
-            
+
             neutralmass = query["neutralmass"]
             unifi_number = query["unifi_number"]
             #hrepeat = query["hrepeat"]
@@ -31,43 +31,38 @@ def index():
             mass_error = query["mass_error"]
             mode = query["mode"]
 
-            if not query["neutralmass"] or not query["unifi_number"] or not query["mass_error"]:
-                return render_template("index_wrong.html")
+            value_list = {
+                #Neutral mass (Da)
+                "neutralmass":      float("".join(neutralmass)),
+                #Observed m/z
+                "unifi_number":     float("".join(unifi_number)),
+                "hexact":           1.007825,
+                "hrepeat":          3,
+                "repeat":           3,
+                "mass_error":       float("".join(mass_error))*1e-6,
+                "mode":             "".join(mode)
+                }
+            without_h   = without_hydro(value_list)
+            result      = m_calculation(value_list)
+            value_list["mass_error"] = "".join(mass_error)
+            keys_to_remove = ["hexact", "repeat", "hrepeat"]
+            for key in keys_to_remove:
+                value_list.pop(key, None)
 
-            else:
-                value_list = {
-                    #Neutral mass (Da)
-                    "neutralmass":      float("".join(neutralmass)),
-                    #Observed m/z 
-                    "unifi_number":     float("".join(unifi_number)),
-                    "hexact":           1.007825,
-                    "hrepeat":          3,
-                    "repeat":           3,
-                    "mass_error":       float("".join(mass_error)),
-                    "mode":             "".join(mode)
-                    }
-                without_h   = without_hydro(value_list)
-                result      = m_calculation(value_list)
+            rename_keys = {
+                "neutralmass": "Neutral mass (Da)",
+                "unifi_number": "Observed m/z",
+                "mass_error":  "Mass Error (ppm)",
+                }
+            for old_key, new_key in rename_keys.items():
+                if old_key in value_list:
+                    value_list[new_key] = value_list.pop(old_key)
 
-                keys_to_remove = ["hexact", "repeat", "hrepeat"]
-                for key in keys_to_remove:
-                    value_list.pop(key, None)
-
-                rename_keys = {
-                    "neutralmass": "Neutral mass (Da)",
-                    "unifi_number": "Observed m/z",
-                    "mass_error":  "Mass Error",
-                    }
-
-                for old_key, new_key in rename_keys.items():
-                    if old_key in value_list:
-                        value_list[new_key] = value_list.pop(old_key)
-
-                all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
-                return render_template("result.html",all_info=all_info)
+            all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
+            return render_template("result.html",all_info=all_info)
     except:
         return render_template("index.html")
-    
+
 
 
 def without_hydro(value_list):
