@@ -27,7 +27,7 @@
             color: #fff;
         }
         table {
-            width: 70%;
+            width: 100%;
             margin-bottom: 20px;
             border-collapse: collapse;
             font-size: 16px;
@@ -80,16 +80,29 @@
             </div>
         </div>
     </nav>
-
+    <h1 class="text-white">Compounds List</h1>
     <table>
-        {% for info in all_info  %}
+        {% if "Fault" in all_info  %}
           <tr>
-            <td>{{info}}</td>
+             <td>{{ all_info}}</td>
           </tr>
-        {% endfor %}
+        {% else %}
+          {% for each_compound in all_info  %}
+                   <tr>
+                   {% for key,value in each_compound.items() %}
+                         {% if key == "link" %}
+                            <td><iframe class="pubchem-widget" src={{value}} style="width: 450px; max-width: 100%; height: 650px;"></iframe></td>
+                         {% elif key == "iupac_name"  %}
+                            <td>{{ value }}</td>
+                         {% else %}
+                            <td>{{key }}: {{ value }}</td>
+                         {% endif %}
+                  {% endfor %}
+                  </tr>
+          {% endfor %}
+        {% endif %}
     </table>
-    
-    <iframe class="pubchem-widget" src="https://pubchem.ncbi.nlm.nih.gov/compound/aspirin#section=2D-Structure&embed=true" style="width: 450px; max-width: 100%; height: 650px;"></iframe>
+
 
     <!-- JavaScript: Above <body>  -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
