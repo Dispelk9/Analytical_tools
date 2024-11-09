@@ -87,24 +87,28 @@
              <td>{{ all_info}}</td>
           </tr>
         {% else %}
-          {% for each_compound in all_info  %}
+          {%for each_compound in all_info  %}
+            {% for key,value in each_compound.items() %}
+                 {% if key == "iupac_name"  %}
+                    <td>{{ value }}</td>
+                 {% elif key == "foto"  %}
+                    <td>
+                      <a href="{{each_compound.get('link', '#') }}" target="_blank">
+                        <img src={{value}} style="width: 225px; max-width: 100%; height: auto;">
+                      </a>
+                    </td>
+                 {% elif key == "link"  %}
+                    {# Do nothing here #}
+                 {% elif key == "cid"  %}
                    <tr>
-                   {% for key,value in each_compound.items() %}
-                         {% if key == "iupac_name"  %}
-                            <td>{{ value }}</td>
-                         {% elif key == "foto"  %}
-                            <td>
-                              <a href="{{each_compound.get('link', '#') }}" target="_blank">
-                                <img src={{value}} style="width: 450px; max-width: 100%; height: auto;">
-                              </a>
-                            </td>
-                         {% elif key == "link"  %}
-                            {# Do nothing here #}
-                         {% else %}
-                            <td>{{key }}: {{ value }}</td>
-                         {% endif %}
-                  {% endfor %}
-                  </tr>
+                      <th>{{key }}: {{ value }}</th>
+                   </tr>
+                 {% else %}
+                 <tr>
+                    <td>{{key }}: {{ value }}</td>
+                 </tr>
+                 {% endif %}
+            {% endfor %}
           {% endfor %}
         {% endif %}
     </table>

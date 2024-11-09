@@ -46,9 +46,12 @@ def compound():
             #    if value_list["adduct"] == i[0]:
             #        value_list["adduct"] == i[1]
             #print(value_list["adduct"])
+            b = value_list["unifi_number"] - value_list["adduct"]
+            a = value_list["mass_error"]*b + b
+            range_diff = a - b
 
-            min_mass = value_list["unifi_number"] - value_list["adduct"] - value_list["mass_error"]
-            max_mass = value_list["unifi_number"] - value_list["adduct"] + value_list["mass_error"]
+            min_mass = b - (a - b)
+            max_mass = b + (a - b)
 
             #https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/fastformula/exactmass/382.9755-383.5755/JSON
             #https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/exact_mass/range/400.0/400.05/cids/JSON
@@ -67,18 +70,19 @@ def compound():
                print(cids)
                list_of_compounds = []
                for compound in cids:
-
+                 compound_em = pcp.Compound.from_cid(compound)
                  compound_each = {
+                    "molecular_formula": "",
+                    "cid": "",
                     "foto": "",
                     "link": "",
-                    "molecular_formula" : "",
-                    "molecular_weight": "",
+                    "exact mass" : "",
                     "iupac_name": "",
                   }
-
                  c = pcp.Compound.from_cid(compound)
                  compound_each["molecular_formula"] = c.molecular_formula
-                 compound_each["molecular_weight"] = c.molecular_weight
+                 compound_each["cid"] = compound
+                 compound_each["exact mass"] = compound_em.exact_mass
                  compound_each["iupac_name"] = c.iupac_name
                  compound_each["link"]= base_url + "compound/" + str(compound)
                  compound_each["foto"]= base_url + "rest/pug/compound/cid/" + str(compound)  + "/PNG"
