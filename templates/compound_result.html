@@ -90,10 +90,16 @@
           {% for each_compound in all_info  %}
                    <tr>
                    {% for key,value in each_compound.items() %}
-                         {% if key == "link" %}
-                            <td><iframe class="pubchem-widget" src={{value}} style="width: 450px; max-width: 100%; height: 650px;"></iframe></td>
-                         {% elif key == "iupac_name"  %}
+                         {% if key == "iupac_name"  %}
                             <td>{{ value }}</td>
+                         {% elif key == "foto"  %}
+                            <td>
+                              <a href="{{each_compound.get('link', '#') }}" target="_blank">
+                                <img src={{value}} style="width: 450px; max-width: 100%; height: auto;">
+                              </a>
+                            </td>
+                         {% elif key == "link"  %}
+                            {# Do nothing here #}
                          {% else %}
                             <td>{{key }}: {{ value }}</td>
                          {% endif %}

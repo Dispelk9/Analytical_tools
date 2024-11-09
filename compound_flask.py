@@ -69,6 +69,7 @@ def compound():
                for compound in cids:
 
                  compound_each = {
+                    "foto": "",
                     "link": "",
                     "molecular_formula" : "",
                     "molecular_weight": "",
@@ -79,7 +80,9 @@ def compound():
                  compound_each["molecular_formula"] = c.molecular_formula
                  compound_each["molecular_weight"] = c.molecular_weight
                  compound_each["iupac_name"] = c.iupac_name
-                 compound_each["link"]= base_url + "compound/" + str(compound) + "#section=2D-Structure"
+                 compound_each["link"]= base_url + "compound/" + str(compound)
+                 compound_each["foto"]= base_url + "rest/pug/compound/cid/" + str(compound)  + "/PNG"
+
 
                  list_of_compounds.append(compound_each)
                  #print(list_of_compounds)
