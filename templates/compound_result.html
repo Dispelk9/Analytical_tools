@@ -89,25 +89,41 @@
         {% else %}
           {%for each_compound in all_info  %}
             {% for key,value in each_compound.items() %}
-                 {% if key == "iupac_name"  %}
-                    <td>{{ value }}</td>
-                 {% elif key == "foto"  %}
-                    <td>
-                      <a href="{{each_compound.get('link', '#') }}" target="_blank">
-                        <img src={{value}} style="width: 225px; max-width: 100%; height: auto;">
-                      </a>
-                    </td>
-                 {% elif key == "link"  %}
-                    {# Do nothing here #}
-                 {% elif key == "cid"  %}
-                   <tr>
-                      <th>{{key }}: {{ value }}</th>
-                   </tr>
-                 {% else %}
-                 <tr>
-                    <td>{{key }}: {{ value }}</td>
-                 </tr>
-                 {% endif %}
+              <tr>
+                  <!-- Foto Column -->
+                  <td>
+                      {% if each_compound.get("foto") %}
+                          <a href="{{ each_compound.get('link', '#') }}" target="_blank">
+                              <img src="{{ each_compound.get('foto') }}" style="width: 225px; max-width: 100%; height: auto;" loading="eager" alt="Compound Image">
+                          </a>
+                      {% else %}
+                          No image available
+                      {% endif %}
+                  </td>
+
+                  <!-- Details Column -->
+                  <td>
+                      <table>
+                          {% for key, value in each_compound.items() %}
+                              {% if key == "iupac_name" %}
+                                  <tr>
+                                      <td><strong>{{ key }}:</strong> {{ value }}</td>
+                                  </tr>
+                              {% elif key == "cid" %}
+                                  <tr>
+                                      <td><strong>{{ key }}:</strong> {{ value }}</td>
+                                  </tr>
+                              {% elif key == "link" %}
+                                  {# Skip the link since it's handled by the foto link #}
+                              {% elif key != "foto" %}
+                                  <tr>
+                                      <td><strong>{{ key }}:</strong> {{ value }}</td>
+                                  </tr>
+                              {% endif %}
+                          {% endfor %}
+                      </table>
+                  </td>
+              </tr>
             {% endfor %}
           {% endfor %}
         {% endif %}
