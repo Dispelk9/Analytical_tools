@@ -88,7 +88,6 @@
           </tr>
         {% else %}
           {%for each_compound in all_info  %}
-            {% for key,value in each_compound.items() %}
               <tr>
                   <!-- Foto Column -->
                   <td>
@@ -96,38 +95,42 @@
                           <a href="{{ each_compound.get('link', '#') }}" target="_blank">
                               <img src="{{ each_compound.get('foto') }}" style="width: 225px; max-width: 100%; height: auto;" loading="eager" alt="Compound Image">
                           </a>
-                      {% else %}
-                          No image available
                       {% endif %}
                   </td>
 
                   <!-- Details Column -->
                   <td>
-                      <table>
-                          {% for key, value in each_compound.items() %}
-                              {% if key == "iupac_name" %}
-                                  <tr>
-                                      <td><strong>{{ key }}:</strong> {{ value }}</td>
-                                  </tr>
-                              {% elif key == "cid" %}
-                                  <tr>
-                                      <td><strong>{{ key }}:</strong> {{ value }}</td>
-                                  </tr>
-                              {% elif key == "link" %}
-                                  {# Skip the link since it's handled by the foto link #}
-                              {% elif key != "foto" %}
-                                  <tr>
-                                      <td><strong>{{ key }}:</strong> {{ value }}</td>
-                                  </tr>
-                              {% endif %}
-                          {% endfor %}
-                      </table>
+                  <table>
+                      {% if each_compound.get("molecular_formula") %}
+                          <tr>
+                            <td><strong>MF:</strong> {{ each_compound.get("molecular_formula") }}</td>
+                          </tr>
+                      {% endif %}
+                      {% if each_compound.get("cid") %}
+                          <tr>
+                              <td><strong>CID:</strong> {{each_compound.get("cid") }}</td>
+                          </tr>
+                      {% endif %}
+                      {% if each_compound.get("iupac_name") %}
+                          <tr>
+                              <td><strong>IUPAC:</strong> {{ each_compound.get("iupac_name") }}</td>
+                          </tr>
+                      {% endif %}
+                      {% if each_compound.get("link") %}
+                          {# Skip the link since it's handled by the foto link #}
+                      {% endif %}
+                      {% if each_compound.get("exact mass") %}
+                          <tr>
+                              <td><strong>Exact Mass:</strong> {{ each_compound.get("exact mass") }}</td>
+                          </tr>
+                      {% endif %}
+                  </table>
                   </td>
               </tr>
             {% endfor %}
-          {% endfor %}
         {% endif %}
     </table>
+
 
 
     <!-- JavaScript: Above <body>  -->
