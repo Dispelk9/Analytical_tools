@@ -3,7 +3,7 @@ from flask import Flask, render_template
 from flask import request
 #from flask import jsonify
 from OpenSSL import SSL
-from flask import Response
+from datetime import datetime
 import psycopg2
 import pubchempy as pcp
 import requests
@@ -66,31 +66,30 @@ def compound():
                print(error_message)
                return render_template("compound_result.html", all_info=error_message)
             else:
-               cids = pubchem_data.get("IdentifierList", {}).get("CID", [])
-               print(cids)
-               list_of_compounds = []
-               for compound in cids:
-                 compound_em = pcp.Compound.from_cid(compound)
-                 compound_each = {
-                    "molecular_formula": "",
-                    "cid": "",
-                    "foto": "",
-                    "link": "",
-                    "exact mass" : "",
-                    "iupac_name": "",
-                  }
-                 c = pcp.Compound.from_cid(compound)
-                 compound_each["molecular_formula"] = c.molecular_formula
-                 compound_each["cid"] = compound
-                 compound_each["exact mass"] = compound_em.exact_mass
-                 compound_each["iupac_name"] = c.iupac_name
-                 compound_each["link"]= base_url + "compound/" + str(compound)
-                 compound_each["foto"]= base_url + "rest/pug/compound/cid/" + str(compound)  + "/PNG"
-
-
-                 list_of_compounds.append(compound_each)
-                 #print(list_of_compounds)
-               return render_template("compound_result.html",all_info=list_of_compounds)
+                cids = pubchem_data.get("IdentifierList", {}).get("CID", [])
+                print(cids)
+                list_of_compounds = []
+                for compound in cids:
+                    compound_each = {
+                        "molecular_formula": "",
+                        "cid": "",
+                        "foto": "",
+                        "link": "",
+                        "exact mass" : "",
+                        "iupac_name": "",
+                    }
+                    c = pcp.Compound.from_cid(compound)
+                    compound_each["molecular_formula"] = c.molecular_formula
+                    compound_each["cid"] = compound
+                    compound_each["exact mass"] = c.exact_mass
+                    compound_each["iupac_name"] = c.iupac_name
+                    compound_each["link"]= base_url + "compound/" + str(compound)
+                    compound_each["foto"]= base_url + "rest/pug/compound/cid/" + str(compound)  + "/PNG"
+                    print(compound_each)
+                    print(datetime.now())
+                    list_of_compounds.append(compound_each)
+                    #print(list_of_compounds)
+                return render_template("compound_result.html",all_info=list_of_compounds)
     except Exception as e:
         print(f"An error occurred: {e}")
         return render_template("compound.html")
