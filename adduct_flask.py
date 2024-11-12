@@ -1,19 +1,30 @@
 # Ai Viet Hoang Dispelk9@gmail.com
-from flask import Flask, render_template
-from flask import request
-#from flask import jsonify
+from flask import Flask, render_template, session, request, Response
 from OpenSSL import SSL
-from flask import Response
+
 from compound_flask import compound_bp
+from compound_detail_flask import compound_detail_bp
+from flask_session import Session
+from datetime import timedelta
 
 import psycopg2
-#import csv
-#import os
+
+
 app = Flask(__name__)
 
 
-app.register_blueprint(compound_bp)
+app.secret_key = 'BfdW,adWbh!'
 
+# Configure Flask-Session to use filesystem storage
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_FILE_DIR"] = "/tmp/flask_session"  # Directory to store sessions
+app.config["SESSION_PERMANENT"] = False
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
+
+Session(app)
+
+app.register_blueprint(compound_bp)
+app.register_blueprint(compound_detail_bp)
 
 
 @app.route("/index", methods=["GET"])
