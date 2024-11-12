@@ -48,56 +48,43 @@
             </div>
         </div>
     </nav>
-    <h1 class="text-white">Compounds List</h1>
-        {% if duplicates %}
-        <table border="1">
-            <thead>
+    <h1 class="text-white">Compounds Detail</h1>
+    <table>
+
+
+    <tr>
+        <td>
+            {% if each_compound.get("foto") %}
+                <a href="{{ each_compound.get('link', '#') }}" target="_blank">
+                    <img src="{{ each_compound.get('foto') }}" style="width: 225px; max-width: 100%; height: auto;" loading="eager" alt="Compound Image">
+                </a>
+            {% endif %}
+            {% if each_compound.get("molecular_formula") %}
+            <tr>
+              <td><strong>MF:</strong>{{ each_compound.get("molecular_formula") }}</td>
+            </tr>
+            {% endif %}
+            {% if each_compound.get("cid") %}
                 <tr>
-                    <th>Molecular Formula (MF)</th>
-                    <th>Count</th>
+                    <td><strong>CID:</strong> {{each_compound.get("cid") }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for formula, count in duplicates.items() %}
+            {% endif %}
+            {% if each_compound.get("iupac_name") %}
                 <tr>
-                    <td>{{ formula }}</td>
-                    <td>{{ count }}</td>
+                    <td><strong>IUPAC:</strong> {{ each_compound.get("iupac_name") }}</td>
                 </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-        <table>
-        {% if "Fault" in all_info  %}
-          <tr>
-             <td>{{ all_info}}</td>
-          </tr>
-        {% else %}
-          {%for each_compound in all_info  %}
+            {% endif %}
+            {% if each_compound.get("link") %}
+                {# Skip the link since it's handled by the foto link #}
+            {% endif %}
+            {% if each_compound.get("exact mass") %}
                 <tr>
-                  <!-- Details Column -->
-                  <table>
-                        {% if each_compound.get("molecular_formula") %}
-                        <tr>
-                          <td><strong>MF:</strong>
-                             <a href="{{ url_for('compound_detail.compound_detail', cid=each_compound.get('cid')) }}">
-                               {{ each_compound.get("molecular_formula") }}
-                             </a>
-                          </td>
-                        </tr>
-                        {% endif %}
-                        {% if each_compound.get("exact mass") %}
-                        <tr>
-                            <td><strong>Exact Mass:</strong> {{ each_compound.get("exact mass") }}</td>
-                        </tr>
-                    {% endif %}
-                  </table>
+                    <td><strong>Exact Mass:</strong> {{ each_compound.get("exact mass") }}</td>
                 </tr>
-            {% endfor %}
-        {% endif %}
+            {% endif %}
+        </td>
+    </tr>
     </table>
-
-
 
     <!-- JavaScript: Above <body>  -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
