@@ -12,6 +12,7 @@
         <link rel="apple-touch-icon" sizes="180x180" href="../static/favicon_io/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon_io/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon_io/favicon-16x16.png">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="manifest" href="../static/favicon_io/site.webmanifest">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
@@ -60,40 +61,12 @@
             <tbody>
                 {% for formula, count in duplicates.items() %}
                 <tr>
-                    <td>{{ formula }}</td>
+                    <td>{{ formula }} <a href="{{ url_for('compound_detail.compound_detail', MF=formula) }}" title="View details"><i class="fas fa-link"></i></a></td>
                     <td>{{ count }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% endif %}
-        <table>
-        {% if "Fault" in all_info  %}
-          <tr>
-             <td>{{ all_info}}</td>
-          </tr>
-        {% else %}
-          {%for each_compound in all_info  %}
-                <tr>
-                  <!-- Details Column -->
-                  <table>
-                        {% if each_compound.get("molecular_formula") %}
-                        <tr>
-                          <td><strong>MF:</strong>
-                             <a href="{{ url_for('compound_detail.compound_detail', cid=each_compound.get('cid')) }}">
-                               {{ each_compound.get("molecular_formula") }}
-                             </a>
-                          </td>
-                        </tr>
-                        {% endif %}
-                        {% if each_compound.get("exact mass") %}
-                        <tr>
-                            <td><strong>Exact Mass:</strong> {{ each_compound.get("exact mass") }}</td>
-                        </tr>
-                    {% endif %}
-                  </table>
-                </tr>
-            {% endfor %}
         {% endif %}
     </table>
 
