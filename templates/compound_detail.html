@@ -52,38 +52,37 @@
     <table>
 
 
-    <tr>
-        <td>
-            {% if each_compound.get("foto") %}
-                <a href="{{ each_compound.get('link', '#') }}" target="_blank">
-                    <img src="{{ each_compound.get('foto') }}" style="width: 225px; max-width: 100%; height: auto;" loading="eager" alt="Compound Image">
-                </a>
-            {% endif %}
+    {% for each_compound in list_of_MF %}
+        <tr>
+        <!-- Left Column: All Information -->
+        <td style="vertical-align: top; padding-right: 15px;">
             {% if each_compound.get("molecular_formula") %}
-            <tr>
-              <td><strong>MF:</strong>{{ each_compound.get("molecular_formula") }}</td>
-            </tr>
+                <p><strong>MF:</strong> {{ each_compound.get("molecular_formula") }}</p>
             {% endif %}
+            
             {% if each_compound.get("cid") %}
-                <tr>
-                    <td><strong>CID:</strong> {{each_compound.get("cid") }}</td>
-                </tr>
+                <p><strong>CID:</strong> {{ each_compound.get("cid") }}</p>
             {% endif %}
+            
             {% if each_compound.get("iupac_name") %}
-                <tr>
-                    <td><strong>IUPAC:</strong> {{ each_compound.get("iupac_name") }}</td>
-                </tr>
+                <p><strong>IUPAC:</strong> {{ each_compound.get("iupac_name") }}</p>
             {% endif %}
-            {% if each_compound.get("link") %}
-                {# Skip the link since it's handled by the foto link #}
-            {% endif %}
+            
             {% if each_compound.get("exact mass") %}
-                <tr>
-                    <td><strong>Exact Mass:</strong> {{ each_compound.get("exact mass") }}</td>
-                </tr>
+                <p><strong>Exact Mass:</strong> {{ each_compound.get("exact mass") }}</p>
             {% endif %}
         </td>
-    </tr>
+
+        <!-- Right Column: Image (foto) -->
+        <td style="vertical-align: top;">
+            {% if each_compound.get("foto") %}
+                <a href="{{ each_compound.get('link', '#') }}" target="_blank">
+                    <img src="{{ each_compound.get('foto') }}" style="width: 225px; max-width: 100%; height: auto;" loading="lazy" alt="Compound Link">
+                </a>
+            {% endif %}
+        </td>
+        <tr>
+    {% endfor %}
     </table>
 
     <!-- JavaScript: Above <body>  -->
