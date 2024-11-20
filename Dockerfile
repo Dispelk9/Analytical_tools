@@ -19,7 +19,9 @@ COPY privkey.pem   /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem
 
 # Expose the Flask app port
 EXPOSE 8080
+# Https
+EXPOSE 443
 
 # Command to run Gunicorn server
 # Set the default command to run the Flask app with Gunicorn
-CMD ["gunicorn", "--config", "gunicorn_config.py", "adduct_flask:app"]
+CMD ["gunicorn", "--config", "gunicorn_config.py", "--certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem", "--keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem", "adduct_flask:app"]
