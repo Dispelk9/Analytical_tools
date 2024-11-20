@@ -40,17 +40,29 @@ jobs:
           DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << 'EOF'
+
+            # Export the environment variable for the session
+            export DB_PASSWORD="${DB_PASSWORD}"
+            
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
-            pkill gunicorn
+            
+            # Remove old repository
             sudo rm -rf /root/Analytical_tools
+
+            #kill gunicorn server
+            #pkill gunicorn
             # sudo rm -rf /root/analytic_flask/Analytical_tools
+            
             # Start the SSH agent and add the key with the passphrase
             # cd /root/analytic_flask/
+
             sudo bash -c 'eval "$(ssh-agent -s)" && echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa'
             git clone git@github.com:Dispelk9/Analytical_tools.git
+            
             #cd /root/analytic_flask/Analytical_tools
             #gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
+            
             cd Analytical_tools
             docker compose down --volumes
             docker compose build
