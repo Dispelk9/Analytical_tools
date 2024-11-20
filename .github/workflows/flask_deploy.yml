@@ -71,7 +71,7 @@ jobs:
             cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./fullchain.pem
             cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./privkey.pem
 
-            docker compose down --volumes
+            docker compose down
             docker compose build
             docker compose up -d
           
