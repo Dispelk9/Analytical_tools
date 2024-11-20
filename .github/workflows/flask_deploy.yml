@@ -42,7 +42,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << 'EOF'
 
             # Export the environment variable for the session
-            export DB_PASSWORD="${DB_PASSWORD}"
+            export DB_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
             
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
