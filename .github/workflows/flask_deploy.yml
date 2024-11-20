@@ -56,7 +56,7 @@ jobs:
             
             # Start the SSH agent and add the key with the passphrase
             # cd /root/analytic_flask/
-
+             
             sudo bash -c 'eval "$(ssh-agent -s)" && echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa'
             git clone git@github.com:Dispelk9/Analytical_tools.git
             
@@ -64,6 +64,11 @@ jobs:
             #gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
             
             cd Analytical_tools
+
+            # Copy certs into Docker repository
+            cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./fullchain.pem
+            cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./privkey.pem
+
             docker compose down --volumes
             docker compose build
             docker compose up -d

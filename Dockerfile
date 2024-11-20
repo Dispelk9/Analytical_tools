@@ -13,8 +13,9 @@ COPY app/ /app/
 
 # Copy the SSL certs
 # in docker-sandbox
-#COPY fullchain.pem /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem
-#COPY privkey.pem   /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem
+COPY fullchain.pem /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem
+COPY privkey.pem   /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem
+
 
 # Expose the Flask app port
 EXPOSE 8080
