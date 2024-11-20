@@ -205,7 +205,7 @@ def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
 def adduct_using_mass(value_list,number_of_hydro):
     delta_m_min = float(-abs(value_list["mass_error"]))
     delta_m_max = value_list["mass_error"]
-    with open("/postgres.txt",'r')as file:
+    with open("postgres.txt",'r')as file:
      postgres_string = file.read().strip()
     if value_list["mode"] == "negative":
         conn_string = "postgresql://postgres:%s@analytical_tools-db-postgres-1:5432/postgres" % postgres_string
