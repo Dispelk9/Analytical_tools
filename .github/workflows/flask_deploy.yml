@@ -42,6 +42,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << 'EOF'
 
             # Export the environment variable for the session
+            export DB_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
             echo ${{ secrets.POSTGRES_PASSWORD }} > /root/postgres.txt
             
             # Update the server and install git if necessary
