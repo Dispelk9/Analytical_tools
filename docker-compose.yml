@@ -6,7 +6,7 @@ services:
     ports:
       - "188.245.69.219:8080:8080"
     environment:
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db-postgres:5432/postgres
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@analytical_tools-db-postgres-1:5432/postgres
       - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       - db-postgres
