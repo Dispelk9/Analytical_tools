@@ -43,6 +43,7 @@ jobs:
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
             pkill gunicorn
+            sudo rm -rf /root/Analytical_tools
             # sudo rm -rf /root/analytic_flask/Analytical_tools
             # Start the SSH agent and add the key with the passphrase
             # cd /root/analytic_flask/
@@ -50,7 +51,6 @@ jobs:
             git clone git@github.com:Dispelk9/Analytical_tools.git
             #cd /root/analytic_flask/Analytical_tools
             #gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
-            sudo rm -rf /root/Analytical_tools
             cd Analytical_tools
             docker compose down --volumes
             docker compose build
