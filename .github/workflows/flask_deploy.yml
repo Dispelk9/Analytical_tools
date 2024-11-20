@@ -37,7 +37,7 @@ jobs:
 
       - name: Docker Compose with ACT
         env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << 'EOF'
             # Update the server and install git if necessary
@@ -50,6 +50,7 @@ jobs:
             git clone git@github.com:Dispelk9/Analytical_tools.git
             #cd /root/analytic_flask/Analytical_tools
             #gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
+            sudo rm -rf /root/Analytical_tools
             cd Analytical_tools
             docker compose down --volumes
             docker compose build
