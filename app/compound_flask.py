@@ -30,10 +30,9 @@ def compound():
                 #"mass_error": 0.0001,
             }
             #postgres key saved in /root/
-            #with open("/root/postgres.txt",'r')as file:
-            #  postgres_string = file.read().strip()
-            #conn_string = "postgresql://postgres:%s@127.0.0.1:5432/postgres" % postgres_string
-            conn_string = "postgresql://postgres:{{postgres_string}}@127.0.0.1:5432/postgres"
+            with open("postgres.txt",'r')as file:
+              postgres_string = file.read().strip()
+            conn_string = "postgresql://postgres:%s@analytical_tools-db-postgres-1:5432/postgres" % postgres_string
             #conn = psycopg2.connect(conn_string)
             #cursor = conn.cursor()
             #cursor.execute("SELECT * FROM negative;")
