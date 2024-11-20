@@ -5,9 +5,10 @@ from datetime import datetime
 import psycopg2
 import pubchempy as pcp
 import requests
+import os
 
 compound_bp = Blueprint('compound', __name__)
-
+postgres_string = os.getenv("DB_PASSWORD")
 
 @compound_bp.route("/compound", methods=["GET"])
 def compound():
