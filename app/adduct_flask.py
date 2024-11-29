@@ -8,6 +8,7 @@ from flask_session import Session
 from datetime import timedelta
 import os
 import psycopg2
+from itertools import combinations
 
 
 app = Flask(__name__)
@@ -77,17 +78,8 @@ def index():
 
 
 def without_hydro(value_list):
-    delta_m_min = float(-abs(value_list["mass_error"]))
-    delta_m_max = value_list["mass_error"]
     with open("postgres.txt",'r')as file:
      postgres_string = file.read().strip()
-#    if value_list["mode"] == "minus":
-#        file_mode = "negative_unifi.csv"
-#    elif value_list["mode"] == "plus":
-#        file_mode = "positive_unifi.csv"
-#
-#    raw_file = open(file_mode, "r")
-#    rawdata = list(csv.reader(raw_file, delimiter=";"))
     if value_list["mode"] == "negative":
         conn_string = "postgresql://postgres:%s@analytical_tools-db-postgres-1:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
@@ -108,15 +100,15 @@ def without_hydro(value_list):
         conn.close()
 
 
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"])
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01
 
     list_exact_mass_of_each_element = []
     for j in range(int(value_list["repeat"])):
         for i in rawdata:
             list_exact_mass_of_each_element.append(i[1])
-    list_add = []
-    subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
+
+    list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
 
     #change each mass into element
     # i combine of mass numbers and total number
@@ -188,23 +180,25 @@ def m_calculation(value_list):
     #print("<--Calculation completed-->")
     return all_results
 
-def subset_sum(numbers,low_limit,high_limit,list_add,partial=[]):
-    s = sum(partial)
-    # check if the partial sum is equals to target
-    if s > low_limit and s < high_limit:
-        list_with_sum = [partial,float("{:.5f}".format(float(s)))]
-        list_add.append(list_with_sum)
-    if s >= high_limit:
-        return  # if we reach the number why bother to continue
+def subset_sum(numbers,low_limit,high_limit):
 
-    for i in range(len(numbers)):
-        n = numbers[i]
-        remaining = numbers[i + 1:]
-        subset_sum(remaining,low_limit,high_limit,list_add,partial + [n])
+    # Filter numbers to include only those smaller than high_limit
+    filtered_numbers = [num for num in numbers if num < high_limit]
+    print(filtered_numbers)
+    # Store results
+    result = []
+
+    # Generate all subsets and check their sums
+    for r in range(1, len(filtered_numbers) + 1):  # Generate subsets of all sizes
+        for subset in combinations(filtered_numbers, r):
+            subset_sum = sum(subset)
+            if low_limit < subset_sum < high_limit:
+                result.append((list(subset), round(subset_sum, 5)))
+
+    return result
+
 
 def adduct_using_mass(value_list,number_of_hydro):
-    delta_m_min = float(-abs(value_list["mass_error"]))
-    delta_m_max = value_list["mass_error"]
     with open("postgres.txt",'r')as file:
      postgres_string = file.read().strip()
     if value_list["mode"] == "negative":
@@ -235,19 +229,15 @@ def adduct_using_mass(value_list,number_of_hydro):
     elif value_list["mode"] == "negative":
         Hydro_mode = float(number_of_hydro)
 
-    high_limit  = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_min*value_list["neutralmass"])
-    low_limit   = value_list["unifi_number"] + value_list["hexact"]*float(Hydro_mode) - value_list["neutralmass"] - (delta_m_max*value_list["neutralmass"])
-
-    #print("M adduct min after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(low_limit))))
-    #print("M adduct max after %s Hydro(s): %s" % (number_of_hydro,float("{:.5f}".format(high_limit))))
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
 
     list_exact_mass_of_each_element = []
     for j in range(int(value_list["repeat"])):
         for i in rawdata:
             #list_exact_mass_of_each_element.append(float(i[1]))
             list_exact_mass_of_each_element.append(i[1])
-    list_add = []
-    subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,list_add,partial=[])
+    list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
 
     #change each mass into element
     # i combine of mass numbers and total number
