@@ -50,7 +50,7 @@ def index():
                 "unifi_number":     float("".join(unifi_number)),
                 "hexact":           1.007825,
                 "hrepeat":          3,
-                "repeat":           2,
+                "repeat":           3,
                 "mass_error":       float("".join(mass_error))*1e-6,
                 "mode":             "".join(mode)
                 }
@@ -125,7 +125,7 @@ def without_hydro(value_list):
     #i[0] now contain element codes
     for i in list_add:
         element_set_dict = {
-            "Number of H(s)": 0,
+            "H_number": 0,
             "element_set": "",
             "sum_of_element_set":""
         }
@@ -285,7 +285,7 @@ def adduct_using_mass(value_list,number_of_hydro):
     #i[0] now contain element codes
     for i in list_add:
         element_set_dict = {
-            "Number of H(s)": "",
+            "H_number": "",
             "element_set": "",
             "sum_of_element_set":""
         }
@@ -303,7 +303,7 @@ def adduct_using_mass(value_list,number_of_hydro):
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
-                element_set_dict["Number of H(s)"]      = str(number_of_hydro) + Hm
+                element_set_dict["H_number"]      = str(number_of_hydro) + Hm
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
@@ -313,26 +313,26 @@ def adduct_using_mass(value_list,number_of_hydro):
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
-                element_set_dict["Number of H(s)"]      = str(number_of_hydro) + Hm
+                element_set_dict["H_number"]      = str(number_of_hydro) + Hm
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
         elif value_list["mode"] == "positive":
             if plus - minus - number_of_hydro == 1:
-                Hm = "H+"
-                combi = {element:i[0].count(element) for element in i[0]}
-                combi = dict(sorted(combi.items()))
-                combi = dict_to_formula(combi)
-                element_set_dict["Number of H(s)"]      = str(number_of_hydro) + Hm
-                element_set_dict["element_set"]         = [combi]
-                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)
-            if plus - minus - number_of_hydro == -1:
                 Hm = "H-"
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
-                element_set_dict["Number of H(s)"]      = str(number_of_hydro) + Hm
+                element_set_dict["H_number"]      = str(number_of_hydro) + Hm
+                element_set_dict["element_set"]         = [combi]
+                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                element_list.append(element_set_dict)
+            if plus - minus + number_of_hydro == -1:
+                Hm = "H+"
+                combi = {element:i[0].count(element) for element in i[0]}
+                combi = dict(sorted(combi.items()))
+                combi = dict_to_formula(combi)
+                element_set_dict["H_number"]      = str(number_of_hydro) + Hm
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
