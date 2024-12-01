@@ -225,40 +225,61 @@ def adduct_using_mass(value_list,number_of_hydro):
         conn.close()
 
 
-    #Hydro_mode = ""
-
-    # if value_list["mode"] == "positive":
-    #     Hydro_mode = float(-abs(int(number_of_hydro)))
-
-    # elif value_list["mode"] == "negative":
-    #     Hydro_mode = float(number_of_hydro)
-
-    # high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
-    # low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
-    
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 
-    print("So cao: %s, So thap: %s" % (high_limit,low_limit))
+    Hydro_mode = ""
     list_exact_mass_of_each_element = []
     for j in range(int(value_list["repeat"])):
         for i in rawdata:
             #list_exact_mass_of_each_element.append(float(i[1]))
             list_exact_mass_of_each_element.append(i[1])
 
-    print("So tat ca element trong csv: %s" % list_exact_mass_of_each_element)
-    list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+    print("Positive")
+    Hydro_mode = float(-abs(int(number_of_hydro)))
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
     
-    print("Before: %s" % list_add)
+
+    print("So cao: %s, So thap: %s" % (high_limit,low_limit))
+
+    print("So tat ca element trong csv: %s" % list_exact_mass_of_each_element)
+    list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+    
+    print("Before list_add_positive: %s" % list_add_positive)
     #change each mass into element
     # i combine of mass numbers and total number
     # j combine of name and mass number
-    for i in list_add:
+    for i in list_add_positive:
         for k in range(len(i[0])):
             for j in rawdata:
                 if i[0][k] == float(j[1]):
                     i[0][k] = j[0]
     
-    print("After %s" % list_add)
+    print("After list_add_positive %s" % list_add_positive)
+
+    print("Negative")
+    Hydro_mode = float(number_of_hydro)
+
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
+    
+
+    print("So cao: %s, So thap: %s" % (high_limit,low_limit))
+
+    print("So tat ca element trong csv: %s" % list_exact_mass_of_each_element)
+    list_add_negative = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+    
+    print("Before list_add_negative: %s" % list_add_negative)
+    #change each mass into element
+    # i combine of mass numbers and total number
+    # j combine of name and mass number
+    for i in list_add_negative:
+        for k in range(len(i[0])):
+            for j in rawdata:
+                if i[0][k] == float(j[1]):
+                    i[0][k] = j[0]
+    
+    print("After list_add_negative %s" % list_add_negative)
+    
+    list_add = list_add_negative + list_add_positive
 
     element_list = []
     #i[0] now contain element codes
