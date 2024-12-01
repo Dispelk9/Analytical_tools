@@ -319,7 +319,7 @@ def adduct_using_mass(value_list,number_of_hydro):
                 element_list.append(element_set_dict)
         elif value_list["mode"] == "positive":
             if plus - minus - number_of_hydro == 1:
-                Hm = "H+"
+                Hm = "H-"
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
@@ -327,8 +327,8 @@ def adduct_using_mass(value_list,number_of_hydro):
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
-            if plus - minus - number_of_hydro == -1:
-                Hm = "H-"
+            if plus - minus + number_of_hydro == -1:
+                Hm = "H+"
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
