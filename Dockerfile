@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy dependencies and install
 COPY app/requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+RUN  apt-get update && apt-get install -y procps
 
 # Copy application code
 COPY app/ /app/
