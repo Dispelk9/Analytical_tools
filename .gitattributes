@@ -1,1 +1,6 @@
+# Mark HTML files as generated (ignored in language stats)
+*.html linguist-generated
+
+# Ensure Python files are detectable
 *.py linguist-detectable=true
+
