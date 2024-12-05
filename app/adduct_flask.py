@@ -9,6 +9,8 @@ from datetime import timedelta
 import os
 import psycopg2
 
+from utils.utils import convert_float
+
 from itertools import combinations_with_replacement
 
 
@@ -75,13 +77,6 @@ def index():
             return render_template("result.html",all_info=all_info)
     except:
         return render_template("index.html")
-
-
-
-def convert_float (value):
-    if "," in value:
-        value.replace(',','.')
-    return value
 
 def without_hydro(value_list):
     with open("postgres.txt",'r')as file:
