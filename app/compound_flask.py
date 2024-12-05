@@ -6,6 +6,8 @@ import psycopg2
 import pubchempy as pcp
 import requests
 import os
+from utils.utils import convert_float
+
 
 compound_bp = Blueprint('compound', __name__)
 postgres_string = os.getenv("DB_PASSWORD")
@@ -161,7 +163,3 @@ def compound():
         print(f"An error occurred: {e}")
         return render_template("compound.html")
 
-def convert_float (value):
-    if "," in value:
-        value.replace(',','.')
-    return value
