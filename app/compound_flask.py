@@ -22,13 +22,13 @@ def compound():
             unifi_number = query["unifi_number"]
             mass_error = query["mass_error"]
             value_list = {
-                "adduct":           float("".join(convert_float(adduct))),
+                "adduct":           convert_float("".join(adduct)),
                 #NA+
                 #"adduct":  22.98977,
                 #Observed m/z
-                "unifi_number":     float("".join(convert_float(unifi_number))),
+                "unifi_number":     convert_float("".join(unifi_number)),
                 #"unifi_number": float(383.2755),
-                "mass_error":       float("".join(convert_float(mass_error)))*1e-6,
+                "mass_error":       convert_float("".join(mass_error))*1e-6,
                 #"mass_error": 0.0001,
             }
             #postgres key saved in /root/
