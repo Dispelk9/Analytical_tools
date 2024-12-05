@@ -8,7 +8,7 @@ from flask_session import Session
 from datetime import timedelta
 import os
 import psycopg2
-from itertools import combinations
+
 from itertools import combinations_with_replacement
 
 
@@ -46,13 +46,13 @@ def index():
 
             value_list = {
                 #Neutral mass (Da)
-                "neutralmass":      float("".join(neutralmass)),
+                "neutralmass":      float("".join(convert_float(neutralmass))),
                 #Observed m/z
-                "unifi_number":     float("".join(unifi_number)),
+                "unifi_number":     float("".join(convert_float(unifi_number))),
                 "hexact":           1.007825,
                 "hrepeat":          3,
                 "repeat":           3,
-                "mass_error":       float("".join(mass_error))*1e-6,
+                "mass_error":       float("".join(convert_float(mass_error)))*1e-6,
                 "mode":             "".join(mode)
                 }
             without_h   = without_hydro(value_list)
@@ -77,6 +77,11 @@ def index():
         return render_template("index.html")
 
 
+
+def convert_float (value):
+    if "," in value:
+        value.replace(',','.')
+    return value
 
 def without_hydro(value_list):
     with open("postgres.txt",'r')as file:
@@ -366,7 +371,7 @@ def dict_to_formula(components):
         if count > 1:
             formula += str(count)
         # Add the element symbol
-        formula += element
+        formula += element + ","
     return formula
 
 

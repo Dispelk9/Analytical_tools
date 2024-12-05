@@ -20,13 +20,13 @@ def compound():
             unifi_number = query["unifi_number"]
             mass_error = query["mass_error"]
             value_list = {
-                "adduct":           float("".join(adduct)),
+                "adduct":           float("".join(convert_float(adduct))),
                 #NA+
                 #"adduct":  22.98977,
                 #Observed m/z
-                "unifi_number":     float("".join(unifi_number)),
+                "unifi_number":     float("".join(convert_float(unifi_number))),
                 #"unifi_number": float(383.2755),
-                "mass_error":       float("".join(mass_error))*1e-6,
+                "mass_error":       float("".join(convert_float(mass_error)))*1e-6,
                 #"mass_error": 0.0001,
             }
             #postgres key saved in /root/
@@ -160,3 +160,8 @@ def compound():
     except Exception as e:
         print(f"An error occurred: {e}")
         return render_template("compound.html")
+
+def convert_float (value):
+    if "," in value:
+        value.replace(',','.')
+    return value
