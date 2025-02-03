@@ -347,15 +347,15 @@ def adduct_using_mass(value_list,number_of_hydro):
                 element_set_dict["element_set"]         = [combi]
                 element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
                 element_list.append(element_set_dict)
-            if plus - minus + number_of_hydro == -1:
-                Hm = "H+"
-                combi = {element:i[0].count(element) for element in i[0]}
-                combi = dict(sorted(combi.items()))
-                combi = dict_to_formula(combi)
-                element_set_dict["H_number"]      = str(number_of_hydro) + Hm
-                element_set_dict["element_set"]         = [combi]
-                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)
+            #if plus - minus + number_of_hydro == -1:
+            #    Hm = "H+"
+            #    combi = {element:i[0].count(element) for element in i[0]}
+            #    combi = dict(sorted(combi.items()))
+            #    combi = dict_to_formula(combi)
+            #    element_set_dict["H_number"]      = str(number_of_hydro) + Hm
+            #    element_set_dict["element_set"]         = [combi]
+            #    element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+            #    element_list.append(element_set_dict)
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
     #for i in element_list:
