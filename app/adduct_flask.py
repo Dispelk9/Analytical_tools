@@ -245,8 +245,8 @@ def adduct_using_mass(value_list,number_of_hydro):
     # In each mode, we can have negative H or positive H therefore we need to have two ranges
     print("If H is Positive")
     Hydro_mode = float(-abs(int(number_of_hydro)))
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
     
 
     print("High Limit: %s, Low limit: %s" % (high_limit,low_limit))
@@ -268,8 +268,8 @@ def adduct_using_mass(value_list,number_of_hydro):
     print("If H is Negative")
     Hydro_mode = float(number_of_hydro)
 
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
     
 
     print("High Limit: %s, Low Limit: %s" % (high_limit,low_limit))
