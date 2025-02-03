@@ -273,7 +273,7 @@ def adduct_using_mass(value_list,number_of_hydro):
                         i[0][k] = j[0]
         
         print("After list_add_positive %s" % list_add_positive)
-        list_add = list_add_negative
+        list_add = list_add_positive
     elif value_list["mode"] == "negative":
         print("If H is Negative")
         Hydro_mode = float(number_of_hydro)
@@ -301,7 +301,7 @@ def adduct_using_mass(value_list,number_of_hydro):
         
         print("After list_add_negative %s" % list_add_negative)
 
-        list_add = list_add_positive
+        list_add = list_add_negative
 
     element_list = []
     #i[0] now contain element codes
