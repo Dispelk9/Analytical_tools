@@ -244,63 +244,64 @@ def adduct_using_mass(value_list,number_of_hydro):
     for i in rawdata:
         list_exact_mass_of_each_element.append(i[1])
 
-    # In each mode, we can have negative H or positive H therefore we need to have two ranges
-    print("If H is Positive")
-    Hydro_mode = float(-abs(int(number_of_hydro)))
-
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
+    list_add = []
+    if value_list["mode"] == "positive":
+        # In each mode, we can have negative H or positive H therefore we need to have two ranges
+        print("If H is Positive")
+        Hydro_mode = float(-abs(int(number_of_hydro)))
     
-
-    #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
-    #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
-   
-
-    print("High Limit: %s, Low limit: %s" % (high_limit,low_limit))
-
-    list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+        high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
+        low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
+        
     
-    print("Before list_add_positive: %s" % list_add_positive)
-    #change each mass into element
-    # i combine of mass numbers and total number
-    # j combine of name and mass number
-    for i in list_add_positive:
-        for k in range(len(i[0])):
-            for j in rawdata:
-                if i[0][k] == float(j[1]):
-                    i[0][k] = j[0]
+        #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
+        #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
+       
     
-    print("After list_add_positive %s" % list_add_positive)
-
-    print("If H is Negative")
-    Hydro_mode = float(number_of_hydro)
-
-
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
-
-    #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
-    #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
-
-    print("High Limit: %s, Low Limit: %s" % (high_limit,low_limit))
-
-    list_add_negative = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+        print("High Limit: %s, Low limit: %s" % (high_limit,low_limit))
     
-    print("Before list_add_negative: %s" % list_add_negative)
-    #change each mass into element
-    # i combine of mass numbers and total number
-    # j combine of name and mass number
-    for i in list_add_negative:
-        for k in range(len(i[0])):
-            for j in rawdata:
-                if i[0][k] == float(j[1]):
-                    i[0][k] = j[0]
+        list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+        
+        print("Before list_add_positive: %s" % list_add_positive)
+        #change each mass into element
+        # i combine of mass numbers and total number
+        # j combine of name and mass number
+        for i in list_add_positive:
+            for k in range(len(i[0])):
+                for j in rawdata:
+                    if i[0][k] == float(j[1]):
+                        i[0][k] = j[0]
+        
+        print("After list_add_positive %s" % list_add_positive)
+        list_add = list_add_negative
+    elif value_list["mode"] == "negative":
+        print("If H is Negative")
+        Hydro_mode = float(number_of_hydro)
     
-    print("After list_add_negative %s" % list_add_negative)
+    
+        high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
+        low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
+    
+        #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
+        #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
+    
+        print("High Limit: %s, Low Limit: %s" % (high_limit,low_limit))
+    
+        list_add_negative = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+        
+        print("Before list_add_negative: %s" % list_add_negative)
+        #change each mass into element
+        # i combine of mass numbers and total number
+        # j combine of name and mass number
+        for i in list_add_negative:
+            for k in range(len(i[0])):
+                for j in rawdata:
+                    if i[0][k] == float(j[1]):
+                        i[0][k] = j[0]
+        
+        print("After list_add_negative %s" % list_add_negative)
 
-    #We have a combined list of each case
-    
-    list_add = list_add_negative + list_add_positive
+        list_add = list_add_positive
 
     element_list = []
     #i[0] now contain element codes
@@ -319,15 +320,15 @@ def adduct_using_mass(value_list,number_of_hydro):
                 minus +=1
 
         if value_list["mode"] == "positive":
-            if plus - minus - number_of_hydro == 1:
-                Hm = "H-"
-                combi = {element:i[0].count(element) for element in i[0]}
-                combi = dict(sorted(combi.items()))
-                combi = dict_to_formula(combi)
-                element_set_dict["H_number"]      = str(number_of_hydro) + Hm
-                element_set_dict["element_set"]         = [combi]
-                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)
+            #if plus - minus - number_of_hydro == 1:
+            #    Hm = "H-"
+            #    combi = {element:i[0].count(element) for element in i[0]}
+            #    combi = dict(sorted(combi.items()))
+            #    combi = dict_to_formula(combi)
+            #    element_set_dict["H_number"]      = str(number_of_hydro) + Hm
+            #    element_set_dict["element_set"]         = [combi]
+            #    element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+            #    element_list.append(element_set_dict)
             if plus - minus + number_of_hydro == 1:
                 Hm = "H+"
                 combi = {element:i[0].count(element) for element in i[0]}
