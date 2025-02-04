@@ -266,7 +266,7 @@ def adduct_using_mass(value_list,number_of_hydro):
         #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
        
     
-        logging.info("++++++++ High Limit: %s, Low limit: %s ++++++++" , (high_limit,low_limit))
+        logging.info("++++++++ High Limit: %s, Low limit: %s ++++++++" , high_limit,low_limit)
     
         list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
         
@@ -293,7 +293,7 @@ def adduct_using_mass(value_list,number_of_hydro):
         #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
         #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
     
-        logging.info("++++++++ High Limit: %s, Low Limit: %s ++++++++" , (high_limit,low_limit))
+        logging.info("++++++++ High Limit: %s, Low Limit: %s ++++++++" , high_limit,low_limit)
     
         list_add_negative = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
         
