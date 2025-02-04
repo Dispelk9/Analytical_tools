@@ -8,7 +8,8 @@ from flask_session import Session
 from datetime import timedelta
 import os
 import psycopg2
-
+import sys
+import logging
 from utils.utils import convert_float
 
 from itertools import combinations_with_replacement
@@ -30,6 +31,12 @@ Session(app)
 app.register_blueprint(compound_bp)
 app.register_blueprint(compound_detail_bp)
 
+# Configure logging to output to STDOUT with INFO level messages
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,  # Logs will appear in STDOUT
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 @app.route("/index", methods=["GET"])
 def index():
@@ -100,7 +107,7 @@ def without_hydro(value_list):
         cursor.close()
         conn.close()
 
-    print("Without H")
+    logging.info("++++++++Without H++++++++")
     #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01
     #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01
     low_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"])
@@ -111,7 +118,7 @@ def without_hydro(value_list):
     for i in rawdata:
         list_exact_mass_of_each_element.append(i[1])
 
-    print(list_exact_mass_of_each_element)
+    logging.info(list_exact_mass_of_each_element)
 
     list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
 
@@ -158,7 +165,8 @@ def without_hydro(value_list):
                 element_list.append(element_set_dict)
     #reduct the duplicate answers
 
-    print("All Combinations in element_list: %s" % element_list)
+    logging.info("++++++++All Combinations in element_list++++++++\n %s", element_list)
+
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
 
     return element_list
@@ -176,7 +184,7 @@ def m_calculation(value_list):
             "Adduct combinations":  "",
         }
 
-        #print("\nNumber of Hydro: %s" % (i + 1))
+        logging.info("\n++++++++ Number of Hydro: %s ++++++++\n", (i + 1))
         list_of_all_adduct.append(adduct_using_mass(value_list,(i + 1)))
 
         each_hydro["Adduct combinations"] = list_of_all_adduct
@@ -199,7 +207,7 @@ def subset_sum(numbers, low_limit, high_limit):
     """
     # Filter numbers to include only those smaller than high_limit
     filtered_numbers = [num for num in numbers if num < high_limit]
-    print(f"Filtered Numbers: {filtered_numbers}")
+    #print(f"Filtered Numbers: {filtered_numbers}")
 
     # Store results
     result = []
@@ -247,7 +255,7 @@ def adduct_using_mass(value_list,number_of_hydro):
     list_add = []
     if value_list["mode"] == "positive":
         # In each mode, we can have negative H or positive H therefore we need to have two ranges
-        print("If H is Positive")
+        logging.info("++++++++Mode H is Positive++++++++")
         Hydro_mode = float(-abs(int(number_of_hydro)))
     
         high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
@@ -258,11 +266,11 @@ def adduct_using_mass(value_list,number_of_hydro):
         #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
        
     
-        print("High Limit: %s, Low limit: %s" % (high_limit,low_limit))
+        logging.info("++++++++ High Limit: %s, Low limit: %s ++++++++" , (high_limit,low_limit))
     
         list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
         
-        print("Before list_add_positive: %s" % list_add_positive)
+        #print("Before list_add_positive: %s" % list_add_positive)
         #change each mass into element
         # i combine of mass numbers and total number
         # j combine of name and mass number
@@ -272,10 +280,10 @@ def adduct_using_mass(value_list,number_of_hydro):
                     if i[0][k] == float(j[1]):
                         i[0][k] = j[0]
         
-        print("After list_add_positive %s" % list_add_positive)
+        logging.info("++++++++After list_add_positive++++++++\n %s" , list_add_positive)
         list_add = list_add_positive
     elif value_list["mode"] == "negative":
-        print("If H is Negative")
+        logging.info("++++++++Mode H is Negative++++++++\n")
         Hydro_mode = float(number_of_hydro)
     
     
@@ -285,11 +293,11 @@ def adduct_using_mass(value_list,number_of_hydro):
         #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
         #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 - value_list["hexact"]*float(Hydro_mode)
     
-        print("High Limit: %s, Low Limit: %s" % (high_limit,low_limit))
+        logging.info("++++++++ High Limit: %s, Low Limit: %s ++++++++" , (high_limit,low_limit))
     
         list_add_negative = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
         
-        print("Before list_add_negative: %s" % list_add_negative)
+        #print("Before list_add_negative: %s" % list_add_negative)
         #change each mass into element
         # i combine of mass numbers and total number
         # j combine of name and mass number
@@ -299,7 +307,7 @@ def adduct_using_mass(value_list,number_of_hydro):
                     if i[0][k] == float(j[1]):
                         i[0][k] = j[0]
         
-        print("After list_add_negative %s" % list_add_negative)
+        logging.info("++++++++After list_add_negative++++++++\n %s" , list_add_negative)
 
         list_add = list_add_negative
 
@@ -361,7 +369,7 @@ def adduct_using_mass(value_list,number_of_hydro):
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
     #for i in element_list:
     #   print("%s\nsum:%s" % (i["element_set"],i["sum_of_element_set"]))
-    print("All Combinations in element_list: %s" % element_list)
+    logging.info("All Combinations in element_list: %s" , element_list)
     return element_list
 
 def dict_to_formula(components):
