@@ -1,0 +1,160 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(1) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+
+/* App.css */
+
+/* Outer container centers the content vertically and horizontally */
+.outer-container {
+  display: flex;
+  align-items: flex-start; /* Changed from center */
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Inner container styles the form card */
+.inner-container {
+  width: 100%;
+  max-width: 1000px;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Wrapper for the form to restrict its width to 500px */
+.form-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Title styling */
+.form-title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Flex row for each form element */
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* Fixed-width label */
+.form-label {
+  width: 150px;
+  text-align: right;
+  margin-right: 1rem;
+}
+
+/* Input and select styling */
+.form-input {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Submit button styling */
+.submit-button {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Response messages */
+.response-message {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.response-success {
+  color: green;
+}
+
+.response-error {
+  color: red;
+}
+
+/* Result CSS */
+
+.result-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #342525;
+  background: #250a0a2f;
+  border-radius: 4px;
+  text-align: left;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.result-container dl {
+  display: grid;
+  grid-template-columns: max-content auto;
+  gap: 0.5rem 1rem;
+}
+
+.result-container dt {
+  font-weight: bold;
+}
+
+.result-container dd {
+  margin: 0;
+}
+
+/*Background*/
+/* Reset the margin and padding of body and html */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Create a full-page background using a pseudo-element */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('/chemiebackground.jpg') no-repeat top center fixed;
+  background-size: cover;
+  z-index: -1; /* Place it behind all other content */
+  filter: blur(5px); /* Apply the blur effect */
+  transform: scale(1.1); /* Optional: Slightly scale up to ensure full coverage */
+}
+
