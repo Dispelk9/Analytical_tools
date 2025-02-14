@@ -1,35 +1,14 @@
-# Ai Viet Hoang Dispelk9@gmail.com
-from flask import Flask, render_template, session, request, Response
-from OpenSSL import SSL
-
-from compound_flask import compound_bp
-from compound_detail_flask import compound_detail_bp
-from flask_session import Session
-from datetime import timedelta
-import os
-import psycopg2
-import sys
+# backend/app.py
+from flask import Flask, request, jsonify
 import logging
-from utils.utils import convert_float
+import sys
+import psycopg2
+#import csv
 
-from itertools import combinations_with_replacement
-
+from utils.adduct_utils import *
 
 app = Flask(__name__)
-postgres_string = os.getenv("DB_PASSWORD")
 
-app.secret_key = 'BfdW,adWbh!'
-
-# Configure Flask-Session to use filesystem storage
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = "/tmp/flask_session"  # Directory to store sessions
-app.config["SESSION_PERMANENT"] = False
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
-
-Session(app)
-
-app.register_blueprint(compound_bp)
-app.register_blueprint(compound_detail_bp)
 
 # Configure logging to output to STDOUT with INFO level messages
 logging.basicConfig(
@@ -38,58 +17,59 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-@app.route("/index", methods=["GET"])
-def index():
-    all_info = []
-    try:
-        if request.method == "GET":
-            #http://192.168.0.31:8080/?file=negative_unifi.csv&neutralmass=300.09&unifi_number=3003.30&hrepeat=3&repeat=3&mass_error=0.00001&mode=minus&hexact=1.007825
-            query = request.args.to_dict(flat=False)
+@app.route('/api/number', methods=['POST'])
+def process_number():
+    data = request.get_json()
+    logging.info(data)
+    if not data or not all(key in data for key in ['NM', 'OB', 'ME']):
+        return jsonify({'error': 'Missing one or more numbers'}), 400
 
-            neutralmass = query["neutralmass"]
-            unifi_number = query["unifi_number"]
-            #hrepeat = query["hrepeat"]
-            #repeat = query["repeat"]
-            mass_error = query["mass_error"]
-            mode = query["mode"]
+    value_list = {
+        #Neutral mass (Da)
+        "neutralmass":      convert_float(data['NM']),
+        #Observed m/z
+        "unifi_number":     convert_float(data['OB']),
+        "hexact":           1.007825,
+        "hrepeat":          3,
+        "repeat":           3,
+        "mass_error":       convert_float(data['ME'])*1e-6,
+        "mode":             data["operation"]
+        }
+    
+    without_h   = without_hydro(value_list)
+    result      = m_calculation(value_list)
+    value_list["mass_error"] = data['ME']
+    keys_to_remove = ["hexact", "repeat", "hrepeat"]
+    for key in keys_to_remove:
+        value_list.pop(key, None)
 
-            value_list = {
-                #Neutral mass (Da)
-                "neutralmass":      convert_float("".join(neutralmass)),
-                #Observed m/z
-                "unifi_number":     convert_float("".join(unifi_number)),
-                "hexact":           1.007825,
-                "hrepeat":          3,
-                "repeat":           3,
-                "mass_error":       convert_float("".join(mass_error))*1e-6,
-                "mode":             "".join(mode)
-                }
-            without_h   = without_hydro(value_list)
-            result      = m_calculation(value_list)
-            value_list["mass_error"] = "".join(mass_error)
-            keys_to_remove = ["hexact", "repeat", "hrepeat"]
-            for key in keys_to_remove:
-                value_list.pop(key, None)
+    rename_keys = {
+        "neutralmass": "Neutral mass (Da)",
+        "unifi_number": "Observed m/z",
+        "mass_error":  "Mass Error (ppm)",
+        }
+    for old_key, new_key in rename_keys.items():
+        if old_key in value_list:
+            value_list[new_key] = value_list.pop(old_key)
 
-            rename_keys = {
-                "neutralmass": "Neutral mass (Da)",
-                "unifi_number": "Observed m/z",
-                "mass_error":  "Mass Error (ppm)",
-                }
-            for old_key, new_key in rename_keys.items():
-                if old_key in value_list:
-                    value_list[new_key] = value_list.pop(old_key)
+    all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
 
-            all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
-            return render_template("result.html",all_info=all_info)
-    except:
-        return render_template("index.html")
+
+    return jsonify({'result': all_info})
+
 
 def without_hydro(value_list):
+    #if value_list["mode"] == "negative":
+    #    file_mode = "csv/negative_unifi.csv"
+    #elif value_list["mode"] == "positive":
+    #    file_mode = "csv/positive_unifi.csv"
+
+    #raw_file = open(file_mode, "r")
+    #rawdata = list(csv.reader(raw_file, delimiter=";"))
     with open("postgres.txt",'r')as file:
-     postgres_string = file.read().strip()
+      postgres_string = file.read().strip()
     if value_list["mode"] == "negative":
-        conn_string = "postgresql://postgres:%s@analytical_tools-db-postgres-1:5432/postgres" % postgres_string
+        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM negative;")
@@ -98,7 +78,7 @@ def without_hydro(value_list):
         cursor.close()
         conn.close()
     elif value_list["mode"] == "positive":
-        conn_string = "postgresql://postgres:%s@analytical_tools-db-postgres-1:5432/postgres" % postgres_string
+        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
@@ -106,6 +86,8 @@ def without_hydro(value_list):
         rawdata = [list(item) for item in positive_postgres]
         cursor.close()
         conn.close()
+
+
 
     logging.info("++++++++Without H++++++++")
     #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01
@@ -116,7 +98,7 @@ def without_hydro(value_list):
     list_exact_mass_of_each_element = []
     #for j in range(int(value_list["repeat"])):
     for i in rawdata:
-        list_exact_mass_of_each_element.append(i[1])
+        list_exact_mass_of_each_element.append(float(i[1]))
 
     logging.info(list_exact_mass_of_each_element)
 
@@ -171,7 +153,6 @@ def without_hydro(value_list):
 
     return element_list
 
-
 def m_calculation(value_list):
     #print("<--Begin Calculations-->")
     all_results = []
@@ -180,7 +161,6 @@ def m_calculation(value_list):
         list_of_all_adduct = []
 
         each_hydro =  {
-            "Number of Hydro(s)": i + 1,
             "Adduct combinations":  "",
         }
 
@@ -193,41 +173,19 @@ def m_calculation(value_list):
     #print("<--Calculation completed-->")
     return all_results
 
-def subset_sum(numbers, low_limit, high_limit):
-    """
-    Find all subsets of 'numbers' (allowing duplicates) whose sums fall within the range (low_limit, high_limit).
-
-    Args:
-        numbers (list): List of numbers to consider (duplicates allowed).
-        low_limit (float): Lower bound of the range (exclusive).
-        high_limit (float): Upper bound of the range (exclusive).
-
-    Returns:
-        list: A list of tuples, where each tuple contains a subset and its sum.
-    """
-    # Filter numbers to include only those smaller than high_limit
-    filtered_numbers = [num for num in numbers if num < high_limit]
-    #print(f"Filtered Numbers: {filtered_numbers}")
-
-    # Store results
-    result = []
-
-    # Generate all subsets with replacements and check their sums
-    max_len = len(filtered_numbers)  # Avoid infinite results by limiting the length
-    for r in range(1, max_len + 1):  # Generate subsets of all sizes up to max_len
-        for subset in combinations_with_replacement(filtered_numbers, r):
-            subset_sum = sum(subset)
-            if low_limit < subset_sum < high_limit:
-                result.append((list(subset), round(subset_sum, 5)))
-
-    return result
-
 
 def adduct_using_mass(value_list,number_of_hydro):
+    #if value_list["mode"] == "negative":
+    #    file_mode = "csv/negative_unifi.csv"
+    #elif value_list["mode"] == "positive":
+    #    file_mode = "csv/positive_unifi.csv"
+
+    #raw_file = open(file_mode, "r")
+    #rawdata = list(csv.reader(raw_file, delimiter=";"))
     with open("postgres.txt",'r')as file:
-     postgres_string = file.read().strip()
+      postgres_string = file.read().strip()
     if value_list["mode"] == "negative":
-        conn_string = "postgresql://postgres:%s@analytical_tools-db-postgres-1:5432/postgres" % postgres_string
+        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM negative;")
@@ -236,7 +194,7 @@ def adduct_using_mass(value_list,number_of_hydro):
         cursor.close()
         conn.close()
     elif value_list["mode"] == "positive":
-        conn_string = "postgresql://postgres:%s@analytical_tools-db-postgres-1:5432/postgres" % postgres_string
+        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
@@ -246,11 +204,13 @@ def adduct_using_mass(value_list,number_of_hydro):
         conn.close()
 
 
+
+
     Hydro_mode = ""
     list_exact_mass_of_each_element = []
     #for j in range(int(value_list["repeat"])):
     for i in rawdata:
-        list_exact_mass_of_each_element.append(i[1])
+        list_exact_mass_of_each_element.append(float(i[1]))
 
     list_add = []
     if value_list["mode"] == "positive":
@@ -372,30 +332,5 @@ def adduct_using_mass(value_list,number_of_hydro):
     logging.info("All Combinations in element_list: %s" , element_list)
     return element_list
 
-def dict_to_formula(components):
-    formula = ""
-    for element, count in components.items():
-        # Add the count if it’s greater than 1
-        if count > 1:
-            formula += str(count)
-        # Add the element symbol
-        formula += element + ","
-    return formula
-
-
-@app.route('/negative_unifi.csv')
-def serve_negative_db():
-    with open('negative_unifi.csv') as f:
-        csv_content = f.read()
-    return Response(csv_content, mimetype='text/plain')
-
-@app.route('/positive_unifi.csv')
-def serve_positive_db():
-    with open('positive_unifi.csv') as f:
-        csv_content = f.read()
-    return Response(csv_content, mimetype='text/plain')
-
-
-if __name__ == "__main__":
-    context = ('/etc/letsencrypt/live/analytical.dispelk9.de/cert.pem','/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem')
-    app.run(host="0.0.0.0", port=8080, debug=True, ssl_context=context, threaded=True)
+if __name__ == '__main__':
+    app.run(debug=True, port=8080)
