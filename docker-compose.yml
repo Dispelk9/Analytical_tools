@@ -6,9 +6,9 @@ services:
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: postgres_admin
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: mydb
+      POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -22,7 +22,7 @@ services:
       - postgres
     environment:
       # This connection string allows the Flask app to reach Postgres by its service name.
-      DATABASE_URL: postgres://postgres_admin:${DB_PASSWORD}@postgres:5432/mydb
+      DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres_db:5432/postgres
     ports:
       - "8080:8080"
 
@@ -31,7 +31,7 @@ services:
     container_name: apache_frontend
     restart: always
     ports:
-      - "80:80"
+      - "8081:80"
 
 volumes:
   postgres_data:

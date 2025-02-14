@@ -71,8 +71,8 @@ jobs:
             cp /root/postgres.txt /root/Analytical_tools/backend/
 
             # Copy certs into Docker repository
-            cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./fullchain.pem
-            cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./privkey.pem
+            cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./frontend/apache/fullchain.pem
+            cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./frontend/apache/privkey.pem
 
             docker compose down
             docker compose build

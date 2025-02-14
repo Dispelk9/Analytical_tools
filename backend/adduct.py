@@ -69,7 +69,7 @@ def without_hydro(value_list):
     with open("postgres.txt",'r')as file:
       postgres_string = file.read().strip()
     if value_list["mode"] == "negative":
-        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
+        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM negative;")
@@ -78,7 +78,7 @@ def without_hydro(value_list):
         cursor.close()
         conn.close()
     elif value_list["mode"] == "positive":
-        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
+        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
@@ -185,7 +185,7 @@ def adduct_using_mass(value_list,number_of_hydro):
     with open("postgres.txt",'r')as file:
       postgres_string = file.read().strip()
     if value_list["mode"] == "negative":
-        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
+        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM negative;")
@@ -194,7 +194,7 @@ def adduct_using_mass(value_list,number_of_hydro):
         cursor.close()
         conn.close()
     elif value_list["mode"] == "positive":
-        conn_string = "postgresql://postgres_admin:%s@postgres_db:5432/mydb" % postgres_string
+        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM positive;")
