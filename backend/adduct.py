@@ -36,6 +36,7 @@ def process_number():
         "mode":             data["operation"]
         }
     
+    logging.info("== Initiate Calculation ==")
     without_h   = without_hydro(value_list)
     result      = m_calculation(value_list)
     value_list["mass_error"] = data['ME']
@@ -90,17 +91,18 @@ def without_hydro(value_list):
 
 
     logging.info("++++++++Without H++++++++")
-    #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01
-    #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01
-    low_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"])
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] + (value_list["mass_error"]*value_list["neutralmass"])
+    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01
+    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01
+    
+    #low_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"])
+    #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] + (value_list["mass_error"]*value_list["neutralmass"])
     
     list_exact_mass_of_each_element = []
     #for j in range(int(value_list["repeat"])):
     for i in rawdata:
         list_exact_mass_of_each_element.append(float(i[1]))
 
-    logging.info(list_exact_mass_of_each_element)
+    #logging.info(list_exact_mass_of_each_element)
 
     list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
 
