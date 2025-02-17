@@ -141,6 +141,9 @@
 html, body {
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased; /* Improves rendering on WebKit (Chrome, Safari) */
+  -moz-osx-font-smoothing: grayscale; /* Improves rendering on Firefox (Mac) */
+  text-rendering: optimizeLegibility; /* Enhances font readability */
 }
 
 /* Create a full-page background using a pseudo-element */
