@@ -1,6 +1,6 @@
 // src/Adduct.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
-import reactLogo from './assets/react.svg'
+import reactLogo from '../assets/react.svg'
 import RenderObject from './RenderObject';
 
 import './App.css'
