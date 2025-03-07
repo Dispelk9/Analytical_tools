@@ -1,0 +1,18 @@
+{
+  "main": "cjs/index.cjs",
+  "module": "esm/index.mjs",
+  "types": "esm/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./esm/index.d.ts",
+      "import": "./esm/index.mjs",
+      "default": "./cjs/index.cjs"
+    },
+    "./vanilla-extract": {
+      "types": "./vanilla-extract/esm/vanilla-extract/index.d.ts",
+      "import": "./vanilla-extract/esm/vanilla-extract/index.mjs",
+      "default": "./vanilla-extract/cjs/vanilla-extract/index.cjs"
+    }
+  }
+}
