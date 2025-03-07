@@ -1,0 +1,30 @@
+import type { BaseProps } from '../../BaseProps';
+import type { SelectWrapperDropdownDirection, SelectWrapperState, Theme } from '../types';
+export type PSelectWrapperDropdownProps = BaseProps & {
+    description?: string;
+    direction?: SelectWrapperDropdownDirection;
+    disabled?: boolean;
+    filter?: boolean;
+    isOpenOverride?: boolean;
+    label?: string;
+    message?: string;
+    onOpenChange: (isOpen: boolean) => void;
+    required?: boolean;
+    selectRef?: HTMLSelectElement;
+    state?: SelectWrapperState;
+    theme?: Theme;
+};
+export declare const PSelectWrapperDropdown: import("react").ForwardRefExoticComponent<import("react").DOMAttributes<{}> & Pick<import("react").HTMLAttributes<{}>, "suppressHydrationWarning" | "autoFocus" | "className" | "dir" | "hidden" | "id" | "inert" | "lang" | "slot" | "style" | "tabIndex" | "title" | "translate" | "role"> & {
+    description?: string;
+    direction?: SelectWrapperDropdownDirection;
+    disabled?: boolean;
+    filter?: boolean;
+    isOpenOverride?: boolean;
+    label?: string;
+    message?: string;
+    onOpenChange: (isOpen: boolean) => void;
+    required?: boolean;
+    selectRef?: HTMLSelectElement;
+    state?: SelectWrapperState;
+    theme?: Theme;
+} & import("react").RefAttributes<HTMLElement>>;

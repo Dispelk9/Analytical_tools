@@ -1,0 +1,42 @@
+/* Auto Generated Start */
+const borderRadiusMedium = "8px";
+const borderRadiusSmall = "4px";
+const fontFamily = "'Porsche Next','Arial Narrow',Arial,'Heiti SC',SimHei,sans-serif";
+const fontSizeTextSmall = "1rem";
+const fontSizeTextXSmall = "clamp(0.81rem, 0.23vw + 0.77rem, 0.88rem)";
+const fontWeightSemiBold = 600;
+const themeDarkBackgroundBase = "#0E0E12";
+const themeDarkBackgroundFrosted = "hsl(240 3% 26%/35%)";
+const themeDarkBackgroundSurface = "#212225";
+const themeDarkContrastLow = "#404044";
+const themeDarkContrastMedium = "#88898C";
+const themeDarkNotificationError = "#FC4040";
+const themeDarkNotificationInfo = "#178BFF";
+const themeDarkPrimary = "#FBFCFF";
+const themeDarkStateDisabled = "#7E7F82";
+const themeDarkStateFocus = "#1A44EA";
+const themeDarkStateHover = "rgba(148, 149, 152, .18)";
+const themeLightBackgroundBase = "#FFF";
+const themeLightBackgroundFrosted = "hsl(240 4% 85%/35%)";
+const themeLightBackgroundSurface = "#EEEFF2";
+const themeLightContrastLow = "#D8D8DB";
+const themeLightContrastMedium = "#6B6D70";
+const themeLightNotificationError = "#CC1922";
+const themeLightNotificationInfo = "#2762EC";
+const themeLightPrimary = "#010205";
+const themeLightStateDisabled = "#949598";
+const themeLightStateFocus = "#1A44EA";
+const themeLightStateHover = "rgba(148, 149, 152, .18)";
+const themeDarkContrastHigh = "#AFB0B3";
+const themeLightContrastHigh = "#535457";
+const borderWidthBase = "2px";
+const spacingStaticXSmall = "4px";
+const themeDarkNotificationSuccess = "#09D087";
+const themeLightNotificationSuccess = "#197E10";
+const themeLightBackgroundSurfaceDarken = "#CBCED7";
+const themeDarkBackgroundSurfaceDarken = "#040405";
+const themeLightSuccessColorDarken = "#0E4809";
+const themeDarkSuccessColorDarken = "#069561";
+/* Auto Generated End */
+
+export { borderRadiusMedium, borderRadiusSmall, borderWidthBase, fontFamily, fontSizeTextSmall, fontSizeTextXSmall, fontWeightSemiBold, spacingStaticXSmall, themeDarkBackgroundBase, themeDarkBackgroundFrosted, themeDarkBackgroundSurface, themeDarkBackgroundSurfaceDarken, themeDarkContrastHigh, themeDarkContrastLow, themeDarkContrastMedium, themeDarkNotificationError, themeDarkNotificationInfo, themeDarkNotificationSuccess, themeDarkPrimary, themeDarkStateDisabled, themeDarkStateFocus, themeDarkStateHover, themeDarkSuccessColorDarken, themeLightBackgroundBase, themeLightBackgroundFrosted, themeLightBackgroundSurface, themeLightBackgroundSurfaceDarken, themeLightContrastHigh, themeLightContrastLow, themeLightContrastMedium, themeLightNotificationError, themeLightNotificationInfo, themeLightNotificationSuccess, themeLightPrimary, themeLightStateDisabled, themeLightStateFocus, themeLightStateHover, themeLightSuccessColorDarken };

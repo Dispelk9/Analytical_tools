@@ -1,0 +1,12 @@
+$pds-spacing-static-x-small: 4px;
+$pds-spacing-static-small: 8px;
+$pds-spacing-static-medium: 16px;
+$pds-spacing-static-large: 32px;
+$pds-spacing-static-x-large: 48px;
+$pds-spacing-static-xx-large: 80px;
+$pds-spacing-fluid-x-small: clamp(4px, 0.25vw + 3px, 8px);
+$pds-spacing-fluid-small: clamp(8px, 0.5vw + 6px, 16px);
+$pds-spacing-fluid-medium: clamp(16px, 1.25vw + 12px, 36px);
+$pds-spacing-fluid-large: clamp(32px, 2.75vw + 23px, 76px);
+$pds-spacing-fluid-x-large: clamp(48px, 3vw + 38px, 96px);
+$pds-spacing-fluid-xx-large: clamp(80px, 7.5vw + 56px, 200px);

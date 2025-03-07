@@ -1,0 +1,15 @@
+export declare const _cssVariableGridExtendedSpanOneHalf = "--pds-grid-extended-span-one-half";
+export declare const _cssVariableGridBasicSpanOneHalf = "--pds-grid-basic-span-one-half";
+export declare const _cssVariableGridBasicSpanOneThird = "--pds-grid-basic-span-one-third";
+export declare const _cssVariableGridBasicSpanTwoThirds = "--pds-grid-basic-span-two-thirds";
+export declare const _cssVariableGridNarrowSpanOneHalf = "--pds-grid-narrow-span-one-half";
+export declare const _cssVariableGridSafeZone = "--pds-internal-grid-safe-zone";
+export declare const _cssVariableGridOuterColumn = "--pds-internal-grid-outer-column";
+export declare const _cssVariableGridMargin = "--pds-internal-grid-margin";
+export declare const _cssVariableGridWidthMin = "--pds-internal-grid-width-min";
+export declare const _cssVariableGridWidthMax = "--pds-internal-grid-width-max";
+export declare const _gridWidthMin = "320px";
+export declare const _gridWidthMax = "2560px";
+export declare const _gridSafeZoneBase = "max(22px, 10.625vw - 12px)";
+export declare const _gridSafeZoneS = "calc(5vw - 16px)";
+export declare const _gridSafeZoneXXL = "min(50vw - 880px, 400px)";
