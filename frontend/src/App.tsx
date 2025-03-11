@@ -60,6 +60,18 @@ const AppLayout = () => (
         </PTag>
         <img src="./assets/ssl.jpg" alt="Certcheck" />
       </PLinkTile>
+      {/* Mailcow Tile */}
+      <PLinkTile
+        href="https://mail.dispelk9.de/s"
+        label="Mailing"
+        description="Mailserver with Postfix/Dovecot"
+        compact={true}
+      >
+        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+          #Docker#Mailcow#SoGo#Postfix
+        </PTag>
+        <img src="./assets/sogo.png" alt="Mailing" />
+      </PLinkTile>
     </div>
 
     {/* Main Content */}
