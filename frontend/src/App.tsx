@@ -18,7 +18,12 @@ const AppLayout = () => (
       <h1 className="text-white text-xl">Dispelk9 Tools</h1>
     </header>
 
-    <div>
+    <div   
+      style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(5, 1fr)', // 5 equal-width columns in one row
+      gap: '16px',                           // spacing between columns
+      }}>
       <PLinkTile
         label="Home"
         description="Go to homepage"
