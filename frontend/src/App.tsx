@@ -26,7 +26,7 @@ const AppLayout = () => (
       }}>
       <PLinkTile
         label="Home"
-        description="Go to homepage"
+        description="Homepage"
         compact={true}
         href="/"
       >
@@ -60,22 +60,22 @@ const AppLayout = () => (
       <PLinkTile
         href="https://analytical.dispelk9.de:8443/"
         label="Certcheck"
-        description="For SMTP Certfetcher"
+        description="SMTP Certfetcher"
         compact={true}
       >
         <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Go#Js
+          #Go#Js#Certs
         </PTag>
         <img src="./assets/ssl.jpg" alt="Certcheck" />
       </PLinkTile>
       <PLinkTile
-        href="https://mail.dispelk9.de/s"
+        href="https://mail.dispelk9.de"
         label="Mailing"
-        description="Mailserver with Postfix/Dovecot"
+        description="MX Postfix/Dovecot"
         compact={true}
       >
         <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Docker#Mailcow#SoGo#Postfix
+          #Docker#Mailcow
         </PTag>
         <img src="./assets/sogo.png" alt="Mailing" />
       </PLinkTile>
