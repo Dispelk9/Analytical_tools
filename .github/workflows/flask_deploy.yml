@@ -37,7 +37,7 @@ jobs:
 
       - name: Docker Compose with ACT
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
 
             # Export environment variables from GitHub secrets
             export DB_USERNAME="${{ secrets.DB_USERNAME }}"
@@ -47,36 +47,40 @@ jobs:
             export DB_NAME="${{ secrets.DB_NAME }}"
             export SESSION_SECRET="${{ secrets.SESSION_SECRET }}"
 
-            # Optionally, write secrets to a .env file (commonly used with Docker)
-            cat <<EOL > .env
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-            EOL
+            # Write secrets to .env file explicitly
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > /root/.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /root/.env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> /root/.env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> /root/.env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> /root/.env
+            echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> /root/.env
 
-            
-            # Update the server and install git if necessary
+            # Update server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
             
             # Remove old repository
             sudo rm -rf /root/Analytical_tools
-             
-            sudo bash -c 'eval "$(ssh-agent -s)" && echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa'
-            git clone git@github.com:Dispelk9/Analytical_tools.git
             
+            # Setup SSH agent and clone repository
+            eval "$(ssh-agent -s)"
+            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa
+            git clone git@github.com:Dispelk9/Analytical_tools.git
 
-            cd Analytical_tools
-
+            # Copy the .env file into your backend folder
             cp /root/.env /root/Analytical_tools/backend/.env
 
-            # Copy certs into Docker repository
+            # Navigate to project directory
+            cd /root/Analytical_tools
+
+            # Copy SSL certificates
             cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./frontend/apache/fullchain.pem
             cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./frontend/apache/privkey.pem
 
+            # Restart Docker Compose setup
             docker compose down
             docker compose build
             docker compose up -d
+
+          EOF
+
           
