@@ -3,9 +3,20 @@ from flask import Flask, request, jsonify
 import logging
 import sys
 import psycopg2
-#import csv
+from dotenv import load_dotenv
+import os
 
 from utils.adduct_utils import *
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve database connection details from .env
+DB_USERNAME = os.getenv("DB_USERNAME")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
 app = Flask(__name__)
 
@@ -60,33 +71,24 @@ def process_number():
 
 
 def without_hydro(value_list):
-    #if value_list["mode"] == "negative":
-    #    file_mode = "csv/negative_unifi.csv"
-    #elif value_list["mode"] == "positive":
-    #    file_mode = "csv/positive_unifi.csv"
-
-    #raw_file = open(file_mode, "r")
-    #rawdata = list(csv.reader(raw_file, delimiter=";"))
-    with open("postgres.txt",'r')as file:
-      postgres_string = file.read().strip()
-    if value_list["mode"] == "negative":
-        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
-        conn = psycopg2.connect(conn_string)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM negative;")
-        negative_postgres = cursor.fetchall()
-        rawdata = [list(item) for item in negative_postgres]
-        cursor.close()
-        conn.close()
-    elif value_list["mode"] == "positive":
-        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
-        conn = psycopg2.connect(conn_string)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM positive;")
-        positive_postgres = cursor.fetchall()
-        rawdata = [list(item) for item in positive_postgres]
-        cursor.close()
-        conn.close()
+    # Set table based on mode
+    mode = value_list["mode"]
+    if mode == "negative":
+        table_name = "negative"
+    elif mode == "positive":
+        table_name = "positive"
+    else:
+        raise ValueError("Invalid mode provided")
+    
+    # Create PostgreSQL connection string
+    conn_string = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    
+    # Connect to PostgreSQL and fetch data
+    with psycopg2.connect(conn_string) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM {table_name};")
+            rawdata = [list(item) for item in cursor.fetchall()]
+    logging.info("Get rawdata Successfully: %s" % rawdata)
 
 
 
@@ -177,33 +179,24 @@ def m_calculation(value_list):
 
 
 def adduct_using_mass(value_list,number_of_hydro):
-    #if value_list["mode"] == "negative":
-    #    file_mode = "csv/negative_unifi.csv"
-    #elif value_list["mode"] == "positive":
-    #    file_mode = "csv/positive_unifi.csv"
-
-    #raw_file = open(file_mode, "r")
-    #rawdata = list(csv.reader(raw_file, delimiter=";"))
-    with open("postgres.txt",'r')as file:
-      postgres_string = file.read().strip()
-    if value_list["mode"] == "negative":
-        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
-        conn = psycopg2.connect(conn_string)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM negative;")
-        negative_postgres = cursor.fetchall()
-        rawdata = [list(item) for item in negative_postgres]
-        cursor.close()
-        conn.close()
-    elif value_list["mode"] == "positive":
-        conn_string = "postgresql://postgres:%s@postgres_db:5432/postgres" % postgres_string
-        conn = psycopg2.connect(conn_string)
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM positive;")
-        positive_postgres = cursor.fetchall()
-        rawdata = [list(item) for item in positive_postgres]
-        cursor.close()
-        conn.close()
+    # Set table based on mode
+    mode = value_list["mode"]
+    if mode == "negative":
+        table_name = "negative"
+    elif mode == "positive":
+        table_name = "positive"
+    else:
+        raise ValueError("Invalid mode provided")
+    
+    # Create PostgreSQL connection string
+    conn_string = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    
+    # Connect to PostgreSQL and fetch data
+    with psycopg2.connect(conn_string) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM {table_name};")
+            rawdata = [list(item) for item in cursor.fetchall()]
+    logging.info("Get rawdata Successfully: %s" % rawdata)
 
 
 
