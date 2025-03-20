@@ -68,7 +68,7 @@ jobs:
             #for docker branch
             #cp /root/postgres.txt /root/Analytical_tools/app/
             #for docker_react branch
-            cp /root/postgres.txt /root/Analytical_tools/backend/
+            cp /root/postgres.txt /root/Analytical_tools/backend/.env
 
             # Copy certs into Docker repository
             cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./frontend/apache/fullchain.pem

@@ -5,3 +5,4 @@ pyopenssl
 pubchempy
 requests
 flask_session
+dotenv
