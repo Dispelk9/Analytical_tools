@@ -1,58 +1,60 @@
-// src/Compound.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
-import reactLogo from '../../public/assets/react.svg'
-import RenderObject from './RenderObject';
+import reactLogo from '../../public/assets/react.svg';
+import {
+  PTable,
+  PTableBody,
+  PTableCell,
+  PTableHead,
+  PTableHeadCell,
+  PTableHeadRow,
+  PTableRow,
+} from '@porsche-design-system/components-react';
+import '../App.css';
 
-import '../App.css'
-
-
-interface NumberResponse {
-  result: number;
+interface Compound {
+  molecular_formula: string;
+  cid: number;
+  exact_mass: string;
+  iupac_name: string;
+  link: string;
+  foto: string;
 }
 
-const Adduct: React.FC = () => {
-  // Store each input as a string
-  const [Adduct, setAdduct] = useState<string>('');
-  const [Observed, setObserved] = useState<string>('');
-  const [Mass_error, setMass_error] = useState<string>('');
-
-  const [result, setResult] = useState<number | null>(null);
+const Compound: React.FC = () => {
+  const [adduct, setAdduct] = useState<string>('');
+  const [observed, setObserved] = useState<string>('');
+  const [massError, setMassError] = useState<string>('');
+  const [compounds, setCompounds] = useState<Compound[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Handlers for each input change
-  const handleChangeA = (e: ChangeEvent<HTMLInputElement>) => setAdduct(e.target.value);
-  const handleChangeB = (e: ChangeEvent<HTMLInputElement>) => setObserved(e.target.value);
-  const handleChangeC = (e: ChangeEvent<HTMLInputElement>) => setMass_error(e.target.value);
+  const handleChangeAdduct = (e: ChangeEvent<HTMLInputElement>) => setAdduct(e.target.value);
+  const handleChangeObserved = (e: ChangeEvent<HTMLInputElement>) => setObserved(e.target.value);
+  const handleChangeMassError = (e: ChangeEvent<HTMLInputElement>) => setMassError(e.target.value);
 
-  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    setResult(null);
 
-    // Ensure all boxes have a value
-    if (Adduct.trim() === '' || Observed.trim() === '' || Mass_error.trim() === '') {
-      setError('Please enter a number for Neutral_mass, Observed, and Mass_error.');
+    if (!adduct || !observed || !massError) {
+      setError('Please enter values for all fields.');
       return;
     }
 
     try {
-      const response = await fetch('/api/number', {
+      const response = await fetch('/api/compound', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Send an object with keys A, B, C, and operation
-        body: JSON.stringify({ AD: Adduct, OB: Observed, ME: Mass_error }),
+        body: JSON.stringify({ AD: adduct, OB: observed, ME: massError }),
       });
 
       if (!response.ok) {
         throw new Error('Server error');
       }
 
-      const data: NumberResponse = await response.json();
-      setResult(data.result);
+      const data = await response.json();
+      setCompounds(data.compounds);
     } catch (err) {
-      console.error('Error:', err);
-      setError('Error processing your request.');
+      setError('Error fetching data from server.');
     }
   };
 
@@ -64,75 +66,84 @@ const Adduct: React.FC = () => {
         </a>
 
         <h1 className="form-title">Compound Calculation</h1>
-        <div className="form-wrapper">
-          <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <label className="form-label">Neutral mass (Da):</label>
-              <input
-                type="number"
-                value={Adduct}
-                onChange={handleChangeA}
-                placeholder="Enter Neutral mass"
-                className="form-input"
-              />
-            </div>
-            <div className="form-row">
-              <label className="form-label">Observed m/z:</label>
-              <input
-                type="number"
-                value={Observed}
-                onChange={handleChangeB}
-                placeholder="Enter Observed m/z"
-                className="form-input"
-              />
-            </div>
-            <div className="form-row">
-              <label className="form-label">Mass error (ppm):</label>
-              <input
-                type="number"
-                value={Mass_error}
-                onChange={handleChangeC}
-                placeholder="Enter Mass error"
-                className="form-input"
-              />
-            </div>
-            <button type="submit" className="submit-button">
-              Calculate
-            </button>
-          </form>
-        </div>
-        {result !== null && (
-          <div className="result-container">
-            <h3>Compound Combination</h3>
-            <div className="result-content">
-              <RenderObject data={result} />
-            </div>
+
+        <form onSubmit={handleSubmit} className="form-wrapper">
+          <div className="form-row">
+            <label className="form-label">Adduct:</label>
+            <input
+              type="number"
+              value={adduct}
+              onChange={handleChangeAdduct}
+              placeholder="Enter Adduct"
+              className="form-input"
+            />
           </div>
-        )}
 
-        {error && (
-          <div className="response-message response-error">
-            {error}
+          <div className="form-row">
+            <label className="form-label">Observed m/z:</label>
+            <input
+              type="number"
+              value={observed}
+              onChange={handleChangeObserved}
+              placeholder="Enter Observed m/z"
+              className="form-input"
+            />
           </div>
+
+          <div className="form-row">
+            <label className="form-label">Mass error (ppm):</label>
+            <input
+              type="number"
+              value={massError}
+              onChange={handleChangeMassError}
+              placeholder="Enter Mass error"
+              className="form-input"
+            />
+          </div>
+
+          <button type="submit" className="submit-button">
+            Calculate
+          </button>
+        </form>
+
+        {error && <div className="response-message response-error">{error}</div>}
+
+        {compounds.length > 0 && (
+          <PTable caption="Compound Search Results">
+            <PTableHead>
+              <PTableHeadRow>
+                <PTableHeadCell style={{ color: 'white' }}>Molecular Formula</PTableHeadCell>
+                <PTableHeadCell style={{ color: 'white' }}>CID</PTableHeadCell>
+                <PTableHeadCell style={{ color: 'white' }}>Exact Mass</PTableHeadCell>
+                <PTableHeadCell style={{ color: 'white' }}>IUPAC Name</PTableHeadCell>
+                <PTableHeadCell style={{ color: 'white' }}>Link</PTableHeadCell>
+                <PTableHeadCell style={{ color: 'white' }}>Image</PTableHeadCell>
+              </PTableHeadRow>
+            </PTableHead>
+            <PTableBody>
+              {compounds.map((item) => (
+                <PTableRow key={item.cid}>
+                  <PTableCell style={{ color: 'white' }}>{item.molecular_formula}</PTableCell>
+                  <PTableCell style={{ color: 'white' }}>{item.cid}</PTableCell>
+                  <PTableCell style={{ color: 'white' }}>{item.exact_mass}</PTableCell>
+                  <PTableCell style={{ color: 'white' }}>{item.iupac_name}</PTableCell>
+                  <PTableCell style={{ color: 'white' }}>
+                    <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
+                      View Compound
+                    </a>
+                  </PTableCell>
+                  <PTableCell>
+                    <img src={item.foto} alt={`Compound ${item.cid}`} style={{ width: '60px' }} />
+                  </PTableCell>
+                </PTableRow>
+              ))}
+            </PTableBody>
+          </PTable>
         )}
-
-        <p style={{ textAlign: 'justify' }}>
-            Used to find the compounds base on the neutralmass and adduct from the unifi devices.<br />
-            How to use:<br />
-            1. Fill all the blanks with parameters:<br />
-            <strong>Adduct:</strong><br />
-            - Get from the both DBs, should be float number<br />
-            <strong>Observed m/z:</strong><br />
-            - Number from the unifi machine.<br />
-            <strong>Mass Error:</strong><br />
-            - The acceptable error which can be approved, the smaller it get the more accurate the results.<br />
-            - Normal parameter is: 1 ppm<br />
-            2. Click Convert.<br />
-        </p>
-
       </div>
     </div>
   );
 };
 
-export default Adduct;
+export default Compound;
+
