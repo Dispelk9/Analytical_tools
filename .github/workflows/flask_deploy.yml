@@ -36,39 +36,41 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Docker Compose with ACT
-        env:
-         DB_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << 'EOF'
 
-            # Export the environment variable for the session
-            export DB_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
-            echo ${{ secrets.POSTGRES_PASSWORD }} > /root/postgres.txt
+            # Export environment variables from GitHub secrets
+            export DB_USERNAME="${{ secrets.DB_USERNAME }}"
+            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            export DB_HOST="${{ secrets.DB_HOST }}"
+            export DB_PORT="${{ secrets.DB_PORT }}"
+            export DB_NAME="${{ secrets.DB_NAME }}"
+            export SESSION_SECRET="${{ secrets.SESSION_SECRET }}"
+
+            # Optionally, write secrets to a .env file (commonly used with Docker)
+            cat <<EOL > .env
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            EOL
+
             
             # Update the server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git
             
             # Remove old repository
             sudo rm -rf /root/Analytical_tools
-
-            #kill gunicorn server
-            #pkill gunicorn
-            # sudo rm -rf /root/analytic_flask/Analytical_tools
-            
-            # Start the SSH agent and add the key with the passphrase
-            # cd /root/analytic_flask/
              
             sudo bash -c 'eval "$(ssh-agent -s)" && echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa'
             git clone git@github.com:Dispelk9/Analytical_tools.git
             
-            #cd /root/analytic_flask/Analytical_tools
-            #gunicorn --config gunicorn_config.py adduct_flask:app --certfile=/etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem --keyfile=/etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem > /tmp/flask_log.txt 2>&1 &
-            
+
             cd Analytical_tools
-            #for docker branch
-            #cp /root/postgres.txt /root/Analytical_tools/app/
-            #for docker_react branch
-            cp /root/postgres.txt /root/Analytical_tools/backend/.env
+
+            cp /root/.env /root/Analytical_tools/backend/.env
 
             # Copy certs into Docker repository
             cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./frontend/apache/fullchain.pem
