@@ -140,7 +140,33 @@ const Compound: React.FC = () => {
             </PTableBody>
           </PTable>
         )}
+
+        <p style={{ textAlign: 'justify' }}>
+          This tool is designed to help getting the compounds from Pubchem
+          <br />
+          How to use:
+          <br />
+          1. Input parameters:
+          <br />
+          <strong>Adduct</strong>
+          <br />
+          <strong>Neutral mass (Da):</strong>
+          <br />
+          <strong>Observed m/z:</strong>
+          <br />
+          - Input the observed mass-to-charge ratio (m/z) value from the UNIFI Software.
+          <br />
+          <strong>Mass Error:</strong>
+          <br />
+          - Define the acceptable error range, typically between 1-10 ppm.
+          <br />
+          - Smaller mass error values yield more accurate results.
+          <br />
+          2. Click Calculate.
+          <br />
+        </p>
       </div>
+
     </div>
   );
 };

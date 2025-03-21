@@ -23,7 +23,7 @@ compound_bp = Blueprint('compound', __name__)
 def compound():
     try:
         data = request.get_json()
-        logging.info(data)
+        logging.info(f"Received data: {data}")
 
         required_keys = ['AD', 'OB', 'ME']
         if not data or not all(key in data for key in required_keys):
@@ -45,8 +45,17 @@ def compound():
         base_url = "https://pubchem.ncbi.nlm.nih.gov/"
         request_url = f"{base_url}rest/pug/compound/exact_mass/range/{min_mass}/{max_mass}/cids/JSON"
 
-        response_cid = requests.get(request_url, timeout=10)
-        pubchem_data = response_cid.json()
+        try:
+            response_cid = requests.get(request_url, timeout=10)
+            response_cid.raise_for_status()
+            pubchem_data = response_cid.json()
+        except requests.exceptions.RequestException as req_err:
+            logging.error(f"Request Error: {req_err} - Response content: {response_cid.text}")
+            return jsonify({'error': f'Unable to connect to PubChem API: {req_err}', 'response': response_cid.text}), 500
+        except ValueError as json_err:
+            logging.error(f"JSON Error: {json_err} - Response content: {response_cid.text}")
+            return jsonify({'error': f'Invalid JSON from PubChem API: {json_err}', 'response': response_cid.text}), 500
+
         formula_counts = {}
 
         if "Fault" in pubchem_data and pubchem_data["Fault"]["Code"] == "PUGREST.NotFound":
@@ -57,7 +66,7 @@ def compound():
         list_of_compounds = []
 
         for compound in cids:
-            logging.info("Getting %s" % compound)
+            logging.info(f"Getting CID {compound}")
             c = pcp.Compound.from_cid(compound)
             compound_each = {
                 "molecular_formula": c.molecular_formula,
@@ -75,9 +84,9 @@ def compound():
         duplicates = {f: c for f, c in formula_counts.items() if c > 1}
         session['list_of_compounds'] = list_of_compounds
         response_data = {"compounds": list_of_compounds, "duplicates": duplicates}
-        logging.info(response_data)
+        logging.info(f"Response data: {response_data}")
         return jsonify(response_data)
 
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        logging.error(f"Unhandled error occurred: {e}")
         return jsonify({'error': str(e)}), 500
