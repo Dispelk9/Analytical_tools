@@ -1,59 +1,66 @@
 // src/Adduct.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
-import reactLogo from '../../public/assets/react.svg'
+import reactLogo from '../../public/assets/react.svg';
 import RenderObject from './RenderObject';
-
-import '../App.css'
-
+import {
+  PButton,
+  PSpinner,
+  PTextFieldWrapper,
+  PSelectWrapper,
+  PText,
+} from "@porsche-design-system/components-react";
+import '../App.css';
 
 interface NumberResponse {
   result: number;
 }
 
 const Adduct: React.FC = () => {
-  // Store each input as a string
   const [Neutral_mass, setNeutral_mass] = useState<string>('');
   const [Observed, setObserved] = useState<string>('');
   const [Mass_error, setMass_error] = useState<string>('');
-  // New state for the dropdown selection (operation)
   const [operation, setOperation] = useState<string>('Please Choose');
+
   const [result, setResult] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
 
-  // Handlers for each input change
+  // Input handlers
   const handleChangeA = (e: ChangeEvent<HTMLInputElement>) => setNeutral_mass(e.target.value);
   const handleChangeB = (e: ChangeEvent<HTMLInputElement>) => setObserved(e.target.value);
   const handleChangeC = (e: ChangeEvent<HTMLInputElement>) => setMass_error(e.target.value);
 
-  // Handler for dropdown change
+  // Dropdown handler
   const handleOperationChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setOperation(e.target.value);
   };
 
-  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setResult(null);
 
-    // Ensure all boxes have a value
-    if (Neutral_mass.trim() === '' || Observed.trim() === '' || Mass_error.trim() === '') {
+    if (!Neutral_mass.trim() || !Observed.trim() || !Mass_error.trim()) {
       setError('Please enter a number for Neutral_mass, Observed, and Mass_error.');
       return;
     }
-
-    // Ensure the user has chosen an operation
     if (operation === 'Please Choose') {
       setError('Please select an operation.');
       return;
     }
 
     try {
+      setIsCalculating(true);
+
       const response = await fetch('/api/number', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Send an object with keys A, B, C, and operation
-        body: JSON.stringify({ NM: Neutral_mass, OB: Observed, ME: Mass_error, operation }),
+        body: JSON.stringify({
+          NM: Neutral_mass,
+          OB: Observed,
+          ME: Mass_error,
+          operation
+        }),
       });
 
       if (!response.ok) {
@@ -65,6 +72,8 @@ const Adduct: React.FC = () => {
     } catch (err) {
       console.error('Error:', err);
       setError('Error processing your request.');
+    } finally {
+      setIsCalculating(false);
     }
   };
 
@@ -78,8 +87,7 @@ const Adduct: React.FC = () => {
         <h1 className="form-title">Adduct Calculation</h1>
         <div className="form-wrapper">
           <form onSubmit={handleSubmit}>
-            <div className="form-row">
-              <label className="form-label">Neutral mass (Da):</label>
+            <PTextFieldWrapper theme="dark" label="Neutral mass (Da):" description="Should be a float number">
               <input
                 type="number"
                 value={Neutral_mass}
@@ -87,9 +95,9 @@ const Adduct: React.FC = () => {
                 placeholder="Enter Neutral mass"
                 className="form-input"
               />
-            </div>
-            <div className="form-row">
-              <label className="form-label">Observed m/z:</label>
+            </PTextFieldWrapper>
+
+            <PTextFieldWrapper theme="dark" label="Observed m/z:" description="Measured mass-to-charge ratio">
               <input
                 type="number"
                 value={Observed}
@@ -97,9 +105,9 @@ const Adduct: React.FC = () => {
                 placeholder="Enter Observed m/z"
                 className="form-input"
               />
-            </div>
-            <div className="form-row">
-              <label className="form-label">Mass error (ppm):</label>
+            </PTextFieldWrapper>
+
+            <PTextFieldWrapper theme="dark" label="Mass error (ppm):" description="Allowed error of mass">
               <input
                 type="number"
                 value={Mass_error}
@@ -107,9 +115,9 @@ const Adduct: React.FC = () => {
                 placeholder="Enter Mass error"
                 className="form-input"
               />
-            </div>
-            <div className="form-row">
-              <label className="form-label">Mode:</label>
+            </PTextFieldWrapper>
+
+            <PSelectWrapper theme="dark" label="Mode:" description="Positive or negative ESI mode">
               <select
                 value={operation}
                 onChange={handleOperationChange}
@@ -119,10 +127,17 @@ const Adduct: React.FC = () => {
                 <option value="positive">positive</option>
                 <option value="negative">negative</option>
               </select>
-            </div>
-            <button type="submit" className="submit-button">
+            </PSelectWrapper>
+
+            <PButton theme="dark"  variant="secondary" type="submit" >
               Calculate
-            </button>
+            </PButton>
+
+            {isCalculating && (
+              <div style={{ marginTop: '1rem' }}>
+                <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
+              </div>
+            )}
           </form>
         </div>
         {result !== null && (
@@ -140,10 +155,10 @@ const Adduct: React.FC = () => {
           </div>
         )}
 
-        <p style={{ textAlign: 'justify' }}>
-          This tool is designed to help identify adduct ions in ESI-MS (Electrospray ionization in mass
-          spectroscopy) measurements using the Neutral mass and Observed mass m/z data obtained
-          from the UNIFI Scientific Information System software.
+        <PText theme="dark" style={{ textAlign: 'justify' }}>
+          This tool is designed to help identify adduct ions in ESI-MS (Electrospray ionization
+          in mass spectroscopy) measurements using the Neutral mass and Observed mass m/z data
+          obtained from the UNIFI Scientific Information System software.
           <br />
           How to use:
           <br />
@@ -185,8 +200,7 @@ const Adduct: React.FC = () => {
           <br />
           2. Click Calculate.
           <br />
-        </p>
-
+        </PText>
       </div>
     </div>
   );
