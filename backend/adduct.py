@@ -70,16 +70,18 @@ def process_number():
     for key in keys_to_remove:
         value_list.pop(key, None)
 
-    rename_keys = {
-        "neutralmass": "Neutral mass (Da)",
-        "unifi_number": "Observed m/z",
-        "mass_error":  "Mass Error (ppm)",
-        }
-    for old_key, new_key in rename_keys.items():
-        if old_key in value_list:
-            value_list[new_key] = value_list.pop(old_key)
+    # rename_keys = {
+    #     "neutralmass": "Neutral mass (Da)",
+    #     "unifi_number": "Observed m/z",
+    #     "mass_error":  "Mass Error (ppm)",
+    #     }
+    # for old_key, new_key in rename_keys.items():
+    #     if old_key in value_list:
+    #         value_list[new_key] = value_list.pop(old_key)
 
-    all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
+    # all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
+    all_info = {"Results without Hydro": without_h,"Results with Hydro":result}
+
 
 
     return jsonify({'result': all_info})
