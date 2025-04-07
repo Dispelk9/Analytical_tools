@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    restart: always
+    env_file:
+      - ./backend/.env  # Path to the .env file relative to the docker-compose.yml
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: flask_app
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}
+    ports:
+      - "8080:8080"
+
+  apache:
+    build: ./frontend
+    container_name: apache_frontend
+    restart: always
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
