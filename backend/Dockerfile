@@ -22,7 +22,7 @@ COPY . /app/
 # Expose the Flask app port
 EXPOSE 8080
 # Https
-EXPOSE 443
+EXPOSE 80
 
 # Command to run Gunicorn server
 # Set the default command to run the Flask app with Gunicorn
