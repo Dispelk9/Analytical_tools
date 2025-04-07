@@ -97,8 +97,9 @@ def without_hydro(value_list,db_config):
 
 
     logging.info("++++++++Without H++++++++")
-    high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01
-    low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01
+
+    high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
+    low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
 
     #low_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"])
     #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] + (value_list["mass_error"]*value_list["neutralmass"])
@@ -150,9 +151,12 @@ def without_hydro(value_list,db_config):
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
-                element_set_dict["element_set"]         = [combi]
-                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)
+                if "H+" in combi or "H-" in combi:
+                    logging.info(" remove: %s", combi)
+                else:
+                    element_set_dict["element_set"]         = [combi]
+                    element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                    element_list.append(element_set_dict)
     #reduct the duplicate answers
 
     logging.info("++++++++All Combinations in element_list++++++++\n %s", element_list)
@@ -217,12 +221,13 @@ def adduct_using_mass(value_list,number_of_hydro,db_config):
         logging.info("++++++++Mode H is Positive++++++++")
         Hydro_mode = float(-abs(int(number_of_hydro)))
 
-        #Huong 07.04.2025
-        high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"] *   (value_list["unifi_number"]  - value_list["neutralmass"])
-        low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + 10e-6                    *   (value_list["unifi_number"]  - value_list["neutralmass"])
 
-        #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
-        #low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
+        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
+        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
+
+
+        # high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
+        # low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
 
 
         #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 - value_list["hexact"]*float(Hydro_mode)
@@ -249,10 +254,8 @@ def adduct_using_mass(value_list,number_of_hydro,db_config):
         logging.info("++++++++Mode H is Negative++++++++\n")
         Hydro_mode = float(number_of_hydro)
 
-        #Huong 07.04.2025
-        high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"] *   (value_list["unifi_number"]  - value_list["neutralmass"])
-        low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + 10e-6                    *   (value_list["unifi_number"]  - value_list["neutralmass"])
-
+        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
+        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] + 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
         # high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) + 0.01 + value_list["hexact"]*Hydro_mode
         # low_limit   = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"]) - 0.01 + value_list["hexact"]*Hydro_mode
 
@@ -295,23 +298,31 @@ def adduct_using_mass(value_list,number_of_hydro,db_config):
 
         if value_list["mode"] == "positive":
             #if plus - minus - number_of_hydro == 1:
-            #    Hm = "H-"
-            #    combi = {element:i[0].count(element) for element in i[0]}
-            #    combi = dict(sorted(combi.items()))
-            #    combi = dict_to_formula(combi)
-            #    element_set_dict["H_number"]      = str(number_of_hydro) + Hm
-            #    element_set_dict["element_set"]         = [combi]
-            #    element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-            #    element_list.append(element_set_dict)
-            if plus - minus + number_of_hydro == 1:
-                Hm = "H+"
+            if plus - minus == 1:
+               #Hm = "H-"
+                Hm = "H"
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
-                element_set_dict["H_number"]      = str(number_of_hydro) + Hm
-                element_set_dict["element_set"]         = [combi]
-                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)
+                if "H+" in combi and "H-" in combi:
+                    logging.info(" remove: %s", combi)
+                else:
+                    if "H+" in combi or "H-" in combi:
+                        element_set_dict["H_number"]            = str(number_of_hydro) + Hm
+                        element_set_dict["element_set"]         = [combi]
+                        element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                        element_list.append(element_set_dict)
+                    else:
+                        logging.info("no H %s removed" % combi)
+            # if plus - minus + number_of_hydro == 1:
+            #     Hm = "H+"
+            #     combi = {element:i[0].count(element) for element in i[0]}
+            #     combi = dict(sorted(combi.items()))
+            #     combi = dict_to_formula(combi)
+            #     element_set_dict["H_number"]      = str(number_of_hydro) + Hm
+            #     element_set_dict["element_set"]         = [combi]
+            #     element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+            #     element_list.append(element_set_dict)
         if value_list["mode"] == "negative":
             if plus - minus - number_of_hydro == -1:
                 Hm = "H-"

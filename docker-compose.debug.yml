@@ -9,7 +9,9 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   backend:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.debug
     container_name: flask_app
     restart: always
     depends_on:
@@ -20,7 +22,9 @@ services:
       - "8080:8080"
 
   apache:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.debug
     container_name: apache_frontend
     restart: always
     ports:
