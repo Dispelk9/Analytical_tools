@@ -22,11 +22,6 @@ COPY --from=build /app/dist/ /usr/local/apache2/htdocs/
 # and ensure you have an appropriate httpd.conf file in the apache folder.
 COPY apache/httpd.conf /usr/local/apache2/conf/httpd.conf
 
-# Copy the certs into apache container
-COPY apache/fullchain.pem /usr/local/apache2/conf/fullchain.pem
-COPY apache/privkey.pem /usr/local/apache2/conf/privkey.pem
-
-
 EXPOSE 80
 
 CMD ["httpd-foreground"]

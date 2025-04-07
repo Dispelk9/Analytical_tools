@@ -6,3 +6,5 @@ pubchempy
 requests
 flask_session
 dotenv
+numpy
+matplotlib

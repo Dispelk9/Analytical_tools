@@ -8,6 +8,7 @@ import {
 import Home from './pages/Home';
 import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
+import CollisionPlot from './pages/ACT_Math';
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,7 @@ const AppLayout = () => (
     <div   
       style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(5, 1fr)', // 5 equal-width columns in one row
+      gridTemplateColumns: 'repeat(4, 1fr)', // 5 equal-width columns in one row
       gap: '16px',                           // spacing between columns
       }}>
       <PLinkTile
@@ -58,6 +59,17 @@ const AppLayout = () => (
         <img src="./assets/compound.png" alt="Compound" />
       </PLinkTile>
       <PLinkTile
+        href="/math"
+        label="Math"
+        description="ACT Math"
+        compact={true}
+      >
+        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+          #Math#Equation
+        </PTag>
+        <img src="/assets/ACT-math.jpg" alt="Home" />
+      </PLinkTile>
+      <PLinkTile
         href="https://analytical.dispelk9.de:8443/"
         label="Certcheck"
         description="SMTP Certfetcher"
@@ -79,6 +91,28 @@ const AppLayout = () => (
         </PTag>
         <img src="./assets/sogo.png" alt="Mailing" />
       </PLinkTile>
+      <PLinkTile
+        href="/"
+        label="In development"
+        description="Next Tool"
+        compact={true}
+      >
+        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+          #Incoming
+        </PTag>
+        <img src="./assets/in_dev.png" alt="Mailing" />
+      </PLinkTile>
+      <PLinkTile
+        href="/"
+        label="In development"
+        description="Next Tool"
+        compact={true}
+      >
+        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+          ##Incoming
+        </PTag>
+        <img src="./assets/in_dev.png" alt="Mailing" />
+      </PLinkTile>
     </div>
 
 
@@ -88,6 +122,7 @@ const AppLayout = () => (
           <Route path="/" element={<Home />} />
           <Route path="/adduct" element={<Adduct />} />
           <Route path="/compound" element={<Compound />} />
+          <Route path="/math" element={<CollisionPlot />} />
         </Routes>
     </main>
 

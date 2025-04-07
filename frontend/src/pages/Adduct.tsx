@@ -52,7 +52,7 @@ const Adduct: React.FC = () => {
     try {
       setIsCalculating(true);
 
-      const response = await fetch('/api/number', {
+      const response = await fetch('/api/adduct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
