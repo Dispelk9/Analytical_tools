@@ -1,10 +1,65 @@
-.idea/
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Editor and IDE directories/files
 .vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Python / Flask artifacts
 __pycache__/
 .tox/
-.coverage
-.coverage.*
+*.py[cod]
+*.egg-info/
+env/
+venv/
+ENV/
+venv.bak/
 htmlcov/
 docs/_build/
+instance/                # Flask instance folder
+*.env
+.env
+*.env.*
+.flaskenv                # Flask configuration file
+.coverage
+.coverage.*
+
+# Log files
+*.log
+logs/
+
+# Node.js / Vite.js artifacts
+node_modules/
+bower_components/
 dist/
-venv/
+build/
+.vite/                   # Vite cache folder
+
+# Terraform files
+.terraform/              # Terraform working directory
+*.tfstate                # Terraform state files
+*.tfstate.backup
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# Docker related files
+docker-compose.override.yml
+*.pid
+
+# Sensitive keys and certificates
+*.pem
+*.key
+*.crt
+secrets.json
+
+# Other potentially dangerous or build artifacts
+*.seed

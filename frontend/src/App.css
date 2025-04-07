@@ -47,16 +47,16 @@
 /* Inner container styles the form card */
 .inner-container {
   width: 100%;
-  max-width: 1000px;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Wrapper for the form to restrict its width to 500px */
+/* Wrapper for the form to restrict its width to 1000px */
 .form-wrapper {
-  max-width: 500px;
+  max-width: 1000px;
   margin: 0 auto;
+  gap: 20 px;
 }
 
 /* Title styling */
@@ -133,10 +133,6 @@
 html, body {
   margin: 0;
   padding: 0;
-  color: #fff;
-  -webkit-font-smoothing: antialiased; /* Improves rendering on WebKit (Chrome, Safari) */
-  -moz-osx-font-smoothing: grayscale; /* Improves rendering on Firefox (Mac) */
-  text-rendering: optimizeLegibility; /* Enhances font readability */
 }
 
 /* Create a full-page background using a pseudo-element */
