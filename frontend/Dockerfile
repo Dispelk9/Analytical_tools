@@ -23,7 +23,7 @@ COPY --from=build /app/dist/ /usr/local/apache2/htdocs/
 COPY apache/httpd.conf /usr/local/apache2/conf/httpd.conf
 
 # Copy the certs into apache container
-COPY apache/fullchain.pem /usr/local/apache2/conf/fullchain.pems
+COPY apache/fullchain.pem /usr/local/apache2/conf/fullchain.pem
 COPY apache/privkey.pem /usr/local/apache2/conf/privkey.pem
 
 
