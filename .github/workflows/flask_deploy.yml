@@ -46,6 +46,9 @@ jobs:
             export DB_PORT="${{ secrets.DB_PORT }}"
             export DB_NAME="${{ secrets.DB_NAME }}"
             export SESSION_SECRET="${{ secrets.SESSION_SECRET }}"
+            export SENDER="${{ secrets.SENDER }}"
+            export MAIL_PW="${{ secrets.MAIL_PW }}"
+            export SMTP_RELAY="${{ secrets.SMTP_RELAY }}"
 
             # Write secrets to .env file explicitly
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > /root/.env
@@ -54,6 +57,9 @@ jobs:
             echo "DB_PORT=${{ secrets.DB_PORT }}" >> /root/.env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> /root/.env
             echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> /root/.env
+            echo "SENDER=${{ secrets.SENDER }}" >> /root/.env
+            echo "MAIL_PW=${{ secrets.MAIL_PW }}" >> /root/.env
+            echo "SMTP_RELAY=${{ secrets.SMTP_RELAY }}" >> /root/.env
 
             # Update server and install git if necessary
             sudo apt-get update -y && sudo apt-get install -y git

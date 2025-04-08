@@ -18,37 +18,59 @@ def convert_float(value):
         raise ValueError(f"Invalid input for conversion: {value}")
     
 
-def subset_sum(numbers, low_limit, high_limit):
+def subset_sum(numbers, low_limit, high_limit,number_of_hydro):
+
     """
-    Find all subsets of 'numbers' (allowing duplicates) whose sums fall within the range (low_limit, high_limit),
-    with the additional condition that if the number 1.007825 or -1.007825 appears more than 3 times in a subset,
-    that subset is skipped.
-
-    Args:
-        numbers (list): List of numbers to consider (duplicates allowed).
-        low_limit (float): Lower bound of the range (exclusive).
-        high_limit (float): Upper bound of the range (exclusive).
-
-    Returns:
-        list: A list of tuples, where each tuple contains a subset (as a list) and its rounded sum.
+    Returns: list of tuples: Each tuple contains a valid subset (as a list) and its sum rounded to 5 decimals.
     """
-    # Filter numbers to include only those smaller than high_limit
-    filtered_numbers = [num for num in numbers if num < high_limit]
-
     result = []
+    
+    # Filter to include only numbers less than high_limit.
+    # (If high_limit is positive, this helps avoid numbers that alone exceed the target.)
+    filtered_numbers = [num for num in numbers if num < high_limit]
+    filtered_numbers.sort()  # sort in ascending order
+    
+    target_plus = 1.007825
+    target_minus = -1.007825
 
-    # Generate all subsets with replacements and check their sums
-    max_len = len(filtered_numbers)  # Limit to avoid infinite results
-    for r in range(1, max_len + 1):
-        for subset in combinations_with_replacement(filtered_numbers, r):
-            # Skip this subset if 1.007825 or -1.007825 appears more than 3 times
-            if subset.count(1.007825) > 3 or subset.count(-1.007825) > 3:
-                continue
+    def subset_calculation(start, current_subset, current_sum, count_plus, count_minus,number_of_hydro):
+        # If current sum is within the target range (and the subset isn't empty),
+        # record it.
+        if current_subset and low_limit < current_sum < high_limit:
+            result.append((list(current_subset), round(current_sum, 5)))
+        
+        # Explore further addition of candidates.
+        # Iterate from 'start' to allow repeated choices (combinations with replacement).
+        for i in range(start, len(filtered_numbers)):
+            candidate = filtered_numbers[i]
+            
+            # Update counts for special numbers.
+            new_count_plus = count_plus
+            new_count_minus = count_minus
+            if candidate == target_plus:
+                if count_plus >= number_of_hydro:
+                    continue  # skip adding candidate if 1.007825 already appears 3 times
+                new_count_plus += 1
+            elif candidate == target_minus:
+                if count_minus >= number_of_hydro:
+                    continue  # skip adding candidate if -1.007825 already appears 3 times
+                new_count_minus += 1
+            
+            new_sum = current_sum + candidate
 
-            subset_total = sum(subset)
-            if low_limit < subset_total < high_limit:
-                result.append((list(subset), round(subset_total, 5)))
+            # Prune: If candidate is positive and adding it drives sum above high_limit,
+            # further candidates (which are >= current candidate due to sorting) will also fail.
+            if candidate > 0 and new_sum > high_limit:
+                break
+            
+            # Choose candidate
+            current_subset.append(candidate)
+            # Allow the same candidate again (hence 'i' not 'i+1')
+            subset_calculation(i, current_subset, new_sum, new_count_plus, new_count_minus,number_of_hydro)
+            # Backtrack
+            current_subset.pop()
 
+    subset_calculation(0, [], 0, 0, 0,number_of_hydro)
     return result
 
 def dict_to_formula(components):
