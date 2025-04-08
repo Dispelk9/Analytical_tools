@@ -6,9 +6,14 @@ import psycopg2
 from utils.adduct_utils import *
 from dotenv import load_dotenv
 from utils.db_connection import DB_CONNECT
+from utils.send_log import send_email
+from handler.ListHandler import ListHandler
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Global list to capture the log messages.
+log_entries = []
 
 # Configure logging to output to STDOUT with INFO level messages
 logging.basicConfig(
@@ -16,6 +21,16 @@ logging.basicConfig(
     stream=sys.stdout,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+# Create and configure the custom list handler.
+list_handler = ListHandler(log_entries)
+# It's best to use the same formatter as in basicConfig for consistency.
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+list_handler.setFormatter(formatter)
+
+# Attach the custom handler to the root logger.
+logger = logging.getLogger()
+logger.addHandler(list_handler)
 
 adduct_bp = Blueprint('adduct', __name__)
 
@@ -40,9 +55,9 @@ def process_number():
         "unifi_number":     convert_float(data['OB']),
         "hexact":           1.007825,
         "hrepeat":          3,
-        "repeat":           3,
         "mass_error":       convert_float(data['ME'])*1e-6,
-        "mode":             data["operation"]
+        "mode":             data["operation"],
+        "receiver_email":   (data['Email'])
         }
 
     logging.info("== Initiate Calculation ==")
@@ -55,24 +70,16 @@ def process_number():
     for key in keys_to_remove:
         value_list.pop(key, None)
 
-    # rename_keys = {
-    #     "neutralmass": "Neutral mass (Da)",
-    #     "unifi_number": "Observed m/z",
-    #     "mass_error":  "Mass Error (ppm)",
-    #     }
-    # for old_key, new_key in rename_keys.items():
-    #     if old_key in value_list:
-    #         value_list[new_key] = value_list.pop(old_key)
-
-    # all_info = {"Requested Parameters":value_list,"Results without Hydro": without_h,"Results with Hydro":result}
     all_info = {"Results without Hydro": without_h,"Results with Hydro":result}
 
-
+    if value_list["receiver_email"] != "":
+        send_email(log_entries,value_list["receiver_email"])
 
     return jsonify({'result': all_info})
 
 
 def without_hydro(value_list,db_config):
+    number_of_hydro = 0
     # Set table based on mode
     mode = value_list["mode"]
     if mode == "negative":
@@ -101,17 +108,13 @@ def without_hydro(value_list,db_config):
     high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
     low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
 
-    #low_limit  = value_list["unifi_number"]  - value_list["neutralmass"] - (value_list["mass_error"]*value_list["neutralmass"])
-    #high_limit  = value_list["unifi_number"]  - value_list["neutralmass"] + (value_list["mass_error"]*value_list["neutralmass"])
 
     list_exact_mass_of_each_element = []
-    #for j in range(int(value_list["repeat"])):
+
     for i in rawdata:
         list_exact_mass_of_each_element.append(float(i[1]))
 
-    #logging.info(list_exact_mass_of_each_element)
-
-    list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+    list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,number_of_hydro)
 
     #change each mass into element
     # i combine of mass numbers and total number
@@ -165,10 +168,8 @@ def without_hydro(value_list,db_config):
     return element_list
 
 def m_calculation(value_list,db_config):
-    #print("<--Begin Calculations-->")
-    all_results = []
-    #for i in range(int(value_list["hrepeat"])):
 
+    all_results = []
     list_of_all_adduct = []
 
     each_hydro =  {
@@ -224,7 +225,7 @@ def adduct_using_mass(value_list,db_config):
 
         logging.info("++++++++ High Limit: %s, Low limit: %s ++++++++" , high_limit,low_limit)
 
-        list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+        list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,value_list["hrepeat"])
 
         #print("Before list_add_positive: %s" % list_add_positive)
         #change each mass into element

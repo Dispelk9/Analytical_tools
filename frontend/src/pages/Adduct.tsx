@@ -19,6 +19,7 @@ const Adduct: React.FC = () => {
   const [Neutral_mass, setNeutral_mass] = useState<string>('');
   const [Observed, setObserved] = useState<string>('');
   const [Mass_error, setMass_error] = useState<string>('');
+  const [Recipient, setRecipient] = useState<string>('');
   const [operation, setOperation] = useState<string>('Please Choose');
 
   const [result, setResult] = useState<number | null>(null);
@@ -29,6 +30,7 @@ const Adduct: React.FC = () => {
   const handleChangeA = (e: ChangeEvent<HTMLInputElement>) => setNeutral_mass(e.target.value);
   const handleChangeB = (e: ChangeEvent<HTMLInputElement>) => setObserved(e.target.value);
   const handleChangeC = (e: ChangeEvent<HTMLInputElement>) => setMass_error(e.target.value);
+  const handleChangeD = (e: ChangeEvent<HTMLInputElement>) => setRecipient(e.target.value);
 
   // Dropdown handler
   const handleOperationChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -59,6 +61,7 @@ const Adduct: React.FC = () => {
           NM: Neutral_mass,
           OB: Observed,
           ME: Mass_error,
+          Email: Recipient,
           operation
         }),
       });
@@ -113,6 +116,16 @@ const Adduct: React.FC = () => {
                 value={Mass_error}
                 onChange={handleChangeC}
                 placeholder="Enter Mass error"
+                className="form-input"
+              />
+            </PTextFieldWrapper>
+
+            <PTextFieldWrapper theme="dark" label="Recipient address:" description="Allowed send result to your address">
+              <input
+                type="email"
+                value={Recipient}
+                onChange={handleChangeD}
+                placeholder="Enter address"
                 className="form-input"
               />
             </PTextFieldWrapper>
