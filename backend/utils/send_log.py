@@ -37,6 +37,13 @@ def send_email(log_entries,receiver_email ):
             <p>Hello,<br>
                This is a <b>Adduct Result</b>!</p>
             <pre>%s</pre>
+
+
+            Mit freundlichen Grüßen/Best regards,<br>
+            <br>
+            ACT Team<br>
+            act-info@dispelk9.de<br>
+            
         </body>
     </html>
     """ % joined_logs
