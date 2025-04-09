@@ -61,12 +61,12 @@ def process_number():
         }
 
     logging.info("== Initiate Calculation ==")
-    # Calculating Adduct without Hydro
+    logging.info("== Begin calculation without Hydro ==")
     without_h   = without_hydro(value_list,db_config)
-    # Calculating Adduct with Hydro
+    logging.info("== Begin calculation with Hydro ==")
     result      = m_calculation(value_list,db_config)
     value_list["mass_error"] = data['ME']
-    keys_to_remove = ["hexact", "repeat", "hrepeat"]
+    keys_to_remove = ["hexact", "hrepeat"]
     for key in keys_to_remove:
         value_list.pop(key, None)
 
@@ -80,12 +80,18 @@ def process_number():
 
 def without_hydro(value_list,db_config):
     number_of_hydro = 0
+    high_limit= 0
+    low_limit = 0
     # Set table based on mode
     mode = value_list["mode"]
     if mode == "negative":
         table_name = "negative"
+        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
+        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])*20
     elif mode == "positive":
         table_name = "positive"
+        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
+        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
     else:
         raise ValueError("Invalid mode provided")
 
@@ -102,17 +108,12 @@ def without_hydro(value_list,db_config):
     except Exception as e:
         logging.info("Cannot connect to the database or fetch data: %s", e)
 
-
-    logging.info("++++++++Without H++++++++")
-
-    high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
-    low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
-
-
     list_exact_mass_of_each_element = []
-
+    #for j in range(int(value_list["repeat"])):
     for i in rawdata:
         list_exact_mass_of_each_element.append(float(i[1]))
+
+    #logging.info(list_exact_mass_of_each_element)
 
     list_add = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,number_of_hydro)
 
@@ -129,8 +130,8 @@ def without_hydro(value_list,db_config):
     #i[0] now contain element codes
     for i in list_add:
         element_set_dict = {
-            "element_set": "",
-            "sum_of_element_set":""
+            "Element Set": "",
+            "Sum":""
         }
         plus = 0
         minus = 0
@@ -145,9 +146,12 @@ def without_hydro(value_list,db_config):
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
-                element_set_dict["element_set"]         = [combi]
-                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)
+                if "H+" in combi or "H-" in combi:
+                    logging.info(" remove: %s", combi)
+                else:
+                    element_set_dict["Element Set"]         = [combi]
+                    element_set_dict["Sum"]  = [str(float(i[1]))]
+                    element_list.append(element_set_dict)
         elif value_list["mode"] == "positive":
             if plus - minus == 1:
                 combi = {element:i[0].count(element) for element in i[0]}
@@ -156,42 +160,47 @@ def without_hydro(value_list,db_config):
                 if "H+" in combi or "H-" in combi:
                     logging.info(" remove: %s", combi)
                 else:
-                    element_set_dict["element_set"]         = [combi]
-                    element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                    element_set_dict["Element Set"]         = [combi]
+                    element_set_dict["Sum"]  = [str(float(i[1]))]
                     element_list.append(element_set_dict)
     #reduct the duplicate answers
 
-    logging.info("++++++++All Combinations in element_list++++++++\n %s", element_list)
+    logging.info("== All Combinations without Hydro == %s", element_list)
 
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
 
     return element_list
 
 def m_calculation(value_list,db_config):
-
     all_results = []
+
     list_of_all_adduct = []
 
     each_hydro =  {
-        "Adduct combinations":  "",
+        "Adduct Combinations":  "",
     }
 
     list_of_all_adduct.append(adduct_using_mass(value_list,db_config))
 
-    each_hydro["Adduct combinations"] = list_of_all_adduct
+    each_hydro["Adduct Combinations"] = list_of_all_adduct
     all_results.append(each_hydro)
 
-    #print("<--Calculation completed-->")
     return all_results
 
 
 def adduct_using_mass(value_list,db_config):
     # Set table based on mode
+    high_limit= 0
+    low_limit = 0
     mode = value_list["mode"]
     if mode == "negative":
         table_name = "negative"
+        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
+        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])*20
     elif mode == "positive":
         table_name = "positive"
+        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
+        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
     else:
         raise ValueError("Invalid mode provided")
 
@@ -216,14 +225,8 @@ def adduct_using_mass(value_list,db_config):
     list_add = []
     if value_list["mode"] == "positive":
         # In each mode, we can have negative H or positive H therefore we need to have two ranges
-        logging.info("++++++++Mode H is Positive++++++++")
-
-
-        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
-        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
-
-
-        logging.info("++++++++ High Limit: %s, Low limit: %s ++++++++" , high_limit,low_limit)
+        logging.info("== With Hydro Mode Positive ==")
+        logging.info("== High Limit: %s, Low limit: %s ==" , high_limit,low_limit)
 
         list_add_positive = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,value_list["hrepeat"])
 
@@ -237,17 +240,14 @@ def adduct_using_mass(value_list,db_config):
                     if i[0][k] == float(j[1]):
                         i[0][k] = j[0]
 
-        logging.info("++++++++After list_add_positive++++++++\n %s" , list_add_positive)
+        
         list_add = list_add_positive
+        logging.info(list_add)
     elif value_list["mode"] == "negative":
-        logging.info("++++++++Mode H is Negative++++++++\n")
+        logging.info("== With Hydro Mode Negative ==")
+        logging.info("== High Limit: %s, Low Limit: %s ==" , high_limit,low_limit)
 
-        high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
-        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] + 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
-
-        logging.info("++++++++ High Limit: %s, Low Limit: %s ++++++++" , high_limit,low_limit)
-
-        list_add_negative = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit)
+        list_add_negative = subset_sum(list_exact_mass_of_each_element,low_limit,high_limit,value_list["hrepeat"])
 
         #print("Before list_add_negative: %s" % list_add_negative)
         #change each mass into element
@@ -259,16 +259,16 @@ def adduct_using_mass(value_list,db_config):
                     if i[0][k] == float(j[1]):
                         i[0][k] = j[0]
 
-        logging.info("++++++++After list_add_negative++++++++\n %s" , list_add_negative)
 
         list_add = list_add_negative
+        logging.info(list_add)
 
     element_list = []
     #i[0] now contain element codes
     for i in list_add:
         element_set_dict = {
-            "element_set": "",
-            "sum_of_element_set":""
+            "Element Set": "",
+            "Sum":""
         }
         plus = 0
         minus = 0
@@ -279,7 +279,6 @@ def adduct_using_mass(value_list,db_config):
                 minus +=1
 
         if value_list["mode"] == "positive":
-            #if plus - minus - number_of_hydro == 1:
             if plus - minus == 1:
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
@@ -288,41 +287,29 @@ def adduct_using_mass(value_list,db_config):
                     logging.info(" remove: %s", combi)
                 else:
                     if "H+" in combi or "H-" in combi:
-                        element_set_dict["element_set"]         = [combi]
-                        element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
+                        element_set_dict["Element Set"]         = [combi]
+                        element_set_dict["Sum"]  = [str(float(i[1]))]
                         element_list.append(element_set_dict)
                     else:
                         logging.info("no H %s removed" % combi)
-            # if plus - minus + number_of_hydro == 1:
-            #     Hm = "H+"
-            #     combi = {element:i[0].count(element) for element in i[0]}
-            #     combi = dict(sorted(combi.items()))
-            #     combi = dict_to_formula(combi)
-            #     element_set_dict["H_number"]      = str(number_of_hydro) + Hm
-            #     element_set_dict["element_set"]         = [combi]
-            #     element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-            #     element_list.append(element_set_dict)
+
         if value_list["mode"] == "negative":
             if plus - minus == -1:
                 combi = {element:i[0].count(element) for element in i[0]}
                 combi = dict(sorted(combi.items()))
                 combi = dict_to_formula(combi)
-                element_set_dict["element_set"]         = [combi]
-                element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-                element_list.append(element_set_dict)
-            #if plus - minus + number_of_hydro == -1:
-            #    Hm = "H+"
-            #    combi = {element:i[0].count(element) for element in i[0]}
-            #    combi = dict(sorted(combi.items()))
-            #    combi = dict_to_formula(combi)
-            #    element_set_dict["H_number"]      = str(number_of_hydro) + Hm
-            #    element_set_dict["element_set"]         = [combi]
-            #    element_set_dict["sum_of_element_set"]  = ["Sum: " + str(float(i[1]))]
-            #    element_list.append(element_set_dict)
+                if "H+" in combi and "H-" in combi:
+                    logging.info(" remove: %s", combi)
+                else:
+                    if "H+" in combi or "H-" in combi:
+                        element_set_dict["Element Set"]         = [combi]
+                        element_set_dict["Sum"]  = [str(float(i[1]))]
+                        element_list.append(element_set_dict)
+                    else:
+                        logging.info("no H %s removed" % combi)
     #reduct the duplicate answers
     element_list = [i for n, i in enumerate(element_list) if i not in element_list[n + 1:]]
-    #for i in element_list:
-    #   print("%s\nsum:%s" % (i["element_set"],i["sum_of_element_set"]))
-    logging.info("All Combinations in element_list: %s" , element_list)
+
+    logging.info("== All Combinations with Hydro == %s" , element_list)
     return element_list
 

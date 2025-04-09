@@ -49,11 +49,11 @@ def subset_sum(numbers, low_limit, high_limit,number_of_hydro):
             new_count_minus = count_minus
             if candidate == target_plus:
                 if count_plus >= number_of_hydro:
-                    continue  # skip adding candidate if 1.007825 already appears 3 times
+                    continue  # skip adding candidate if 1.007825 already appears number_of_hydro times
                 new_count_plus += 1
             elif candidate == target_minus:
                 if count_minus >= number_of_hydro:
-                    continue  # skip adding candidate if -1.007825 already appears 3 times
+                    continue  # skip adding candidate if -1.007825 already appears number_of_hydro times
                 new_count_minus += 1
             
             new_sum = current_sum + candidate
@@ -73,6 +73,7 @@ def subset_sum(numbers, low_limit, high_limit,number_of_hydro):
     subset_calculation(0, [], 0, 0, 0,number_of_hydro)
     return result
 
+
 def dict_to_formula(components):
     formula = ""
     for element, count in components.items():
@@ -80,6 +81,6 @@ def dict_to_formula(components):
         if count > 1:
             formula += str(count)
         # Add the element symbol
-        formula += element + ","
+        formula += element + " "
     return formula
 
