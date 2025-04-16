@@ -24,7 +24,7 @@ COPY apache/httpd.conf /usr/local/apache2/conf/httpd.conf
 
 # Optionally, if you want to use a custom Apache configuration, uncomment the next line
 # and ensure you have an appropriate httpd.conf file in the apache folder.
-COPY apache/httpd.debug.conf /usr/local/apache2/conf/httpd.conf
+COPY apache/httpd.conf /usr/local/apache2/conf/httpd.conf
 
 # Copy the certs into apache container
 COPY apache/fullchain.pem /usr/local/apache2/conf/fullchain.pem
