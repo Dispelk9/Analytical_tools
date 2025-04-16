@@ -22,6 +22,9 @@ COPY --from=build /app/dist/ /usr/local/apache2/htdocs/
 # and ensure you have an appropriate httpd.conf file in the apache folder.
 COPY apache/httpd.debug.conf /usr/local/apache2/conf/httpd.conf
 
+# Copy the .htpasswd file into the container (place it in the same directory as referenced in httpd.conf)
+COPY apache/.htpasswd /usr/local/apache2/conf/.htpasswd
+
 EXPOSE 80
 
 CMD ["httpd-foreground"]
