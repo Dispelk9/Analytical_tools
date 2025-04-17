@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react'
+import React, { useState, FormEvent, KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   PButton,
@@ -37,9 +37,17 @@ const Login: React.FC = () => {
     }
   }
 
+  // Auto-submit on Enter key
+  const handleKeyDown = (e: KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSubmit(e as any)
+    }
+  }
+
   return (
     <div>
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
       <div>
         <PText theme="dark" style={{ textAlign: 'justify' }}>
           <h2 className="text-2xl">Welcome to my Playground</h2>
@@ -76,7 +84,7 @@ const Login: React.FC = () => {
             <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
           </div>
         )}
-        <PButton type="submit">Login</PButton>
+        <PButton type="submit" style={{ marginTop: '50px' }}>Login</PButton>
     </form>
 
     {/* Footer */}

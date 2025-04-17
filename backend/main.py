@@ -8,7 +8,7 @@ from utils.adduct_utils import *
 from compound import compound_bp
 from adduct import adduct_bp
 from act_math import math_bp
-from auth_backend.load_user import auth_user_bp , db, login_manager
+from backend.auth_backend.login_user import auth_user_bp , db, login_manager
 from utils.db_connection import DB_CONNECT
 
 app = Flask(__name__)
