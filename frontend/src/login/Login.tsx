@@ -38,10 +38,8 @@ const Login: React.FC = () => {
   }
 
   return (
+    <div>
     <form onSubmit={handleSubmit}>
-      <PText theme="dark" style={{ textAlign: 'justify' }}>
-      <h2>Login</h2>
-      </PText>
       <div>
         <PText theme="dark" style={{ textAlign: 'justify' }}>
           <h2 className="text-2xl">Welcome to my Playground</h2>
@@ -80,6 +78,12 @@ const Login: React.FC = () => {
         )}
         <PButton type="submit">Login</PButton>
     </form>
+
+    {/* Footer */}
+    <footer className="h-16 flex items-center justify-center bg-gray-800">
+      <p className="text-sm text-white">Copyright 2025 - Porsche Design x Dispelk9</p>
+    </footer>
+    </div>
   )
 }
 

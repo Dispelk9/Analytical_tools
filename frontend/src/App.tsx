@@ -46,7 +46,7 @@ const AppLayout = () => (
     <div   
       style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)', // 4 equal-width columns in one row
+      gridTemplateColumns: 'repeat(4, 1fr)', // 4 equal-width columns in one row
       gap: '16px',                           // spacing between columns
       }}>
       <PLinkTile
