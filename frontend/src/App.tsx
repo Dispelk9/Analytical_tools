@@ -6,7 +6,6 @@ import {
   PLinkTile,
   PTag,
 } from '@porsche-design-system/components-react';
-import Home from './pages/Home';
 import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
@@ -47,20 +46,9 @@ const AppLayout = () => (
     <div   
       style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)', // 5 equal-width columns in one row
+      gridTemplateColumns: 'repeat(3, 1fr)', // 4 equal-width columns in one row
       gap: '16px',                           // spacing between columns
       }}>
-      <PLinkTile
-        label="Home"
-        description="Homepage"
-        compact={true}
-        href="/"
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #About
-        </PTag>
-        <img src="/assets/devop.jpg" alt="Home" />
-      </PLinkTile>
       <PLinkTile
         href="/adduct"
         label="Adduct"
@@ -144,7 +132,6 @@ const AppLayout = () => (
     {/* Main Content */}
     <main className="flex-1 overflow-auto p-8 sm:p-20">
         <Routes>
-          <Route path="/" element={<Home />} />
           <Route path="/adduct" element={<Adduct />} />
           <Route path="/compound" element={<Compound />} />
           <Route path="/math" element={<CollisionPlot />} />
