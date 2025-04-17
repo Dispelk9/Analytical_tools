@@ -6,27 +6,13 @@ from flask_login import (
     logout_user, current_user
 )
 from werkzeug.security import check_password_hash
-from utils.db_connection import DB_CONNECT
-from dotenv import load_dotenv
 import os
-
-# Load environment variables from .env file
-load_dotenv()
-
-secret_key = os.getenv("SESSION_SECRET")
 
 auth_user_bp = Blueprint('/', __name__)
 
-db_config = DB_CONNECT()
 
-auth_user_bp.config.update({
-    'SECRET_KEY': secret_key,
-    'SQLALCHEMY_DATABASE_URI': f"postgresql://{db_config['username']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['dbname']} ",
-    'SQLALCHEMY_TRACK_MODIFICATIONS': False
-})
-
-db = SQLAlchemy(auth_user_bp)
-login_manager = LoginManager(auth_user_bp)
+db = SQLAlchemy()
+login_manager = LoginManager()
 login_manager.login_view = 'api_login'
 
 # User model

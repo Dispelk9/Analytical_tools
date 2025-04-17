@@ -9,6 +9,7 @@ from compound import compound_bp
 from adduct import adduct_bp
 from act_math import math_bp
 from auth_backend.load_user import auth_user_bp , db, login_manager
+from utils.db_connection import DB_CONNECT
 
 app = Flask(__name__)
 
@@ -25,17 +26,26 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
 
 Session(app)
 
+
+db_config = DB_CONNECT()
+
+app.config.update({
+    'SECRET_KEY': app.secret_key,
+    'SQLALCHEMY_DATABASE_URI': f"postgresql://{db_config['username']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['dbname']} ",
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False
+})
+
 app.config.update(auth_user_bp.config)
 # Initialize extensions
 db.init_app(app)
 login_manager.init_app(app)
 
 
-
+app.register_blueprint(auth_user_bp)
 app.register_blueprint(compound_bp)
 app.register_blueprint(adduct_bp)
 app.register_blueprint(math_bp)
-app.register_blueprint(auth_user_bp)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
