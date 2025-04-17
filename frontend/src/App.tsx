@@ -1,16 +1,41 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { ReactNode, useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   PorscheDesignSystemProvider,
   PLinkTile,
   PTag,
 } from '@porsche-design-system/components-react';
-//import Home from './pages/Home';
+import Home from './pages/Home';
 import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
+import Login from './login/Login'
 
 const queryClient = new QueryClient();
+
+
+interface RequireAuthProps {
+  children: ReactNode
+}
+
+const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
+  const [loading, setLoading] = useState<boolean>(true)
+  const [authed, setAuthed] = useState<boolean>(false)
+
+  useEffect(() => {
+    fetch('/api/check-auth', { credentials: 'include' })
+      .then(res => {
+        setAuthed(res.ok)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) return <div>Loading...</div>
+  return authed ? <>{children}</> : <Navigate to="/login" />
+}
+
+
 
 const AppLayout = () => (
   <div className="min-h-screen flex flex-col">
@@ -25,7 +50,7 @@ const AppLayout = () => (
       gridTemplateColumns: 'repeat(4, 1fr)', // 5 equal-width columns in one row
       gap: '16px',                           // spacing between columns
       }}>
-      {/* <PLinkTile
+      <PLinkTile
         label="Home"
         description="Homepage"
         compact={true}
@@ -35,7 +60,7 @@ const AppLayout = () => (
           #About
         </PTag>
         <img src="/assets/devop.jpg" alt="Home" />
-      </PLinkTile> */}
+      </PLinkTile>
       <PLinkTile
         href="/adduct"
         label="Adduct"
@@ -119,7 +144,7 @@ const AppLayout = () => (
     {/* Main Content */}
     <main className="flex-1 overflow-auto p-8 sm:p-20">
         <Routes>
-          {/* <Route path="/" element={<Home />} /> */}
+          <Route path="/" element={<Home />} />
           <Route path="/adduct" element={<Adduct />} />
           <Route path="/compound" element={<Compound />} />
           <Route path="/math" element={<CollisionPlot />} />
@@ -138,7 +163,18 @@ function App() {
     <PorscheDesignSystemProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <AppLayout />
+
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/*"
+            element={
+              <RequireAuth>
+                <AppLayout />
+              </RequireAuth>
+            }
+          />
+        </Routes>
         </BrowserRouter>
       </QueryClientProvider>
     </PorscheDesignSystemProvider>
@@ -146,4 +182,6 @@ function App() {
 }
 
 export default App;
+
+
 
