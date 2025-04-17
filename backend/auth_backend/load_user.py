@@ -7,9 +7,16 @@ from flask_login import (
 )
 from werkzeug.security import check_password_hash
 import os
+import sys
+import logging
 
 auth_user_bp = Blueprint('/', __name__)
-
+# Configure logging to output to STDOUT with INFO level messages
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -31,6 +38,7 @@ def load_user(user_id):
 def api_login():
     data = request.json or {}
     user = User.query.filter_by(username=data.get('username')).first()
+    logging.INFO(User)
     if user and check_password_hash(user.password, data.get('password')):
         login_user(user)
         return jsonify({'message': 'Logged in'}), 200

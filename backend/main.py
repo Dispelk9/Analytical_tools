@@ -29,16 +29,15 @@ Session(app)
 
 db_config = DB_CONNECT()
 
-# app.config.update({
-#     'SECRET_KEY': app.secret_key,
-#     'SQLALCHEMY_DATABASE_URI': f"postgresql://{db_config['username']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['dbname']} ",
-#     'SQLALCHEMY_TRACK_MODIFICATIONS': False
-# })
+app.config.update({
+    'SECRET_KEY': app.secret_key,
+    'SQLALCHEMY_DATABASE_URI': f"postgresql://{db_config['username']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['dbname']}",
+    'SQLALCHEMY_TRACK_MODIFICATIONS': False
+})
 
-# app.config.update(auth_user_bp.config)
-# # Initialize extensions
-# db.init_app(app)
-# login_manager.init_app(app)
+# Initialize extensions
+db.init_app(app)
+login_manager.init_app(app)
 
 
 app.register_blueprint(auth_user_bp)
