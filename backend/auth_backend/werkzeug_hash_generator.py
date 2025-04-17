@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash
 
 def main():
     username = input("Enter username: ")
+    ##getpass.getpass
     password = input("Enter password: ")
     hashed = generate_password_hash(password)
     print(f"Username: {username}")
