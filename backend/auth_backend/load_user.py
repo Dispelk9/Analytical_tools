@@ -37,12 +37,25 @@ def load_user(user_id):
 @auth_user_bp.route('/api/login', methods=['POST'])
 def api_login():
     data = request.json or {}
-    user = User.query.filter_by(username=data.get('username')).first()
-    logging.INFO(User)
-    if user and check_password_hash(user.password, data.get('password')):
+    username = data.get('username')
+    password = data.get('password')
+    logging.info(f"Login attempt for username: {username}")
+
+    user = User.query.filter_by(username=username).first()
+    logging.info(f"User query result: {user}")
+    if not user:
+        logging.info("User not found in database.")
+    else:
+        logging.info("User found, verifying password.")
+
+    if user and check_password_hash(user.password, password):
+        logging.info("Password valid. Logging in user.")
         login_user(user)
         return jsonify({'message': 'Logged in'}), 200
+
+    logging.info("Invalid credentials provided.")
     return jsonify({'message': 'Invalid credentials'}), 401
+
 
 # Logout endpoint
 @auth_user_bp.route('/api/logout', methods=['POST'])
