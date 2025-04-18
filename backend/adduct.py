@@ -55,7 +55,7 @@ def process_number():
         "unifi_number":     convert_float(data['OB']),
         "hexact":           1.007825,
         "hrepeat":          3,
-        "mass_error":       convert_float(data['ME'])*1e-6,
+        "mass_error":       convert_float(data['ME'])*1e-5,
         "mode":             data["operation"],
         "receiver_email":   (data['Email'])
         }
@@ -91,7 +91,7 @@ def without_hydro(value_list,db_config):
     elif mode == "positive":
         table_name = "positive"
         high_limit   = value_list["unifi_number"]  - value_list["neutralmass"] + value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
-        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - 1e-6                    * (value_list["unifi_number"]  - value_list["neutralmass"])
+        low_limit    = value_list["unifi_number"]  - value_list["neutralmass"] - value_list["mass_error"]* (value_list["unifi_number"]  - value_list["neutralmass"])
     else:
         raise ValueError("Invalid mode provided")
 
