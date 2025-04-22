@@ -141,7 +141,7 @@ const Compound: React.FC = () => {
           </PTable>
         )}
 
-        <PText style={{ textAlign: 'justify' }}>
+        <PText theme="dark" style={{ textAlign: 'justify' }}>
           This tool is designed to help getting the compounds from Pubchem
           <br />
           How to use:
