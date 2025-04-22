@@ -150,3 +150,8 @@ body::before {
   transform: scale(1.1); /* Optional: Slightly scale up to ensure full coverage */
 }
 
+.inputStyle {
+  width: '200px';         
+  height: '2.75rem';
+  padding: '0.5rem 0.75rem';
+};
