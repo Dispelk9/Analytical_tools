@@ -8,6 +8,9 @@ import {
   PTableHeadCell,
   PTableHeadRow,
   PTableRow,
+  PText,
+  PTextFieldWrapper,
+  PButton,
 } from '@porsche-design-system/components-react';
 import '../App.css';
 
@@ -68,8 +71,7 @@ const Compound: React.FC = () => {
         <h1 className="form-title">Compound Calculation</h1>
 
         <form onSubmit={handleSubmit} className="form-wrapper">
-          <div className="form-row">
-            <label className="form-label">Adduct:</label>
+          <PTextFieldWrapper theme="dark" label="Adduct:" description="Should be a float number">
             <input
               type="number"
               value={adduct}
@@ -77,10 +79,9 @@ const Compound: React.FC = () => {
               placeholder="Enter Adduct"
               className="form-input"
             />
-          </div>
+          </PTextFieldWrapper>
 
-          <div className="form-row">
-            <label className="form-label">Observed m/z:</label>
+          <PTextFieldWrapper theme="dark" label="Observed m/z:" description="Measured mass-to-charge ratio">
             <input
               type="number"
               value={observed}
@@ -88,10 +89,9 @@ const Compound: React.FC = () => {
               placeholder="Enter Observed m/z"
               className="form-input"
             />
-          </div>
+          </PTextFieldWrapper>
 
-          <div className="form-row">
-            <label className="form-label">Mass error (ppm):</label>
+          <PTextFieldWrapper theme="dark" label="Mass error (ppm):" description="Allowed error of mass">
             <input
               type="number"
               value={massError}
@@ -99,11 +99,11 @@ const Compound: React.FC = () => {
               placeholder="Enter Mass error"
               className="form-input"
             />
-          </div>
+          </PTextFieldWrapper>
 
-          <button type="submit" className="submit-button" style={{ marginTop: '50px' }}>
+          <PButton theme="dark"  variant="secondary" type="submit" style={{ marginTop: '50px' }}>
             Calculate
-          </button>
+          </PButton>
         </form>
 
         {error && <div className="response-message response-error">{error}</div>}
@@ -141,7 +141,7 @@ const Compound: React.FC = () => {
           </PTable>
         )}
 
-        <p style={{ textAlign: 'justify' }}>
+        <PText style={{ textAlign: 'justify' }}>
           This tool is designed to help getting the compounds from Pubchem
           <br />
           How to use:
@@ -164,7 +164,7 @@ const Compound: React.FC = () => {
           <br />
           2. Click Calculate.
           <br />
-        </p>
+        </PText>
       </div>
 
     </div>
