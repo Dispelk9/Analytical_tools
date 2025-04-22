@@ -16,11 +16,6 @@ import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
 import Login from './login/Login'
 
-const queryClient = new QueryClient();
-const navigate = useNavigate()
-const [isCalculating, setIsCalculating] = useState<boolean>(false);
-const [error, setError] = useState<string>('')
-
 interface RequireAuthProps {
   children: ReactNode
 }
@@ -42,29 +37,38 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
 }
 
 
-const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault()
-  try {
-    setIsCalculating(true);
-    const res = await fetch('/api/logout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    })
-    if (res.ok) {
-      navigate('/login')
-    } else {
-      setError('Can not logout')
+const AppLayout: React.FC = () => {
+
+
+  const navigate = useNavigate()
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [error, setError] = useState<string>('')
+
+
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    try {
+      setIsCalculating(true);
+      const res = await fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (res.ok) {
+        navigate('/login')
+      } else {
+        setError('Can not logout')
+      }
+    } catch (err) {
+      console.error('Error logout', err);
+      setError('Failed to logout');
+    } finally {
+      setIsCalculating(false);
     }
-  } catch (err) {
-    console.error('Error logout', err);
-    setError('Failed to logout');
-  } finally {
-    setIsCalculating(false);
   }
-}
 
-
-const AppLayout = () => (
+  
+  return(
   <div className="min-h-screen flex flex-col">
     {/* Header */}
     <header className="h-16 flex items-center justify-center bg-gray-800">
@@ -184,7 +188,10 @@ const AppLayout = () => (
   </div>
 );
 
+};
+
 function App() {
+  const queryClient = new QueryClient();
   return (
     <PorscheDesignSystemProvider>
       <QueryClientProvider client={queryClient}>
