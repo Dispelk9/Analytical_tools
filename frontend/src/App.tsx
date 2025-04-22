@@ -160,6 +160,17 @@ const AppLayout: React.FC = () => {
       </PLinkTile>
     </div>
 
+    {/* Main Content */}
+    <main className="flex-1 overflow-auto p-8 sm:p-20">
+        <Routes>
+          <Route path="/adduct" element={<Adduct />} />
+          <Route path="/compound" element={<Compound />} />
+          <Route path="/math" element={<CollisionPlot />} />
+        </Routes>
+    </main>
+
+
+
     <div>
     <form onSubmit={handleSubmit}>
         {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -171,15 +182,6 @@ const AppLayout: React.FC = () => {
         <PButton type="submit" style={{ marginTop: '50px' }}>Logout</PButton>
     </form>
     </div>
-
-    {/* Main Content */}
-    <main className="flex-1 overflow-auto p-8 sm:p-20">
-        <Routes>
-          <Route path="/adduct" element={<Adduct />} />
-          <Route path="/compound" element={<Compound />} />
-          <Route path="/math" element={<CollisionPlot />} />
-        </Routes>
-    </main>
 
     {/* Footer */}
     <footer className="h-16 flex items-center justify-center bg-gray-800" style={{ marginTop: '200px' }}>
