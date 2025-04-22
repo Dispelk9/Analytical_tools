@@ -149,4 +149,3 @@ body::before {
   filter: blur(5px); /* Apply the blur effect */
   transform: scale(1.1); /* Optional: Slightly scale up to ensure full coverage */
 }
-

@@ -6,6 +6,7 @@ import {
   PTextFieldWrapper,
   PText,
 } from "@porsche-design-system/components-react";
+import '../App.css'
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('')
@@ -46,7 +47,7 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="form-wrapper">
     <form onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
       <div>
         <PText theme="dark" style={{ textAlign: 'justify' }}>
@@ -58,7 +59,7 @@ const Login: React.FC = () => {
       </div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
         <div>
-          <PTextFieldWrapper theme="dark" label="Username" description="input testuser if want to test">
+          <PTextFieldWrapper theme="dark" label="Username" description="Username: testuser for demo">
             <input
               id="username"
               type="text"
@@ -69,7 +70,7 @@ const Login: React.FC = () => {
           </PTextFieldWrapper>
         </div>
         <div>
-          <PTextFieldWrapper theme="dark" label="Password" description="input dispelk9 if want to test">
+          <PTextFieldWrapper theme="dark" label="Password" description="Password: dispelk9 for demo">
             <input
               id="password"
               type="password"

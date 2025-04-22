@@ -1,18 +1,20 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState, FormEvent } from 'react'
 import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   PorscheDesignSystemProvider,
   PLinkTile,
   PTag,
+  PButton,
+  PSpinner,
 } from '@porsche-design-system/components-react';
+import { useNavigate } from 'react-router-dom'
+
+
 import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
 import Login from './login/Login'
-
-const queryClient = new QueryClient();
-
 
 interface RequireAuthProps {
   children: ReactNode
@@ -35,8 +37,38 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
 }
 
 
+const AppLayout: React.FC = () => {
 
-const AppLayout = () => (
+
+  const navigate = useNavigate()
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [error, setError] = useState<string>('')
+
+
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    try {
+      setIsCalculating(true);
+      const res = await fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (res.ok) {
+        navigate('/login')
+      } else {
+        setError('Can not logout')
+      }
+    } catch (err) {
+      console.error('Error logout', err);
+      setError('Failed to logout');
+    } finally {
+      setIsCalculating(false);
+    }
+  }
+
+  
+  return(
   <div className="min-h-screen flex flex-col">
     {/* Header */}
     <header className="h-16 flex items-center justify-center bg-gray-800">
@@ -128,7 +160,6 @@ const AppLayout = () => (
       </PLinkTile>
     </div>
 
-
     {/* Main Content */}
     <main className="flex-1 overflow-auto p-8 sm:p-20">
         <Routes>
@@ -138,6 +169,20 @@ const AppLayout = () => (
         </Routes>
     </main>
 
+
+
+    <div>
+    <form onSubmit={handleSubmit}>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {isCalculating && (
+          <div style={{ marginTop: '1rem' }}>
+            <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
+          </div>
+        )}
+        <PButton type="submit" style={{ marginTop: '50px' }}>Logout</PButton>
+    </form>
+    </div>
+
     {/* Footer */}
     <footer className="h-16 flex items-center justify-center bg-gray-800" style={{ marginTop: '200px' }}>
       <p className="text-sm text-white">Copyright 2025 - Porsche Design x Dispelk9</p>
@@ -145,7 +190,10 @@ const AppLayout = () => (
   </div>
 );
 
+};
+
 function App() {
+  const queryClient = new QueryClient();
   return (
     <PorscheDesignSystemProvider>
       <QueryClientProvider client={queryClient}>
