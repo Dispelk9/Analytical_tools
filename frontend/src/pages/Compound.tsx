@@ -101,7 +101,7 @@ const Compound: React.FC = () => {
             />
           </div>
 
-          <button type="submit" className="submit-button">
+          <button type="submit" className="submit-button" style={{ marginTop: '50px' }}>
             Calculate
           </button>
         </form>

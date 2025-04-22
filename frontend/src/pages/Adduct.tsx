@@ -142,7 +142,7 @@ const Adduct: React.FC = () => {
               </select>
             </PSelectWrapper>
 
-            <PButton theme="dark"  variant="secondary" type="submit" >
+            <PButton theme="dark"  variant="secondary" type="submit" style={{ marginTop: '50px' }}>
               Calculate
             </PButton>
 

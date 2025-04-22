@@ -68,7 +68,7 @@ const CollisionPlot: React.FC = () => {
               />
             </PTextFieldWrapper>
           </div>
-          <PButton type="submit">Plot</PButton>
+          <PButton type="submit" style={{ marginTop: '50px' }}>Plot</PButton>
         </form>
         {isCalculating && (
           <div style={{ marginTop: '1rem' }}>
