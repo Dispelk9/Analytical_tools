@@ -116,8 +116,8 @@ jobs:
           context: ./backend
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/Analytical_tools_backend:${{ steps.set-tag.outputs.tag }}
-            ghcr.io/${{ github.repository_owner }}/Analytical_tools_backend:latest
+            ghcr.io/dispelk9/analytical_tools_backend:${{ steps.set-tag.outputs.tag }}
+            ghcr.io/dispelk9/analytical_tools_backend:latest
 
       - name: Build & push apache (frontend)
         uses: docker/build-push-action@v4
@@ -125,8 +125,8 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/Analytical_tools_frontend:${{ steps.set-tag.outputs.tag }}
-            ghcr.io/${{ github.repository_owner }}/Analytical_tools_frontend:latest
+            ghcr.io/dispelk9/analytical_tools_frontend:${{ steps.set-tag.outputs.tag }}
+            ghcr.io/dispelk9/analytical_tools_frontend:latest
 
   deploy:
     name: Deploy on Hetzner
@@ -152,22 +152,14 @@ jobs:
             set -euo pipefail
             cd ~/Analytical_tools
 
-            # Write only the DB_PASSWORD for Compose interpolation
-            cat > .env << ENV
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            ENV
-            chmod 600 .env
-
             # Pull images you just pushed
             TAG=${{ needs.build-and-push.outputs.tag }}
-            docker pull ghcr.io/${{ github.repository_owner }}/Analytical_tools_backend:$TAG
-            docker pull ghcr.io/${{ github.repository_owner }}/Analytical_tools_frontend:$TAG
+            docker pull ghcr.io/dispelk9/analytical_tools_backend:$TAG
+            docker pull ghcr.io/dispelk9/analytical_tools_frontend:$TAG
 
             # Recreate all services
             TAG=$TAG docker compose up -d --remove-orphans
 
-            # Remove secrets on disk
-            shred -u .env
           EOF
 
         
