@@ -81,7 +81,7 @@
 
 #           EOF
 
-name: CD
+name: Continuous Deployment ACT
 
 on:
   push:
@@ -150,8 +150,23 @@ jobs:
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} bash << 'EOF'
             set -euo pipefail
-            mkdir ~/Analytical_tools
-            cd ~/Analytical_tools
+
+   
+            
+            # Setup SSH agent and clone repository
+            eval "$(ssh-agent -s)"
+            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /${{ secrets.SERVER_USER }}/.ssh/id_rsa
+            git clone git@github.com:Dispelk9/Analytical_tools.git
+
+
+            # Navigate to project directory
+            cd /${{ secrets.SERVER_USER }}/Analytical_tools
+
+            git fetch --all
+            git reset --hard origin/master
+
+            # Remove *all* local images whose name starts with ghcr.io/dispelk9/
+            docker image prune -a --filter "reference=ghcr.io/dispelk9/*" --force
 
             echo "${{ secrets.G_TOKEN }}" \
              | docker login ghcr.io \
@@ -165,15 +180,15 @@ jobs:
 
 
             cat > /${{ secrets.SERVER_USER }}/.env << ENV
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-            SENDER=${{ secrets.SENDER }}
-            MAIL_PW=${{ secrets.MAIL_PW }}
-            SMTP_RELAY=${{ secrets.SMTP_RELAY }}
+              DB_USERNAME=${{ secrets.DB_USERNAME }}
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+              DB_HOST=${{ secrets.DB_HOST }}
+              DB_PORT=${{ secrets.DB_PORT }}
+              DB_NAME=${{ secrets.DB_NAME }}
+              SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+              SENDER=${{ secrets.SENDER }}
+              MAIL_PW=${{ secrets.MAIL_PW }}
+              SMTP_RELAY=${{ secrets.SMTP_RELAY }}
             ENV
 
             # Copy the .env file into your backend folder
