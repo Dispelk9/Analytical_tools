@@ -165,8 +165,11 @@ jobs:
             git fetch --all
             git reset --hard origin/master
 
-            # Remove *all* local images whose name starts with ghcr.io/dispelk9/
-            docker image prune -a --filter "reference=ghcr.io/dispelk9/*" --force
+            # 3) Remove any local dispelk9 images by ID
+            IMAGES=$(docker images "ghcr.io/dispelk9/*" -q)
+            if [ -n "$IMAGES" ]; then
+              docker rmi -f $IMAGES
+            fi
 
             echo "${{ secrets.G_TOKEN }}" \
              | docker login ghcr.io \
