@@ -3,8 +3,8 @@ on: push
 jobs:
   Test:
     name: Prepare Deploy
-    env:
-      ACTIONS_STEP_DEBUG: true
+    # env:
+    #   ACTIONS_STEP_DEBUG: true
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
@@ -23,8 +23,8 @@ jobs:
     needs: Test
     if: github.ref == 'refs/heads/master'
     name: Deploy On Hetzner
-    env:
-      ACTIONS_STEP_DEBUG: true
+    # env:
+    #   ACTIONS_STEP_DEBUG: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,9 +35,15 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
+
       - name: Docker Compose with ACT
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
 
             # Export environment variables from GitHub secrets
             export DB_USERNAME="${{ secrets.DB_USERNAME }}"
@@ -65,22 +71,27 @@ jobs:
             sudo apt-get update -y && sudo apt-get install -y git
             
             # Remove old repository
-            sudo rm -rf /root/Analytical_tools
+            #sudo rm -rf /root/Analytical_tools
             
             # Setup SSH agent and clone repository
             eval "$(ssh-agent -s)"
             echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa
             git clone git@github.com:Dispelk9/Analytical_tools.git
 
-            # Copy the .env file into your backend folder
-            cp /root/.env /root/Analytical_tools/backend/.env
 
             # Navigate to project directory
             cd /root/Analytical_tools
 
+            git fetch --all
+            git reset --hard origin/master
+
+            # Copy the .env file into your backend folder
+            cp /root/.env /root/Analytical_tools/backend/.env
+
+
             # Copy SSL certificates
-            cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./frontend/apache/fullchain.pem
-            cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./frontend/apache/privkey.pem
+            #cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./frontend/apache/fullchain.pem
+            #cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./frontend/apache/privkey.pem
 
             # Restart Docker Compose setup
             docker compose down
