@@ -1,10 +1,10 @@
 name: Continuous Integration ACT
 
 on:
-  pull_request:
+  push:
     # trigger on PRs targeting master
     branches:
-      - master
+      - docker_react
 
 jobs:
   build-and-test:
