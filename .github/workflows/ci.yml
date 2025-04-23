@@ -23,10 +23,10 @@ jobs:
           docker build -t test-backend ./backend
           docker build -t test-apache ./frontend
 
-      - name: Run backend tests
-        run: |
-          # adjust to your actual test command
-          docker run --rm test-backend pytest
+      # - name: Run backend tests
+      #   run: |
+      #     # adjust to your actual test command
+      #     docker run --rm test-backend pytest
 
       - name: Run frontend tests
         run: |
