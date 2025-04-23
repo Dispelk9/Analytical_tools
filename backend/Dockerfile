@@ -5,9 +5,10 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy dependencies and install
-COPY requirements.txt requirements.txt
+COPY requirements.txt requirements-dev.txt ./
 RUN apt-get update && apt-get install -y procps vim && \
     pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r requirements-dev.txt && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy application code
