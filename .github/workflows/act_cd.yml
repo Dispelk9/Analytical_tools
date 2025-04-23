@@ -108,7 +108,8 @@ jobs:
 
       - name: Set image tag
         id: set-tag
-        run: echo "::set-output name=tag::${GITHUB_SHA}"
+        run: |
+          echo "tag=${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Build & push backend
         uses: docker/build-push-action@v4
