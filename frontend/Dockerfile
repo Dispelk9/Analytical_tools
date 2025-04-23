@@ -13,7 +13,7 @@ RUN npm run build
 
 # Stage 2: Serve the build with Apache
 FROM httpd:2.4-alpine
-sss
+
 # Copy the production build from the previous stage into Apache's document root.
 # Vite outputs to the "dist" folder by default.
 COPY --from=build /app/dist/ /usr/local/apache2/htdocs/
