@@ -26,8 +26,11 @@ COPY apache/httpd.conf /usr/local/apache2/conf/httpd.conf
 # COPY apache/.htpasswd /usr/local/apache2/conf/.htpasswd
 
 # Copy the certs into apache container
-COPY apache/fullchain.pem /usr/local/apache2/conf/fullchain.pem
-COPY apache/privkey.pem /usr/local/apache2/conf/privkey.pem
+# COPY apache/fullchain.pem /usr/local/apache2/conf/fullchain.pem
+# COPY apache/privkey.pem /usr/local/apache2/conf/privkey.pem
+
+COPY /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem /usr/local/apache2/conf/fullchain.pem
+COPY /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem /usr/local/apache2/conf/privkey.pem
 
 
 EXPOSE 80
