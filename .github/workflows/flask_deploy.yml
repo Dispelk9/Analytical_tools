@@ -81,97 +81,93 @@
 
 #           EOF
 
-name: Deploy to vhohetzner1
+name: CD
+
 on:
   push:
     branches:
-      - '**'    # trigger on all branches
+      - master
 
 jobs:
-  # ────────────────────────
-  # 1) BUILD on non-master
-  # ────────────────────────
-  Build:
-    name: Build backend & apache (non-master)
+  build-and-push:
+    name: Build & Push Images
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/master'
+    outputs:
+      tag: ${{ steps.set-tag.outputs.tag }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build backend & apache
-        run: |
-          # assumes your docker-compose.yml is at repo root
-          docker compose build backend apache
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.G_TOKEN }}
 
-  # ────────────────────────
-  # 2) TEST SSH on master
-  # ────────────────────────
-  Test:
-    name: Test SSH (master only)
+      - name: Set image tag
+        id: set-tag
+        run: echo "::set-output name=tag::${GITHUB_SHA}"
+
+      - name: Build & push backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/Analytical_tools_backend:${{ steps.set-tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/Analytical_tools_backend:latest
+
+      - name: Build & push apache (frontend)
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/Analytical_tools_frontend:${{ steps.set-tag.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/Analytical_tools_frontend:latest
+
+  deploy:
+    name: Deploy on Hetzner
+    needs: build-and-push
     runs-on: ubuntu-latest
-    needs: Build
-    if: github.ref == 'refs/heads/master'
     steps:
-      - uses: actions/checkout@v4
-      - name: Check SSH port
-        run: |
-          if nc -z ${{ secrets.IP }} 22; then
-            echo "SSH OK ✓"
-          else
-            echo "SSH unreachable ✗"
-            exit 1
-          fi
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # ────────────────────────
-  # 3) DEPLOY on master
-  # ────────────────────────
-  Deploy:
-    name: Deploy on Hetzner (master only)
-    runs-on: ubuntu-latest
-    needs: Test
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v4
-
-      # SSH key + host-key pinning
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Pin server fingerprint
+      - name: Pin server host key
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
 
-      - name: Remote deploy
+      - name: SSH & deploy
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} bash << 'EOF'
             set -euo pipefail
-            cd ~
+            cd ~/Analytical_tools
 
-            # clone if needed
-            if [ ! -d Analytical_tools ]; then
-              git clone git@github.com:Dispelk9/Analytical_tools.git
-            fi
-            cd Analytical_tools
-
-            # write a one-line .env for DB_PASSWORD interpolation
+            # Write only the DB_PASSWORD for Compose interpolation
             cat > .env << ENV
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             ENV
             chmod 600 .env
 
-            # update code
-            git fetch --all
-            git reset --hard origin/master
+            # Pull images you just pushed
+            TAG=${{ needs.build-and-push.outputs.tag }}
+            docker pull ghcr.io/${{ github.repository_owner }}/Analytical_tools_backend:$TAG
+            docker pull ghcr.io/${{ github.repository_owner }}/Analytical_tools_frontend:$TAG
 
-            # rebuild & restart all services
-            docker compose down
-            docker compose build
-            docker compose up -d --remove-orphans
+            # Recreate all services
+            TAG=$TAG docker compose up -d --remove-orphans
 
-            # shred the on-disk secret file
+            # Remove secrets on disk
             shred -u .env
           EOF
+
         
