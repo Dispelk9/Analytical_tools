@@ -57,41 +57,33 @@ jobs:
             export SMTP_RELAY="${{ secrets.SMTP_RELAY }}"
 
             # Write secrets to .env file explicitly
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > /root/.env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /root/.env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> /root/.env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> /root/.env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> /root/.env
-            echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> /root/.env
-            echo "SENDER=${{ secrets.SENDER }}" >> /root/.env
-            echo "MAIL_PW=${{ secrets.MAIL_PW }}" >> /root/.env
-            echo "SMTP_RELAY=${{ secrets.SMTP_RELAY }}" >> /root/.env
-
-            # Update server and install git if necessary
-            sudo apt-get update -y && sudo apt-get install -y git
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > /${{ secrets.SERVER_USER }}/.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /${{ secrets.SERVER_USER }}/.env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> /${{ secrets.SERVER_USER }}/.env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> /${{ secrets.SERVER_USER }}/.env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> /${{ secrets.SERVER_USER }}/.env
+            echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> /${{ secrets.SERVER_USER }}/.env
+            echo "SENDER=${{ secrets.SENDER }}" >> /${{ secrets.SERVER_USER }}/.env
+            echo "MAIL_PW=${{ secrets.MAIL_PW }}" >> /${{ secrets.SERVER_USER }}/.env
+            echo "SMTP_RELAY=${{ secrets.SMTP_RELAY }}" >> /${{ secrets.SERVER_USER }}/.env
             
-            # Remove old repository
-            #sudo rm -rf /root/Analytical_tools
             
             # Setup SSH agent and clone repository
             eval "$(ssh-agent -s)"
-            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /root/.ssh/id_rsa
+            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /${{ secrets.SERVER_USER }}/.ssh/id_rsa
             git clone git@github.com:Dispelk9/Analytical_tools.git
 
 
             # Navigate to project directory
-            cd /root/Analytical_tools
+            cd /${{ secrets.SERVER_USER }}/Analytical_tools
 
             git fetch --all
             git reset --hard origin/master
 
             # Copy the .env file into your backend folder
-            cp /root/.env /root/Analytical_tools/backend/.env
+            mv /${{ secrets.SERVER_USER }}/.env /${{ secrets.SERVER_USER }}/Analytical_tools/backend/.env
 
-
-            # Copy SSL certificates
-            #cp /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem ./frontend/apache/fullchain.pem
-            #cp /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem ./frontend/apache/privkey.pem
+            chmod 600 /${{ secrets.SERVER_USER }}/Analytical_tools/backend/.env
 
             # Restart Docker Compose setup
             docker compose down

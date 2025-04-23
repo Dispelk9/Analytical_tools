@@ -32,6 +32,10 @@ services:
     restart: always
     ports:
       - "8081:80"
+    volumes:
+      # Mount the live certs from the host
+      - /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem:/etc/apache2/ssl/fullchain.pem:ro
+      - /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem:/etc/apache2/ssl/privkey.pem:ro
 
 volumes:
   postgres_data:
