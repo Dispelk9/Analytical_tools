@@ -150,6 +150,7 @@ jobs:
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} bash << 'EOF'
             set -euo pipefail
+            mkdir ~/Analytical_tools
             cd ~/Analytical_tools
 
             echo "${{ secrets.G_TOKEN }}" \

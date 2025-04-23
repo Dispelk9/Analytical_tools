@@ -5,19 +5,13 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy dependencies and install
-COPY requirements.txt requirements-dev.txt ./
+COPY requirements.txt ./
 RUN apt-get update && apt-get install -y procps vim && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r requirements-dev.txt && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy application code
 COPY . /app/
-
-# Copy the SSL certs
-# in docker-sandbox
-#COPY fullchain.pem /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem
-#COPY privkey.pem   /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem
 
 
 # Expose the Flask app port
