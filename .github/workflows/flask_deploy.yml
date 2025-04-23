@@ -152,10 +152,31 @@ jobs:
             set -euo pipefail
             cd ~/Analytical_tools
 
+            echo "${{ secrets.G_TOKEN }}" \
+             | docker login ghcr.io \
+               --username dispelk9 \
+               --password-stdin
+
             # Pull images you just pushed
             TAG=${{ needs.build-and-push.outputs.tag }}
             docker pull ghcr.io/dispelk9/analytical_tools_backend:$TAG
             docker pull ghcr.io/dispelk9/analytical_tools_frontend:$TAG
+
+
+            cat > /${{ secrets.SERVER_USER }}/.env << ENV
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            SENDER=${{ secrets.SENDER }}
+            MAIL_PW=${{ secrets.MAIL_PW }}
+            SMTP_RELAY=${{ secrets.SMTP_RELAY }}
+            ENV
+
+            # Copy the .env file into your backend folder
+            mv /${{ secrets.SERVER_USER }}/.env /${{ secrets.SERVER_USER }}/Analytical_tools/backend/.env
 
             # Recreate all services
             TAG=$TAG docker compose up -d --remove-orphans
