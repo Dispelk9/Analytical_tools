@@ -1,84 +1,177 @@
+# name: Deploy to vhohetzner1
+# on: push
+# jobs:
+#   Test:
+#     name: Prepare Deploy
+#     # env:
+#     #   ACTIONS_STEP_DEBUG: true
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/master'
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Test Website Online
+#         run: |
+#           server=analytical.dispelk9.de
+#           if nc -z $server 22 2>/dev/null; then
+#               echo "$server ✓"
+#           else
+#               echo "$server ✗"
+#           fi
+
+#   Deploy:
+#     runs-on: ubuntu-latest
+#     needs: Test
+#     if: github.ref == 'refs/heads/master'
+#     name: Deploy On Hetzner
+#     # env:
+#     #   ACTIONS_STEP_DEBUG: true
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       # Step 2: Set up SSH agent with the private key
+#       - name: Setup SSH
+#         uses: webfactory/ssh-agent@v0.9.0
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+
+#       - name: Add server to known_hosts
+#         run: |
+#           mkdir -p ~/.ssh
+#           ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
+
+#       - name: Docker Compose with ACT
+#         run: |
+#           ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
+
+#             cat > /${{ secrets.SERVER_USER }}/.env << ENV
+#             DB_USERNAME=${{ secrets.DB_USERNAME }}
+#             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+#             DB_HOST=${{ secrets.DB_HOST }}
+#             DB_PORT=${{ secrets.DB_PORT }}
+#             DB_NAME=${{ secrets.DB_NAME }}
+#             SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+#             SENDER=${{ secrets.SENDER }}
+#             MAIL_PW=${{ secrets.MAIL_PW }}
+#             SMTP_RELAY=${{ secrets.SMTP_RELAY }}
+#             ENV         
+            
+#             # Setup SSH agent and clone repository
+#             eval "$(ssh-agent -s)"
+#             echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /${{ secrets.SERVER_USER }}/.ssh/id_rsa
+#             git clone git@github.com:Dispelk9/Analytical_tools.git
+
+
+#             # Navigate to project directory
+#             cd /${{ secrets.SERVER_USER }}/Analytical_tools
+
+#             git fetch --all
+#             git reset --hard origin/master
+
+#             # Copy the .env file into your backend folder
+#             mv /${{ secrets.SERVER_USER }}/.env /${{ secrets.SERVER_USER }}/Analytical_tools/backend/.env
+
+#             chmod 600 /${{ secrets.SERVER_USER }}/Analytical_tools/backend/.env
+
+#             # Restart Docker Compose setup
+#             docker compose down
+#             docker compose build
+#             docker compose up -d
+
+#           EOF
+
 name: Deploy to vhohetzner1
-on: push
+on:
+  push:
+    branches:
+      - '**'    # trigger on all branches
+
 jobs:
-  Test:
-    name: Prepare Deploy
-    # env:
-    #   ACTIONS_STEP_DEBUG: true
+  # ────────────────────────
+  # 1) BUILD on non-master
+  # ────────────────────────
+  Build:
+    name: Build backend & apache (non-master)
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend & apache
+        run: |
+          # assumes your docker-compose.yml is at repo root
+          docker compose build backend apache
+
+  # ────────────────────────
+  # 2) TEST SSH on master
+  # ────────────────────────
+  Test:
+    name: Test SSH (master only)
+    runs-on: ubuntu-latest
+    needs: Build
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
-      - name: Test Website Online
+      - name: Check SSH port
         run: |
-          server=analytical.dispelk9.de
-          if nc -z $server 22 2>/dev/null; then
-              echo "$server ✓"
+          if nc -z ${{ secrets.IP }} 22; then
+            echo "SSH OK ✓"
           else
-              echo "$server ✗"
+            echo "SSH unreachable ✗"
+            exit 1
           fi
 
+  # ────────────────────────
+  # 3) DEPLOY on master
+  # ────────────────────────
   Deploy:
+    name: Deploy on Hetzner (master only)
     runs-on: ubuntu-latest
     needs: Test
     if: github.ref == 'refs/heads/master'
-    name: Deploy On Hetzner
-    # env:
-    #   ACTIONS_STEP_DEBUG: true
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Step 2: Set up SSH agent with the private key
+      # SSH key + host-key pinning
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-
-      - name: Add server to known_hosts
+      - name: Pin server fingerprint
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
 
-      - name: Docker Compose with ACT
+      - name: Remote deploy
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} bash << 'EOF'
+            set -euo pipefail
+            cd ~
 
-            cat > /${{ secrets.SERVER_USER }}/.env << ENV
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            # clone if needed
+            if [ ! -d Analytical_tools ]; then
+              git clone git@github.com:Dispelk9/Analytical_tools.git
+            fi
+            cd Analytical_tools
+
+            # write a one-line .env for DB_PASSWORD interpolation
+            cat > .env << ENV
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_HOST=${{ secrets.DB_HOST }}
-            DB_PORT=${{ secrets.DB_PORT }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-            SENDER=${{ secrets.SENDER }}
-            MAIL_PW=${{ secrets.MAIL_PW }}
-            SMTP_RELAY=${{ secrets.SMTP_RELAY }}
-            ENV         
-            
-            # Setup SSH agent and clone repository
-            eval "$(ssh-agent -s)"
-            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /${{ secrets.SERVER_USER }}/.ssh/id_rsa
-            git clone git@github.com:Dispelk9/Analytical_tools.git
+            ENV
+            chmod 600 .env
 
-
-            # Navigate to project directory
-            cd /${{ secrets.SERVER_USER }}/Analytical_tools
-
+            # update code
             git fetch --all
             git reset --hard origin/master
 
-            # Copy the .env file into your backend folder
-            mv /${{ secrets.SERVER_USER }}/.env /${{ secrets.SERVER_USER }}/Analytical_tools/backend/.env
-
-            chmod 600 /${{ secrets.SERVER_USER }}/Analytical_tools/backend/.env
-
-            # Restart Docker Compose setup
+            # rebuild & restart all services
             docker compose down
             docker compose build
-            docker compose up -d
+            docker compose up -d --remove-orphans
 
+            # shred the on-disk secret file
+            shred -u .env
           EOF
-
-          
+        
