@@ -151,17 +151,17 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} bash << 'EOF'
             set -euo pipefail
 
+            # Navigate to project directory
+            cd /${{ secrets.SERVER_USER }}/Analytical_tools
    
             
             # Setup SSH agent and clone repository
             eval "$(ssh-agent -s)"
             echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /${{ secrets.SERVER_USER }}/.ssh/id_rsa
-            git clone git@github.com:Dispelk9/Analytical_tools.git
-
-
-            # Navigate to project directory
-            cd /${{ secrets.SERVER_USER }}/Analytical_tools
-
+            # clone once; afterwards just update in-place
+            if [ ! -d ~/Analytical_tools/.git ]; then
+              git clone git@github.com:Dispelk9/Analytical_tools.git ~/Analytical_tools
+            fi
             git fetch --all
             git reset --hard origin/master
 
