@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:13
@@ -11,9 +9,7 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-        #    ports:
-        #      - "5432:5432"
-
+      
   backend:
     build: ./backend
     container_name: flask_app
@@ -35,7 +31,7 @@ services:
     volumes:
       # Mount the live certs from the host
       - /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem:/usr/local/apache2/conf/fullchain.pem:ro
-      - /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem:/usr/local/apache2/conf/fullchain.pem:ro
+      - /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem:/usr/local/apache2/conf/privkey.pem:ro
 
 volumes:
   postgres_data:

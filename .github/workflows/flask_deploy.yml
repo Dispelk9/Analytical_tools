@@ -1,4 +1,4 @@
-name: Deploy to server or Storage Box
+name: Deploy to vhohetzner1
 on: push
 jobs:
   Test:
@@ -45,28 +45,17 @@ jobs:
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} << EOF
 
-            # Export environment variables from GitHub secrets
-            export DB_USERNAME="${{ secrets.DB_USERNAME }}"
-            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
-            export DB_HOST="${{ secrets.DB_HOST }}"
-            export DB_PORT="${{ secrets.DB_PORT }}"
-            export DB_NAME="${{ secrets.DB_NAME }}"
-            export SESSION_SECRET="${{ secrets.SESSION_SECRET }}"
-            export SENDER="${{ secrets.SENDER }}"
-            export MAIL_PW="${{ secrets.MAIL_PW }}"
-            export SMTP_RELAY="${{ secrets.SMTP_RELAY }}"
-
-            # Write secrets to .env file explicitly
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" > /${{ secrets.SERVER_USER }}/.env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /${{ secrets.SERVER_USER }}/.env
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> /${{ secrets.SERVER_USER }}/.env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> /${{ secrets.SERVER_USER }}/.env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> /${{ secrets.SERVER_USER }}/.env
-            echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> /${{ secrets.SERVER_USER }}/.env
-            echo "SENDER=${{ secrets.SENDER }}" >> /${{ secrets.SERVER_USER }}/.env
-            echo "MAIL_PW=${{ secrets.MAIL_PW }}" >> /${{ secrets.SERVER_USER }}/.env
-            echo "SMTP_RELAY=${{ secrets.SMTP_RELAY }}" >> /${{ secrets.SERVER_USER }}/.env
-            
+            cat > /${{ secrets.SERVER_USER }}/.env << ENV
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            SENDER=${{ secrets.SENDER }}
+            MAIL_PW=${{ secrets.MAIL_PW }}
+            SMTP_RELAY=${{ secrets.SMTP_RELAY }}
+            ENV         
             
             # Setup SSH agent and clone repository
             eval "$(ssh-agent -s)"
