@@ -96,9 +96,6 @@ jobs:
 
             # Pull images you just pushed
             TAG=${{ needs.build-and-push.outputs.tag }}
-            docker pull ghcr.io/dispelk9/analytical_tools_backend:$TAG
-            docker pull ghcr.io/dispelk9/analytical_tools_frontend:$TAG
-
 
             printf '%s\n' \
             "DB_USERNAME=${{ secrets.DB_USERNAME }}" \
@@ -114,7 +111,7 @@ jobs:
 
             chmod 600 backend/.env
             # Recreate all services
-            TAG=$TAG docker compose up -d --remove-orphans
+            TAG=$TAG docker compose up -d --remove-orphans --pull=always --force-recreate
 
           EOF
 

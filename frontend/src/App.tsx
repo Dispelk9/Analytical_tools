@@ -158,6 +158,17 @@ const AppLayout: React.FC = () => {
         </PTag>
         <img src="./assets/in_dev.png" alt="Mailing" />
       </PLinkTile>
+      <PLinkTile
+        href="/"
+        label="In development"
+        description="Next Tool"
+        compact={true}
+      >
+        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+          ##Incoming
+        </PTag>
+        <img src="./assets/in_dev.png" alt="Mailing" />
+      </PLinkTile>
     </div>
 
     {/* Main Content */}
