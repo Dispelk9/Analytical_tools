@@ -137,7 +137,7 @@ const AppLayout: React.FC = () => {
         <img src="./assets/sogo.png" alt="Mailing" />
       </PLinkTile>
       <PLinkTile
-        href="http://analytical.dispelk9.de:8082/"
+        href="https://analytical.dispelk9.de/check_mk/"
         label="Checkmk"
         description="Checkmk"
         compact={true}
