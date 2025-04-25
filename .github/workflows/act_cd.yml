@@ -69,6 +69,14 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} bash << 'EOF'
             set -euo pipefail
 
+            echo "${{ secrets.G_TOKEN }}" \
+             | docker login ghcr.io \
+               --username dispelk9 \
+               --password-stdin
+
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export TAG=${{ needs.build-and-push.outputs.tag }}
+
             # Navigate to project directory
             cd /${{ secrets.SERVER_USER }}/Analytical_tools
    
@@ -83,16 +91,12 @@ jobs:
             git fetch --all
             git reset --hard origin/master
 
-            echo "${{ secrets.G_TOKEN }}" \
-             | docker login ghcr.io \
-               --username dispelk9 \
-               --password-stdin
+            printf '%s\n' \
+            "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
+            "TAG=${{ needs.build-and-push.outputs.tag }}" \
+            > .env
 
-            # Pull images you just pushed
-            TAG=${{ needs.build-and-push.outputs.tag }}
-
-            # Tear down containers + old images in one shot
-            docker compose down --remove-orphans --rmi all
+            chmod 600 .env
 
             printf '%s\n' \
             "DB_USERNAME=${{ secrets.DB_USERNAME }}" \
@@ -106,11 +110,11 @@ jobs:
             "SMTP_RELAY=${{ secrets.SMTP_RELAY }}" \
             > backend/.env
 
-            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            export TAG=latest
             chmod 600 backend/.env
             # Recreate all services
-            TAG=$TAG docker compose up -d --remove-orphans --pull=always --force-recreate
+            # Tear down containers + old images in one shot
+            docker compose down --remove-orphans --rmi all
+            TAG=$TAG docker compose up -d --remove-orphans --pull=always --force-recreate --no-build
 
           EOF
 
