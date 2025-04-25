@@ -9,27 +9,29 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      
+
   backend:
-    build: ./backend
+    image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
     container_name: flask_app
     restart: always
     depends_on:
       - postgres
+    env_file:
+      - backend/.env
     environment:
-      # This connection string allows the Flask app to reach Postgres by its service name.
+      # Flask will use this to connect to Postgres
       DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres_db:5432/postgres
     ports:
       - "8080:8080"
 
-  apache:
-    build: ./frontend
+  frontend:
+    image: ghcr.io/dispelk9/analytical_tools_frontend:${TAG}
     container_name: apache_frontend
     restart: always
     ports:
       - "8081:80"
     volumes:
-      # Mount the live certs from the host
+      # Live Let’s Encrypt certs for HTTPS termination in Apache
       - /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem:/usr/local/apache2/conf/fullchain.pem:ro
       - /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem:/usr/local/apache2/conf/privkey.pem:ro
 

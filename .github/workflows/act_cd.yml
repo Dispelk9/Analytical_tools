@@ -109,6 +109,8 @@ jobs:
             "SMTP_RELAY=${{ secrets.SMTP_RELAY }}" \
             > backend/.env
 
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            export TAG=latest
             chmod 600 backend/.env
             # Recreate all services
             TAG=$TAG docker compose up -d --remove-orphans --pull=always --force-recreate
