@@ -97,6 +97,9 @@ jobs:
             # Pull images you just pushed
             TAG=${{ needs.build-and-push.outputs.tag }}
 
+            # Tear down containers + old images in one shot
+            docker compose down --remove-orphans --rmi all
+
             printf '%s\n' \
             "DB_USERNAME=${{ secrets.DB_USERNAME }}" \
             "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
