@@ -1,6 +1,0 @@
-{
-  "main": "cjs/components-react/projects/react-ssr-wrapper/src/public-api.cjs",
-  "module": "esm/components-react/projects/react-ssr-wrapper/src/public-api.mjs",
-  "types": "esm/public-api.d.ts",
-  "sideEffects": false
-}
