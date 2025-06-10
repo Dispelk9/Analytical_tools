@@ -1,10 +1,8 @@
-# backend/adduct.py
 from flask import Blueprint
 import logging
-import sys
 import subprocess
 from dotenv import load_dotenv
-import emit
+from flask_socketio import Namespace, emit
 
 # Load environment variables from .env file
 load_dotenv()
