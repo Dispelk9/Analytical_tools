@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom'
 import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
+import Smtpcheck from './pages/Smtpcheck';
 import Login from './login/Login'
 
 interface RequireAuthProps {
@@ -148,13 +149,13 @@ const AppLayout: React.FC = () => {
         <img src="./assets/checkmk.png" alt="Monitoring" />
       </PLinkTile>
       <PLinkTile
-        href="/"
-        label="In development"
-        description="Next Tool"
+        href="/smtpcheck"
+        label=""
+        description="SMTP/SMTPS/SMTPstarttls"
         compact={true}
       >
         <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          ##Incoming
+          ##Port 25,465 or 587
         </PTag>
         <img src="./assets/in_dev.png" alt="Mailing" />
       </PLinkTile>
@@ -177,6 +178,7 @@ const AppLayout: React.FC = () => {
           <Route path="/adduct" element={<Adduct />} />
           <Route path="/compound" element={<Compound />} />
           <Route path="/math" element={<CollisionPlot />} />
+          <Route path="/smtpcheck" element={<Smtpcheck />} />
         </Routes>
     </main>
 

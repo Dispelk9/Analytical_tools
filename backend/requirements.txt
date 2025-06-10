@@ -11,3 +11,4 @@ matplotlib
 Flask-SQLAlchemy>=2.5
 Flask-Login>=0.6
 Werkzeug>=2.0
+flask_socketio

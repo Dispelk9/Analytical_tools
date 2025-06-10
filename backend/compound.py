@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, session, request
 import pubchempy as pcp
 import requests
-import os
+import time
 from utils.adduct_utils import convert_float
 import logging
 import sys
@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+
+# throttle parameters
+REQUESTS_PER_SEC = 3
+DELAY = 1.0 / REQUESTS_PER_SEC  # 0.333… s
 
 # Configure logging to output to STDOUT with INFO level messages
 logging.basicConfig(
@@ -80,6 +84,9 @@ def compound():
             formula = compound_each["molecular_formula"]
             formula_counts[formula] = formula_counts.get(formula, 0) + 1
             list_of_compounds.append(compound_each)
+
+            # ensure we don’t do more than 3 calls per second
+            time.sleep(DELAY)
 
         duplicates = {f: c for f, c in formula_counts.items() if c > 1}
         session['list_of_compounds'] = list_of_compounds
