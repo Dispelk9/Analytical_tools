@@ -8,8 +8,17 @@ from utils.adduct_utils import *
 from compound import compound_bp
 from adduct import adduct_bp
 from act_math import math_bp
+from smtp_handler import smtp_bp
 from auth_backend.login_user import auth_user_bp , db, login_manager
 from utils.db_connection import DB_CONNECT
+
+from flask_socketio import SocketIO
+
+# Allow CORS from your Vite dev server or production host as needed
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# mount at the same path you use in your TSX:
+socketio.on_namespace(smtp_bp('/terminal'))
 
 app = Flask(__name__)
 
@@ -44,6 +53,7 @@ app.register_blueprint(auth_user_bp)
 app.register_blueprint(compound_bp)
 app.register_blueprint(adduct_bp)
 app.register_blueprint(math_bp)
+app.register_blueprint(smtp_bp)
 
 
 if __name__ == '__main__':

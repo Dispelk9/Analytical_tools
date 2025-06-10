@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom'
 import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
+import Smtpcheck from './pages/Smtpcheck';
 import Login from './login/Login'
 
 interface RequireAuthProps {
@@ -177,6 +178,7 @@ const AppLayout: React.FC = () => {
           <Route path="/adduct" element={<Adduct />} />
           <Route path="/compound" element={<Compound />} />
           <Route path="/math" element={<CollisionPlot />} />
+          <Route path="/smtpcheck" element={<Smtpcheck />} />
         </Routes>
     </main>
 
