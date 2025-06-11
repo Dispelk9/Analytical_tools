@@ -1,159 +1,144 @@
-import React, { useState, FormEvent, ChangeEvent, useRef, useEffect } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
 import {
   PButton,
   PSpinner,
   PTextFieldWrapper,
+  PText,
 } from "@porsche-design-system/components-react";
-import { Terminal } from 'xterm';
-import 'xterm/css/xterm.css';
-import { io, Socket } from 'socket.io-client';
 import '../App.css';
 
-const SOCKET_NAMESPACE = '/terminal';
-const SOCKET_URL       = `http://${window.location.hostname}:8080`;
+interface PortResult {
+  port: number;
+  service: string;
+  open: boolean;
+  noop_response?: string;
+  starttls_supported?: boolean;
+  starttls_result?: string;
+  error?: string;
+}
+
+interface ApiResponse {
+  host: string;
+  results: PortResult[];
+  error?: string;
+}
 
 const SmtpTest: React.FC = () => {
-  // form state
   const [host,    setHost]    = useState<string>('');
   const [error,   setError]   = useState<string|null>(null);
   const [running, setRunning] = useState<boolean>(false);
+  const [data,    setData]    = useState<ApiResponse|null>(null);
 
-  // initialize refs
-  const termRef      = useRef<Terminal | null>(null);
-  const socketRef    = useRef<Socket   | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null!);
-
-  // mount xterm and socket.io once
-  useEffect(() => {
-    const term = new Terminal({
-      cols: 80,
-      rows: 20,
-      cursorBlink: true,
-      convertEol: true,
-      tabStopWidth: 4,
-      theme: { background: '#1e1e1e' },
-    });
-    if (containerRef.current) {
-      term.open(containerRef.current);
-      term.writeln('\x1b[36mSMTP connectivity tester:\x1b[0m');
-      term.writeln(' - Port 25: SMTP (STARTTLS ➔ opportunistic TLS)');
-      term.writeln(' - Port 465: SMTPS');
-      term.writeln(' - Port 587: explicit TLS');
-      term.writeln('');
-      term.writeln('\x1b[32m[Ready] enter hostname and click “Test SMTP”.\x1b[0m');
-    }
-
-    const socket = io(`${SOCKET_URL}${SOCKET_NAMESPACE}`, {
-      transports: ['websocket'],
-      path: '/socket.io',
-    });
-
-    socket.on('connect', () => {
-      term.writeln('\x1b[36m[Socket] connected to backend.\x1b[0m');
-    });
-    socket.on('terminal_output', (chunk: string) => {
-      // replace tab characters with spaces for consistent alignment
-      const sanitized = chunk.replace(/\t/g, '    ');
-      term.write(sanitized);
-    });
-    socket.on('disconnect', () => {
-      term.writeln('\r\n\x1b[31m[Socket] disconnected.\x1b[0m');
-    });
-
-    termRef.current   = term;
-    socketRef.current = socket;
-
-    return () => {
-      socket.disconnect();
-      term.dispose();
-    };
-  }, []);
-
-  // when submit form
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setData(null);
 
     if (!host.trim()) {
       setError('Please enter a mail-server hostname or IP.');
       return;
     }
 
-    termRef.current?.clear();
-    termRef.current?.writeln('\x1b[33m[Info] testing SMTP...\x1b[0m');
     setRunning(true);
-    socketRef.current?.emit('run_script', { host });
-  };
+    try {
+      const resp = await fetch('/api/smtp', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ host }),
+      });
 
-  // listen for finish
-  useEffect(() => {
-    const socket = socketRef.current;
-    if (!socket) return;
+      const payload: ApiResponse = await resp.json();
+      if (!resp.ok) {
+        throw new Error(payload.error || `Server returned ${resp.status}`);
+      }
 
-    const onFinish = () => {
+      setData(payload);
+    } catch (err: any) {
+      setError(err.message || 'Unexpected error');
+    } finally {
       setRunning(false);
-      termRef.current?.writeln('\r\n\x1b[32m[Done] checks complete.\x1b[0m');
-    };
-    socket.on('script_finished', onFinish);
-
-    return () => {
-      socket.off('script_finished', onFinish);
-    };
-  }, []);
+    }
+  };
 
   return (
     <div className="outer-container">
-      <div>
-        <h1 className="form-title">SMTP Connectivity Test</h1>
+      <div className="inner-container">
+      <h1 className="form-title">SMTP Connectivity Test</h1>
 
-        <form onSubmit={handleSubmit} className="form-wrapper">
-          <PTextFieldWrapper theme="dark" label="Mail server host:">
-            <input
-              type="text"
-              value={host}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setHost(e.target.value)}
-              placeholder="e.g. mail.example.com"
-              className="form-input"
-            />
-          </PTextFieldWrapper>
-
-          <PButton theme="dark" variant="secondary" type="submit" style={{ marginTop: 20 }}>
-            Test SMTP
-          </PButton>
-
-          {running && (
-            <div style={{ marginTop: '1rem' }}>
-              <PSpinner size="small" aria={{ 'aria-label': 'Testing...' }} />
-            </div>
-          )}
-
-          {error && (
-            <div className="response-message response-error" style={{ marginTop: '1rem' }}>
-              {error}
-            </div>
-          )}
-        </form>
-
-        {/* xterm.js terminal pane with left-alignment wrapper */}
-        <div style={{ textAlign: 'left' }}>
-          <div
-            ref={containerRef}
-            style={{
-              width: '100%',
-              height: '300px',
-              marginTop: '2rem',
-              backgroundColor: '#000',
-              borderRadius: 4,
-              overflow: 'hidden'
-            }}
+      <form onSubmit={handleSubmit} className="form-wrapper">
+        <PTextFieldWrapper theme="dark" label="Mail server host:">
+          <input
+            type="text"
+            value={host}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setHost(e.target.value)}
+            placeholder="e.g. mail.example.com"
+            className="form-input"
           />
-        </div>
+        </PTextFieldWrapper>
 
+        <PButton
+          theme="dark"
+          variant="secondary"
+          type="submit"
+          style={{ marginTop: 20 }}
+          disabled={running}
+        >
+          Test SMTP
+        </PButton>
+
+        {running && (
+          <div style={{ marginTop: '1rem' }}>
+            <PSpinner size="small" aria={{ 'aria-label': 'Testing...' }} />
+          </div>
+        )}
+
+        {error && (
+          <div className="response-message response-error" style={{ marginTop: '1rem' }}>
+            <PText>{error}</PText>
+          </div>
+        )}
+      </form>
+
+      {data && (
+        <div style={{ marginTop: '2rem' }}>
+          <PText theme="dark">Results for {data.host}:</PText>
+          <table className="result-table" style={{ width: '100%', marginTop: '0.5rem' }}>
+            <thead>
+              <tr>
+                <th>Port</th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>NOOP Response</th>
+                <th>STARTTLS</th>
+                <th>Upgrade Result</th>
+                <th>Error</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.results.map((r) => (
+                <tr key={r.port}>
+                  <td>{r.port}</td>
+                  <td>{r.service}</td>
+                  <td>{r.open ? 'Open' : 'Closed'}</td>
+                  <td>{r.noop_response || '—'}</td>
+                  <td>
+                    {r.starttls_supported === undefined
+                      ? 'n/a'
+                      : r.starttls_supported
+                        ? 'Yes'
+                        : 'No'}
+                  </td>
+                  <td>{r.starttls_result || '—'}</td>
+                  <td>{r.error || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       </div>
     </div>
   );
-
-
 };
 
 export default SmtpTest;
