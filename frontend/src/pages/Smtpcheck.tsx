@@ -1,4 +1,3 @@
-// src/SmtpTest.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import {
   PButton,
@@ -63,6 +62,7 @@ const SmtpTest: React.FC = () => {
 
   return (
     <div className="outer-container">
+      <div className="inner-container">
       <h1 className="form-title">SMTP Connectivity Test</h1>
 
       <form onSubmit={handleSubmit} className="form-wrapper">
@@ -101,7 +101,7 @@ const SmtpTest: React.FC = () => {
 
       {data && (
         <div style={{ marginTop: '2rem' }}>
-          <PText>Results for {data.host}:</PText>
+          <PText theme="dark">Results for {data.host}:</PText>
           <table className="result-table" style={{ width: '100%', marginTop: '0.5rem' }}>
             <thead>
               <tr>
@@ -136,6 +136,7 @@ const SmtpTest: React.FC = () => {
           </table>
         </div>
       )}
+      </div>
     </div>
   );
 };
