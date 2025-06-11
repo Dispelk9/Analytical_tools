@@ -12,7 +12,6 @@ from smtp_handler import smtp_bp,SMTPTestNamespace
 from auth_backend.login_user import auth_user_bp , db, login_manager
 from utils.db_connection import DB_CONNECT
 
-from flask_socketio import SocketIO
 
 
 app = Flask(__name__)
@@ -29,11 +28,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=1)
 
 Session(app)
-# Allow CORS from your Vite dev server or production host as needed
-socketio = SocketIO(app, cors_allowed_origins="*")
 
-# mount at the same path you use in your TSX:
-socketio.on_namespace(SMTPTestNamespace('/terminal'))
 
 db_config = DB_CONNECT()
 
@@ -57,4 +52,3 @@ app.register_blueprint(smtp_bp)
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
-    socketio.run(app, debug=True, port=8080)
