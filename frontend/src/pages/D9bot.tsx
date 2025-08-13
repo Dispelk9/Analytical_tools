@@ -70,15 +70,15 @@ const D9bot: React.FC = () => {
           <img src={reactLogo} className="logo react" alt="Act logo" />
         </a>
 
-        <h1 className="form-title">Adduct Calculation</h1>
+        <h1 className="form-title">D9: How can I help you?</h1>
         <div className="form-wrapper">
           <form onSubmit={handleSubmit}>
-            <PTextarea name="Prompt-box" theme="dark" label="Observed m/z:" description="Measured mass-to-charge ratio">
+            <PTextarea name="Prompt-box" theme="dark" label="Prompt" description="Communication goes here">
               <input
-                type="number"
+                type="text"
                 value={Prompt}
                 onChange={handleChangeA}
-                placeholder="Enter Observed m/z"
+                placeholder="Ask it anything"
                 className="form-input"
               />
             </PTextarea>
