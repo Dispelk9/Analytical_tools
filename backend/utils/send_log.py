@@ -24,7 +24,7 @@ def send_email(log_entries,receiver_email ):
 
     # Create a multipart message
     message = MIMEMultipart("alternative")
-    message["Subject"] = "Logging from ACT Adduct"
+    message["Subject"] = "Logging from ACT"
     message["From"] = sender_email
     message["To"] = receiver_email
 
