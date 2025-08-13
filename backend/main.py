@@ -11,6 +11,7 @@ from act_math import math_bp
 from smtp_handler import smtp_bp
 from auth_backend.login_user import auth_user_bp , db, login_manager
 from utils.db_connection import DB_CONNECT
+from chatbot.gemini import gemini_bp
 
 
 
@@ -48,6 +49,7 @@ app.register_blueprint(compound_bp)
 app.register_blueprint(adduct_bp)
 app.register_blueprint(math_bp)
 app.register_blueprint(smtp_bp)
+app.register_blueprint(gemini_bp)
 
 
 if __name__ == '__main__':

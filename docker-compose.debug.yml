@@ -3,8 +3,10 @@ services:
     image: postgres:13
     container_name: postgres_db
     restart: always
-    env_file:
-      - ./backend/.env  # Path to the .env file relative to the docker-compose.yml
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 
+      POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

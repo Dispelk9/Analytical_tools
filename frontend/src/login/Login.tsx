@@ -59,7 +59,7 @@ const Login: React.FC = () => {
       </div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
         <div>
-          <PTextFieldWrapper theme="dark" label="Username" description="Username: testuser for demo">
+          <PTextFieldWrapper theme="dark" label="Username" description="">
             <input
               id="username"
               type="text"
@@ -70,7 +70,7 @@ const Login: React.FC = () => {
           </PTextFieldWrapper>
         </div>
         <div>
-          <PTextFieldWrapper theme="dark" label="Password" description="Password: dispelk9 for demo">
+          <PTextFieldWrapper theme="dark" label="Password" description="">
             <input
               id="password"
               type="password"
