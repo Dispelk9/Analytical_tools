@@ -10,15 +10,23 @@ import {
 } from "@porsche-design-system/components-react";
 import '../App.css';
 
-interface NumberResponse {
-  result: number;
-}
+
+type D9Response = {
+  candidates: Array<{
+    content: {
+      parts: Array<{ text: string }>;
+      role: string;            // e.g. "model"
+    };
+    finishReason: string;       // e.g. "STOP"
+    avgLogprobs: number;
+  }>;
+};
 
 const D9bot: React.FC = () => {
   const [Prompt, setPrompt] = useState<string>('');
   const [Recipient, setRecipient] = useState<string>('');
 
-  const [result, setResult] = useState<number | null>(null);
+  const [result, setResult] = useState<D9Response | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
 
@@ -53,8 +61,8 @@ const D9bot: React.FC = () => {
         throw new Error('Server error');
       }
 
-      const data: NumberResponse = await response.json();
-      setResult(data.result);
+      const data: D9Response = await response.json();
+      setResult(data);
     } catch (err) {
       console.error('Error:', err);
       setError('Error processing your request.');
