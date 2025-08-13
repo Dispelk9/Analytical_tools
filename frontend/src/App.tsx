@@ -92,7 +92,7 @@ const AppLayout: React.FC = () => {
         <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
           #Gemini#LLM#AI
         </PTag>
-        <img src="./assets/adduct.jpg" alt="Adduct" />
+        <img src="./assets/AI.jpg" alt="Adduct" />
       </PLinkTile>
       <PLinkTile
         href="/adduct"
