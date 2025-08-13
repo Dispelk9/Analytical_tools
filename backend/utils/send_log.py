@@ -35,7 +35,7 @@ def send_email(log_entries,receiver_email ):
     <html>
         <body>
             <p>Hello,<br>
-               This is a <b>Adduct Result</b>!</p>
+               This is a <b>Result from ACT</b>!</p>
             <pre>%s</pre>
 
 

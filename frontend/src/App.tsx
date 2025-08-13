@@ -16,6 +16,7 @@ import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
 import Smtpcheck from './pages/Smtpcheck';
 import Login from './login/Login'
+import D9bot from './pages/D9bot'
 
 interface RequireAuthProps {
   children: ReactNode
@@ -82,6 +83,17 @@ const AppLayout: React.FC = () => {
       gridTemplateColumns: 'repeat(4, 1fr)', // 4 equal-width columns in one row
       gap: '16px',                           // spacing between columns
       }}>
+      <PLinkTile
+        href="/D9bot"
+        label="D9bot"
+        description="Dispelk9 Bot"
+        compact={true}
+      >
+        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+          #Gemini#LLM#AI
+        </PTag>
+        <img src="./assets/adduct.jpg" alt="Adduct" />
+      </PLinkTile>
       <PLinkTile
         href="/adduct"
         label="Adduct"
@@ -179,6 +191,7 @@ const AppLayout: React.FC = () => {
           <Route path="/compound" element={<Compound />} />
           <Route path="/math" element={<CollisionPlot />} />
           <Route path="/smtpcheck" element={<Smtpcheck />} />
+          <Route path="/D9bot" element={<D9bot />} />
         </Routes>
     </main>
 
