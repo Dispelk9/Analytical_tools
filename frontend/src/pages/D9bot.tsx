@@ -1,7 +1,6 @@
 // src/Adduct.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import reactLogo from '../../public/assets/react.svg';
-import RenderObject from './RenderObject';
 import {
   PButton,
   PSpinner,
@@ -31,7 +30,6 @@ const D9bot: React.FC = () => {
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
 
   // Input handlers
-  const handleChangeA = (e: ChangeEvent<HTMLInputElement>) => setPrompt(e.target.value);
   const handleChangeB = (e: ChangeEvent<HTMLInputElement>) => setRecipient(e.target.value);
 
 
@@ -62,6 +60,10 @@ const D9bot: React.FC = () => {
       }
 
       const data: D9Response = await response.json();
+      if (!Array.isArray(data.candidates)) {
+        throw new Error('Unexpected response format');
+      }
+
       setResult(data);
     } catch (err) {
       console.error('Error:', err);
@@ -81,15 +83,15 @@ const D9bot: React.FC = () => {
         <h1 className="form-title">D9: How can I help you?</h1>
         <div className="form-wrapper">
           <form onSubmit={handleSubmit}>
-            <PTextarea name="Prompt-box" theme="dark" label="Prompt" description="Communication goes here">
-              <input
-                type="text"
-                value={Prompt}
-                onChange={handleChangeA}
-                placeholder="Ask it anything"
-                className="form-input"
-              />
-            </PTextarea>
+            <PTextarea
+            name="Prompt-box"
+            theme="dark"
+            label="Prompt"
+            description="Communication goes here"
+            value={Prompt}
+            onInput={(e) => setPrompt((e.target as any).value)}
+            />
+
 
             <PTextFieldWrapper theme="dark" label="Recipient address:" description="Allowed send result to your address">
               <input
@@ -113,13 +115,19 @@ const D9bot: React.FC = () => {
           </form>
         </div>
         {result !== null && (
-          <div className="result-container">
+        <div className="result-container">
             <h3>What I found</h3>
             <div className="result-content">
-              <RenderObject data={result} />
+            {result.candidates?.flatMap(c => c.content?.parts ?? [])
+                .map((p, i) => (
+                <pre key={i} style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+                    {p.text}
+                </pre>
+                ))}
             </div>
-          </div>
+        </div>
         )}
+
 
         {error && (
           <div className="response-message response-error">
