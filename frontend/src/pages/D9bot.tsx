@@ -1,4 +1,3 @@
-// src/Adduct.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import reactLogo from '../../public/assets/react.svg';
 import {
@@ -8,6 +7,32 @@ import {
   PTextarea,
 } from "@porsche-design-system/components-react";
 import '../App.css';
+
+type TextBlock =
+  | { type: 'code'; lang?: string; content: string }
+  | { type: 'text'; content: string };
+
+function splitIntoBlocks(input: string): TextBlock[] {
+  const blocks: TextBlock[] = [];
+  const re = /```([a-zA-Z0-9_-]+)?\s*\n([\s\S]*?)```/g;
+  let last = 0, m: RegExpExecArray | null;
+
+  while ((m = re.exec(input)) !== null) {
+    if (m.index > last) {
+      blocks.push({ type: 'text', content: input.slice(last, m.index) });
+    }
+    blocks.push({
+      type: 'code',
+      lang: (m[1] || '').trim() || undefined,
+      content: m[2],
+    });
+    last = re.lastIndex;
+  }
+  if (last < input.length) {
+    blocks.push({ type: 'text', content: input.slice(last) });
+  }
+  return blocks;
+}
 
 
 type D9Response = {
@@ -115,18 +140,30 @@ const D9bot: React.FC = () => {
           </form>
         </div>
         {result !== null && (
-        <div className="result-container">
-            <h3>What I found</h3>
-            <div className="result-content">
-            {result.candidates?.flatMap(c => c.content?.parts ?? [])
-                .map((p, i) => (
-                <pre key={i} style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
-                    {p.text}
-                </pre>
-                ))}
+            <div className="result-container">
+                <h3>D9 Bot</h3>
+                <div className="result-content">
+                {result.candidates?.flatMap((c, ci) => (c.content?.parts ?? []).map((p, pi) => (
+                    <React.Fragment key={`${ci}-${pi}`}>
+                    {splitIntoBlocks(p.text).map((b, bi) =>
+                        b.type === 'code' ? (
+                        <pre key={`${ci}-${pi}-code-${bi}`} className="code-box" data-lang={b.lang}>
+                            <code>{b.content}</code>
+                        </pre>
+                        ) : (
+                        b.content.trim() ? (
+                            <p key={`${ci}-${pi}-text-${bi}`} style={{ whiteSpace: 'pre-line', margin: 0 }}>
+                            {b.content}
+                            </p>
+                        ) : null
+                        )
+                    )}
+                    </React.Fragment>
+                )))}
+                </div>
             </div>
-        </div>
-        )}
+            )}
+
 
 
         {error && (
