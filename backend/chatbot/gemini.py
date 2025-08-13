@@ -41,6 +41,7 @@ def gemini_request():
             send_email([prompt, response_json], recipient)
 
         # Return JSON back to the frontend
+        logging.info("Response JSON: %s", response_json)
         return jsonify(response_json), 200
 
     except requests.HTTPError as e:
