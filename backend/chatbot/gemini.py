@@ -38,7 +38,8 @@ def gemini_request():
         # Email (optional)
         if recipient:
             # You might want a nicer email body than raw dict
-            send_email([prompt, response_json], recipient)
+            texts = extract_texts(response_json)
+            send_email([f"Prompt: {prompt}", "Response:", *texts],recipient)
 
         # Return JSON back to the frontend
         logging.info("Response JSON: %s", response_json)
@@ -51,6 +52,16 @@ def gemini_request():
         logging.exception("Unhandled error")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
+
+def extract_texts(resp: dict) -> list[str]:
+    texts: list[str] = []
+    for c in resp.get("candidates", []):
+        parts = (c.get("content") or {}).get("parts", [])
+        for p in parts:
+            t = p.get("text")
+            if isinstance(t, str):
+                texts.append(t)
+    return texts
 
 def call_gemini(request_prompt: str) -> dict:
     """Call Google Generative Language API and return parsed JSON."""
