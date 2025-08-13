@@ -18,21 +18,68 @@ function splitIntoBlocks(input: string): TextBlock[] {
   let last = 0, m: RegExpExecArray | null;
 
   while ((m = re.exec(input)) !== null) {
-    if (m.index > last) {
-      blocks.push({ type: 'text', content: input.slice(last, m.index) });
-    }
-    blocks.push({
-      type: 'code',
-      lang: (m[1] || '').trim() || undefined,
-      content: m[2],
-    });
+    if (m.index > last) blocks.push({ type: 'text', content: input.slice(last, m.index) });
+    blocks.push({ type: 'code', lang: (m[1] || '').trim() || undefined, content: m[2] });
     last = re.lastIndex;
   }
-  if (last < input.length) {
-    blocks.push({ type: 'text', content: input.slice(last) });
-  }
+  if (last < input.length) blocks.push({ type: 'text', content: input.slice(last) });
   return blocks;
 }
+
+/** Render one plain-text block, supporting ***…***, **…**, *…* */
+function renderRichTextBlock(text: string, keyPrefix: string): React.ReactNode[] {
+  // Split by single newlines to allow line-level heading detection
+  const lines = text.split(/\r?\n/);
+  const nodes: React.ReactNode[] = [];
+
+  lines.forEach((line, i) => {
+    const h3 = line.match(/^\s*\*{3}\s*(.*?)\s*\*{3}\s*$/);
+    if (h3) {
+      nodes.push(<h3 key={`${keyPrefix}-h3-${i}`}>{h3[1]}</h3>);
+      return;
+    }
+    const h2 = line.match(/^\s*\*{2}\s*(.*?)\s*\*{2}\s*$/);
+    if (h2) {
+      nodes.push(<h2 key={`${keyPrefix}-h2-${i}`}>{h2[1]}</h2>);
+      return;
+    }
+
+    // Inline emphasis within the line
+    const parts: React.ReactNode[] = [];
+    let lastIdx = 0;
+    const re = /(\*\*\*[^*]+?\*\*\*|\*\*[^*]+?\*\*|\*[^*]+?\*)/g;
+    let m: RegExpExecArray | null;
+
+    while ((m = re.exec(line)) !== null) {
+      if (m.index > lastIdx) parts.push(line.slice(lastIdx, m.index));
+      const token = m[0];
+      const inner = token.replace(/^\*+|\*+$/g, '');
+
+      if (token.startsWith('***')) {
+        parts.push(<strong key={`${keyPrefix}-b3-${i}-${m.index}`} className="b-h3">{inner}</strong>);
+      } else if (token.startsWith('**')) {
+        parts.push(<strong key={`${keyPrefix}-b2-${i}-${m.index}`}>{inner}</strong>);
+      } else {
+        parts.push(<em key={`${keyPrefix}-em-${i}-${m.index}`}>{inner}</em>);
+      }
+      lastIdx = re.lastIndex;
+    }
+    if (lastIdx < line.length) parts.push(line.slice(lastIdx));
+
+    // Trim empty lines; otherwise render as paragraph
+    const hasContent = parts.some(p => (typeof p === 'string' ? p.trim() : true));
+    if (hasContent) {
+      nodes.push(
+        <p key={`${keyPrefix}-p-${i}`} style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
+          {parts}
+        </p>
+      );
+    }
+  });
+
+  return nodes;
+}
+
 
 
 type D9Response = {
@@ -143,23 +190,21 @@ const D9bot: React.FC = () => {
             <div className="result-container">
                 <h3>D9 Bot</h3>
                 <div className="result-content">
-                {result.candidates?.flatMap((c, ci) => (c.content?.parts ?? []).map((p, pi) => (
-                    <React.Fragment key={`${ci}-${pi}`}>
-                    {splitIntoBlocks(p.text).map((b, bi) =>
-                        b.type === 'code' ? (
-                        <pre key={`${ci}-${pi}-code-${bi}`} className="code-box" data-lang={b.lang}>
-                            <code>{b.content}</code>
-                        </pre>
-                        ) : (
-                        b.content.trim() ? (
-                            <p key={`${ci}-${pi}-text-${bi}`} style={{ whiteSpace: 'pre-line', margin: 0 }}>
-                            {b.content}
-                            </p>
-                        ) : null
-                        )
+                {result.candidates?.flatMap((c, ci) =>
+                    (c.content?.parts ?? []).map((p, pi) => (
+                        <React.Fragment key={`${ci}-${pi}`}>
+                        {splitIntoBlocks(p.text).map((b, bi) =>
+                            b.type === 'code' ? (
+                            <pre key={`${ci}-${pi}-code-${bi}`} className="code-box" data-lang={b.lang}>
+                                <code>{b.content}</code>
+                            </pre>
+                            ) : (
+                            renderRichTextBlock(b.content, `${ci}-${pi}-text-${bi}`)
+                            )
+                        )}
+                        </React.Fragment>
+                    ))
                     )}
-                    </React.Fragment>
-                )))}
                 </div>
             </div>
             )}
