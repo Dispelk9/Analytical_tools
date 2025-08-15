@@ -2,120 +2,99 @@ name: Continuous Deployment ACT
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: true
 
 jobs:
   build-and-push:
-    name: Build & Push Images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     outputs:
-      tag: ${{ steps.set-tag.outputs.tag }}
+      tag: ${{ steps.t.outputs.tag }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
+      - id: t
+        run: echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.G_TOKEN }}
 
-      - name: Set image tag
-        id: set-tag
-        run: |
-          echo "tag=${GITHUB_SHA}" >> $GITHUB_OUTPUT
-
       - name: Build & push backend
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
-          tags: |
-            ghcr.io/dispelk9/analytical_tools_backend:${{ steps.set-tag.outputs.tag }}
-            ghcr.io/dispelk9/analytical_tools_backend:latest
+          tags: ghcr.io/dispelk9/analytical_tools_backend:${{ steps.t.outputs.tag }}
 
-      - name: Build & push apache (frontend)
-        uses: docker/build-push-action@v4
+      - name: Build & push frontend
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           push: true
-          tags: |
-            ghcr.io/dispelk9/analytical_tools_frontend:${{ steps.set-tag.outputs.tag }}
-            ghcr.io/dispelk9/analytical_tools_frontend:latest
+          tags: ghcr.io/dispelk9/analytical_tools_frontend:${{ steps.t.outputs.tag }}
 
   deploy:
-    name: Deploy on Hetzner
+    runs-on: [self-hosted, act-prod]   
     needs: build-and-push
-    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    timeout-minutes: 15
+
     steps:
-      - name: Checkout code
+      - name: Checkout deploy folder only
         uses: actions/checkout@v4
-
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          persist-credentials: false
+          sparse-checkout: |
+            deploy/
+          sparse-checkout-cone-mode: false
 
-      - name: Pin server host key
+      - name: Stage compose + env locally (on the runner host)
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.IP }} >> ~/.ssh/known_hosts
+          mkdir -p ~/app/backend
+          # compose file
+          cp deploy/docker-compose.yml ~/app/docker-compose.yml
 
-      - name: SSH & deploy
+          # backend container env
+          umask 177
+          cat > ~/app/backend/.env <<'ENV'
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+          SENDER=${{ secrets.SENDER }}
+          MAIL_PW=${{ secrets.MAIL_PW }}
+          SMTP_RELAY=${{ secrets.SMTP_RELAY }}
+          ENV
+
+          # compose parse-time vars (DB_PASSWORD for postgres)
+          cat > ~/app/.env <<'ENV'
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          ENV
+
+      - name: Deploy this commit (immutable tag)
+        env:
+          TAG: ${{ needs.build-and-push.outputs.tag }}
+          # only needed if GHCR packages are private:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.G_TOKEN }}
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.IP }} bash << 'EOF'
-            set -euo pipefail
-
-            echo "${{ secrets.G_TOKEN }}" \
-             | docker login ghcr.io \
-               --username dispelk9 \
-               --password-stdin
-
-            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            export TAG=${{ needs.build-and-push.outputs.tag }}
-
-            # Navigate to project directory
-            cd /${{ secrets.SERVER_USER }}/Analytical_tools
-   
-            
-            # Setup SSH agent and clone repository
-            eval "$(ssh-agent -s)"
-            echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add /${{ secrets.SERVER_USER }}/.ssh/id_rsa
-            # clone once; afterwards just update in-place
-            if [ ! -d ~/Analytical_tools/.git ]; then
-              git clone git@github.com:Dispelk9/Analytical_tools.git ~/Analytical_tools
-            fi
-            git fetch --all
-            git reset --hard origin/master
-
-            printf '%s\n' \
-            "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
-            "TAG=${{ needs.build-and-push.outputs.tag }}" \
-            > .env
-
-            chmod 600 .env
-
-            printf '%s\n' \
-            "DB_USERNAME=${{ secrets.DB_USERNAME }}" \
-            "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
-            "DB_HOST=${{ secrets.DB_HOST }}" \
-            "DB_PORT=${{ secrets.DB_PORT }}" \
-            "DB_NAME=${{ secrets.DB_NAME }}" \
-            "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" \
-            "SENDER=${{ secrets.SENDER }}" \
-            "MAIL_PW=${{ secrets.MAIL_PW }}" \
-            "SMTP_RELAY=${{ secrets.SMTP_RELAY }}" \
-            > backend/.env
-
-            chmod 600 backend/.env
-            # Recreate all services
-            # Tear down containers + old images in one shot
-            docker compose down --remove-orphans --rmi all
-            TAG=$TAG docker compose up -d --remove-orphans --pull=always --force-recreate --no-build
-
-          EOF
-
-        
+          # pass GHCR creds only if needed; deploy.sh will login when GHCR_TOKEN is set
+          sudo GHCR_USER="$GHCR_USER" GHCR_TOKEN="$GHCR_TOKEN" /usr/local/bin/deploy.sh "$TAG"
