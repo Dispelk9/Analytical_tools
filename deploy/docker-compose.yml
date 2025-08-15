@@ -1,8 +1,7 @@
 services:
   postgres:
     image: postgres:13
-    container_name: postgres_db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -12,26 +11,23 @@ services:
 
   backend:
     image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
-    container_name: flask_app
-    restart: always
+    restart: unless-stopped
     depends_on:
       - postgres
     env_file:
       - backend/.env
     environment:
-      # Flask will use this to connect to Postgres
-      DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres_db:5432/postgres
+      # flask connects to postgres in the compose network
+      DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
     ports:
       - "8080:8080"
 
   frontend:
     image: ghcr.io/dispelk9/analytical_tools_frontend:${TAG}
-    container_name: apache_frontend
-    restart: always
+    restart: unless-stopped
     ports:
       - "8081:80"
     volumes:
-      # Live Let’s Encrypt certs for HTTPS termination in Apache
       - /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem:/usr/local/apache2/conf/fullchain.pem:ro
       - /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem:/usr/local/apache2/conf/privkey.pem:ro
 
