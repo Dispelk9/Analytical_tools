@@ -51,7 +51,27 @@ def gemini_request():
     except Exception as e:
         logging.exception("Unhandled error")
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
+    
+def _read_secret_file(path: str) -> str | None:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return None
 
+
+def get_gemini_api_key() -> str:
+    """
+    Prefer file-based secret (Docker secret) over env var.
+    Fallback to env for dev.
+    """
+    path = os.getenv("GEMINI_API_KEY_FILE", "/run/secrets/gemini_api_key")
+    key = _read_secret_file(path)
+    if not key:
+        key = os.getenv("GOOGLE_API_KEY")  # dev fallback
+    if not key:
+        raise RuntimeError("Gemini API key is not configured")
+    return key
 
 def extract_texts(resp: dict) -> list[str]:
     texts: list[str] = []
@@ -65,7 +85,7 @@ def extract_texts(resp: dict) -> list[str]:
 
 def call_gemini(request_prompt: str) -> dict:
     """Call Google Generative Language API and return parsed JSON."""
-    api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
         raise RuntimeError("GOOGLE_API_KEY is not set")
 

@@ -7,6 +7,11 @@ export TAG
 
 cd /home/deploy/app
 
+mkdir -p ~/app/secrets
+umask 177
+printf '%s' '${{ secrets.GEMINI_API_KEY }}' > ~/app/secrets/gemini_api_key
+
+
 # optional: login to GHCR if private
 if [[ -n "${GHCR_TOKEN:-}" ]]; then
   echo "$GHCR_TOKEN" | docker login ghcr.io -u "${GHCR_USER:-}" --password-stdin >/dev/null

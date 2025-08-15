@@ -18,8 +18,10 @@ services:
     env_file:
       - backend/.env
     environment:
-      # flask connects to postgres in the compose network
       DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
+      GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
+    secrets:
+      - gemini_api_key
     ports:
       - "8080:8080"
 
@@ -34,3 +36,7 @@ services:
 
 volumes:
   postgres_data:
+
+secrets:
+  gemini_api_key:
+    file: ./secrets/gemini_api_key
