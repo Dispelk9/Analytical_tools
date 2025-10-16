@@ -3,6 +3,7 @@ name: Continuous Deployment ACT
 on:
   push:
     branches: [ master ]
+  workflow_dispatch:
 
 concurrency:
   group: prod-deploy
