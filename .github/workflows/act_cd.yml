@@ -48,7 +48,9 @@ jobs:
           tags: ghcr.io/dispelk9/analytical_tools_frontend:${{ steps.t.outputs.tag }}
 
   deploy:
-    runs-on: [self-hosted, act-prod]   
+    # deactivate because pricing of self-hosted
+    ##runs-on: [self-hosted, act-prod]
+    runs-on: [act-prod]
     needs: build-and-push
     environment: production
     permissions:
