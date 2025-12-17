@@ -125,6 +125,7 @@ jobs:
           SENDER=${SENDER}
           MAIL_PW=${MAIL_PW}
           SMTP_RELAY=${SMTP_RELAY}
+          GEMINI_MODEL=gemini-2.5-flash-lite
           EOF
 
           # compose parse-time env (.env next to docker-compose.yml)
