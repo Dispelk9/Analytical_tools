@@ -48,8 +48,6 @@ jobs:
           tags: ghcr.io/dispelk9/analytical_tools_frontend:${{ steps.t.outputs.tag }}
 
   deploy:
-    # deactivate because pricing of self-hosted
-    ##runs-on: [self-hosted, act-prod]
     runs-on: ubuntu-latest
     needs: build-and-push
     environment: production
@@ -67,40 +65,82 @@ jobs:
             deploy/
           sparse-checkout-cone-mode: false
 
-      - name: Stage compose + env locally (on the runner host)
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Pin server host key
         run: |
-          mkdir -p ~/app/backend
-          # compose file
-          cp deploy/docker-compose.yml ~/app/docker-compose.yml
-          mkdir -p ~/app/secrets
-          umask 177
-          printf '%s' '${{ secrets.GEMINI_API_KEY }}' > ~/app/secrets/gemini_api_key
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.IP }}" >> ~/.ssh/known_hosts
 
-          # backend container env
-          umask 177
-          cat > ~/app/backend/.env <<'ENV'
-          DB_USERNAME=${{ secrets.DB_USERNAME }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_HOST=${{ secrets.DB_HOST }}
-          DB_PORT=${{ secrets.DB_PORT }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-          SENDER=${{ secrets.SENDER }}
-          MAIL_PW=${{ secrets.MAIL_PW }}
-          SMTP_RELAY=${{ secrets.SMTP_RELAY }}
-          ENV
+      - name: Copy compose file to server
+        run: |
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app"
+          scp -p deploy/docker-compose.yml \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
 
-          # compose parse-time vars (DB_PASSWORD for postgres)
-          cat > ~/app/.env <<'ENV'
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          ENV
-
-      - name: Deploy this commit (immutable tag)
+      - name: Stage env + deploy on server (no repo clone)
         env:
           TAG: ${{ needs.build-and-push.outputs.tag }}
-          # only needed if GHCR packages are private:
+
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.G_TOKEN }}
+
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          SENDER: ${{ secrets.SENDER }}
+          MAIL_PW: ${{ secrets.MAIL_PW }}
+          SMTP_RELAY: ${{ secrets.SMTP_RELAY }}
         run: |
-          # pass GHCR creds only if needed; deploy.sh will login when GHCR_TOKEN is set
-          sudo GHCR_USER="$GHCR_USER" GHCR_TOKEN="$GHCR_TOKEN" /usr/local/bin/deploy.sh "$TAG"
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" bash -s -- "$TAG" <<'EOF'
+            set -euo pipefail
+            TAG="$1"
+
+            mkdir -p ~/app/backend ~/app/secrets
+
+            # compose secret file at ./secrets/gemini_api_key (relative to ~/app)
+            umask 177
+            printf '%s' "$GEMINI_API_KEY" > ~/app/secrets/gemini_api_key
+
+            # backend env_file: backend/.env (relative to ~/app)
+            umask 177
+            cat > ~/app/backend/.env <<ENV
+            DB_USERNAME=$DB_USERNAME
+            DB_PASSWORD=$DB_PASSWORD
+            DB_HOST=$DB_HOST
+            DB_PORT=$DB_PORT
+            DB_NAME=$DB_NAME
+            SESSION_SECRET=$SESSION_SECRET
+            SENDER=$SENDER
+            MAIL_PW=$MAIL_PW
+            SMTP_RELAY=$SMTP_RELAY
+            ENV
+
+            # compose parse-time vars: DB_PASSWORD for postgres + DATABASE_URL interpolation
+            umask 177
+            cat > ~/app/.env <<ENV
+            DB_PASSWORD=$DB_PASSWORD
+            TAG=$TAG
+            ENV
+
+            # login to GHCR (needed if your GHCR packages are private)
+            echo "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+
+            cd ~/app
+
+            # pull new images + restart
+            docker compose pull
+            docker compose up -d --remove-orphans --force-recreate
+          EOF
+
+      # optional cleanup (only if you want to reclaim disk space regularly)
+      # - name: Prune old images on server
+      #   run: |
+      #     ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "docker image prune -af || true"
