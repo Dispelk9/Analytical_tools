@@ -82,7 +82,7 @@ jobs:
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
 
  
-      - name: Stage env + deploy on server (printf only)
+      - name: Stage env + deploy on server
         env:
           TAG: ${{ needs.build-and-push.outputs.tag }}
 
@@ -102,38 +102,56 @@ jobs:
           SMTP_RELAY: ${{ secrets.SMTP_RELAY }}
 
         run: |
+          set -euo pipefail
+
+          tmpdir="$(mktemp -d)"
+          trap 'rm -rf "$tmpdir"' EXIT
+
+          umask 177
+
+          # secret file for docker-compose secret
+          cat > "$tmpdir/gemini_api_key" <<EOF
+${GEMINI_API_KEY}
+EOF
+
+          # backend env_file (backend/.env)
+          cat > "$tmpdir/backend.env" <<EOF
+DB_USERNAME=${DB_USERNAME}
+DB_PASSWORD=${DB_PASSWORD}
+DB_HOST=${DB_HOST}
+DB_PORT=${DB_PORT}
+DB_NAME=${DB_NAME}
+SESSION_SECRET=${SESSION_SECRET}
+SENDER=${SENDER}
+MAIL_PW=${MAIL_PW}
+SMTP_RELAY=${SMTP_RELAY}
+EOF
+
+          # compose parse-time env (.env next to docker-compose.yml)
+          cat > "$tmpdir/compose.env" <<EOF
+DB_PASSWORD=${DB_PASSWORD}
+TAG=${TAG}
+EOF
+
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app/backend ~/app/secrets"
+
+          scp -p "$tmpdir/gemini_api_key" \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/secrets/gemini_api_key"
+          scp -p "$tmpdir/backend.env" \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/backend/.env"
+          scp -p "$tmpdir/compose.env" \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/.env"
+
+          cat <<EOF | ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "docker login ghcr.io --username '$GHCR_USER' --password-stdin"
+${GHCR_TOKEN}
+EOF
+
           ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" bash -lc '
             set -euo pipefail
-
-            mkdir -p ~/app/backend ~/app/secrets
-            umask 177
-
-            # secret file for docker-compose secret
-            printf "%s" "$GEMINI_API_KEY" > ~/app/secrets/gemini_api_key
-
-            # backend env_file (backend/.env)
-            printf "DB_USERNAME=%s\n" "$DB_USERNAME" >  ~/app/backend/.env
-            printf "DB_PASSWORD=%s\n" "$DB_PASSWORD" >> ~/app/backend/.env
-            printf "DB_HOST=%s\n"     "$DB_HOST"     >> ~/app/backend/.env
-            printf "DB_PORT=%s\n"     "$DB_PORT"     >> ~/app/backend/.env
-            printf "DB_NAME=%s\n"     "$DB_NAME"     >> ~/app/backend/.env
-            printf "SESSION_SECRET=%s\n" "$SESSION_SECRET" >> ~/app/backend/.env
-            printf "SENDER=%s\n"      "$SENDER"      >> ~/app/backend/.env
-            printf "MAIL_PW=%s\n"     "$MAIL_PW"     >> ~/app/backend/.env
-            printf "SMTP_RELAY=%s\n"  "$SMTP_RELAY"  >> ~/app/backend/.env
-
-            # compose parse-time env (.env next to docker-compose.yml)
-            printf "DB_PASSWORD=%s\n" "$DB_PASSWORD" >  ~/app/.env
-            printf "TAG=%s\n"         "$TAG"         >> ~/app/.env
-
-            # login to GHCR (if images are private)
-            echo "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
-
             cd ~/app
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
             docker compose ps
           '
-
 
 
