@@ -117,20 +117,14 @@ def extract_texts(resp: dict) -> list[str]:
     return texts
 
 def call_gemini(request_prompt: str) -> dict:
-    """Call Google Generative Language API and return parsed JSON."""
     api_key = get_gemini_api_key()
 
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
-    payload = {
-        "contents": [
-            {"parts": [{"text": request_prompt}]}
-        ]
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "X-goog-api-key": api_key,
-    }
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
+    payload = {"contents": [{"parts": [{"text": request_prompt}]}]}
+    headers = {"Content-Type": "application/json", "X-goog-api-key": api_key}
 
     resp = requests.post(url, headers=headers, json=payload, timeout=30)
-    resp.raise_for_status()  # raises on 4xx/5xx
+    resp.raise_for_status()
     return resp.json()
