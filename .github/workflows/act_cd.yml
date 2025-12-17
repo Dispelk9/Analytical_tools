@@ -89,9 +89,9 @@ jobs:
           GHCR_TOKEN: ${{ secrets.G_TOKEN }}
 
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
@@ -105,7 +105,7 @@ jobs:
             "$GHCR_USER" "$GHCR_TOKEN" \
             "$GEMINI_API_KEY" \
             "$DB_USERNAME" "$DB_PASSWORD" "$DB_HOST" "$DB_PORT" "$DB_NAME" \
-            "$SESSION_SECRET" "$SENDER" "$MAIL_PW" "$SMTP_RELAY" <<'EOF'
+            "$SESSION_SECRET" "$SENDER" "$MAIL_PW" "$SMTP_RELAY" <<-'EOF'
             set -euo pipefail
 
             TAG="$1"
@@ -128,33 +128,31 @@ jobs:
             printf '%s' "$GEMINI_API_KEY" > ~/app/secrets/gemini_api_key
 
             umask 177
-            cat > ~/app/backend/.env <<ENV
-            DB_USERNAME=$DB_USERNAME
-            DB_PASSWORD=$DB_PASSWORD
-            DB_HOST=$DB_HOST
-            DB_PORT=$DB_PORT
-            DB_NAME=$DB_NAME
-            SESSION_SECRET=$SESSION_SECRET
-            SENDER=$SENDER
-            MAIL_PW=$MAIL_PW
-            SMTP_RELAY=$SMTP_RELAY
-            ENV
+            cat > ~/app/backend/.env <<-'BACKEND_ENV'
+            DB_USERNAME='"$DB_USERNAME"'
+            DB_PASSWORD='"$DB_PASSWORD"'
+            DB_HOST='"$DB_HOST"'
+            DB_PORT='"$DB_PORT"'
+            DB_NAME='"$DB_NAME"'
+            SESSION_SECRET='"$SESSION_SECRET"'
+            SENDER='"$SENDER"'
+            MAIL_PW='"$MAIL_PW"'
+            SMTP_RELAY='"$SMTP_RELAY"'
+            BACKEND_ENV
 
             umask 177
-            cat > ~/app/.env <<ENV
-            DB_PASSWORD=$DB_PASSWORD
-            TAG=$TAG
-            ENV
+            cat > ~/app/.env <<-'COMPOSE_ENV'
+            DB_PASSWORD='"$DB_PASSWORD"'
+            TAG='"$TAG"'
+            COMPOSE_ENV
 
             echo "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
 
             cd ~/app
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
+            docker compose ps
           EOF
 
 
-      # optional cleanup (only if you want to reclaim disk space regularly)
-      # - name: Prune old images on server
-      #   run: |
-      #     ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "docker image prune -af || true"
+
