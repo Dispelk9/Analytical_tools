@@ -1,0 +1,41 @@
+HTTP/2 429
+vary: X-Origin
+vary: Referer
+vary: Origin,Accept-Encoding
+content-type: application/json; charset=UTF-8
+date: Wed, 17 Dec 2025 14:35:59 GMT
+server: scaffolding on HTTPServer2
+x-xss-protection: 0
+x-frame-options: SAMEORIGIN
+x-content-type-options: nosniff
+server-timing: gfet4t7; dur=50
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+accept-ranges: none
+
+{
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash\nPlease retry in 59.750708ms.",
+
+
+check quota on
+https://aistudio.google.com/usage?timeRange=last-28-days&tab=rate-limit&project=gen-lang-client-0425526320
+
+change to other model and curl directly to Google URL
+
+curl -i \
+  -X POST \
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent" \
+  -H "Content-Type: application/json" \
+  -H "X-goog-api-key: APIKEYHERE" \
+  -d '{
+    "contents": [
+      {
+        "parts": [
+          { "text": "Hello Gemini, please reply with one sentence." }
+        ]
+      }
+    ]
+  }'
+url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
+
