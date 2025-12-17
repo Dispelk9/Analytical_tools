@@ -16,6 +16,12 @@ logging.basicConfig(
 
 gemini_bp = Blueprint('gemini', __name__)
 
+
+@gemini_bp.route("/health/gemini", methods=["GET"])
+def gemini_health():
+    return jsonify(gemini_health_check_basic())
+
+
 @gemini_bp.route('/api/gemini', methods=['POST'])
 def gemini_request():
     data = request.get_json(silent=True)
@@ -46,7 +52,10 @@ def gemini_request():
         return jsonify(response_json), 200
 
     except requests.HTTPError as e:
+        status = getattr(e.response, "status_code", None)
         logging.exception("Gemini HTTP error")
+        if status == 429:
+            return jsonify({"error": "Gemini rate limited. Please retry."}), 429
         return jsonify({"error": "Upstream error from Gemini", "details": str(e)}), 502
     except Exception as e:
         logging.exception("Unhandled error")
@@ -58,6 +67,30 @@ def _read_secret_file(path: str) -> str | None:
             return f.read().strip()
     except FileNotFoundError:
         return None
+
+def gemini_health_check_basic() -> dict:
+    try:
+        api_key = get_gemini_api_key()
+        resp = requests.get(
+            "https://generativelanguage.googleapis.com/v1beta/models",
+            headers={"X-goog-api-key": api_key},
+            timeout=10,
+        )
+
+        if resp.status_code == 200:
+            return {"status": "ok", "level": "basic", "upstream_http": 200}
+
+        if resp.status_code in (401, 403):
+            return {"status": "error", "reason": "invalid_api_key", "upstream_http": resp.status_code}
+
+        if resp.status_code == 429:
+            return {"status": "degraded", "reason": "rate_limited", "upstream_http": 429}
+
+        return {"status": "error", "reason": "unexpected_status", "upstream_http": resp.status_code}
+
+    except Exception as e:
+        return {"status": "error", "reason": "exception", "details": str(e)}
+
 
 
 def get_gemini_api_key() -> str:
@@ -86,8 +119,6 @@ def extract_texts(resp: dict) -> list[str]:
 def call_gemini(request_prompt: str) -> dict:
     """Call Google Generative Language API and return parsed JSON."""
     api_key = get_gemini_api_key()
-    if not api_key:
-        raise RuntimeError("GOOGLE_API_KEY is not set")
 
     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
     payload = {
