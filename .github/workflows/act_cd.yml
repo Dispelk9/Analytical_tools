@@ -106,52 +106,37 @@ jobs:
             "$GEMINI_API_KEY" \
             "$DB_USERNAME" "$DB_PASSWORD" "$DB_HOST" "$DB_PORT" "$DB_NAME" \
             "$SESSION_SECRET" "$SENDER" "$MAIL_PW" "$SMTP_RELAY" <<-'EOF'
-          	set -euo pipefail
+            set -euo pipefail
 
-          	TAG="$1"
-          	GHCR_USER="$2"
-          	GHCR_TOKEN="$3"
-          	GEMINI_API_KEY="$4"
-          	DB_USERNAME="$5"
-          	DB_PASSWORD="$6"
-          	DB_HOST="$7"
-          	DB_PORT="$8"
-          	DB_NAME="$9"
-          	SESSION_SECRET="${10}"
-          	SENDER="${11}"
-          	MAIL_PW="${12}"
-          	SMTP_RELAY="${13}"
+            mkdir -p ~/app/backend ~/app/secrets
+            umask 177
 
-          	mkdir -p ~/app/backend ~/app/secrets
+            printf '%s' "$4" > ~/app/secrets/gemini_api_key
 
-          	umask 177
-          	printf '%s' "$GEMINI_API_KEY" > ~/app/secrets/gemini_api_key
+            cat > ~/app/backend/.env <<-'BACKEND_ENV'
+            DB_USERNAME='"$5"'
+            DB_PASSWORD='"$6"'
+            DB_HOST='"$7"'
+            DB_PORT='"$8"'
+            DB_NAME='"$9"'
+            SESSION_SECRET='"${10}"'
+            SENDER='"${11}"'
+            MAIL_PW='"${12}"'
+            SMTP_RELAY='"${13}"'
+            BACKEND_ENV
 
-          	umask 177
-          	cat > ~/app/backend/.env <<'BACKEND_ENV'
-          	DB_USERNAME='"$DB_USERNAME"'
-          	DB_PASSWORD='"$DB_PASSWORD"'
-          	DB_HOST='"$DB_HOST"'
-          	DB_PORT='"$DB_PORT"'
-          	DB_NAME='"$DB_NAME"'
-          	SESSION_SECRET='"$SESSION_SECRET"'
-          	SENDER='"$SENDER"'
-          	MAIL_PW='"$MAIL_PW"'
-          	SMTP_RELAY='"$SMTP_RELAY"'
-BACKEND_ENV
+            cat > ~/app/.env <<-'COMPOSE_ENV'
+            DB_PASSWORD='"$6"'
+            TAG='"$1"'
+            COMPOSE_ENV
 
-          	umask 177
-          	cat > ~/app/.env <<'COMPOSE_ENV'
-          	DB_PASSWORD='"$DB_PASSWORD"'
-          	TAG='"$TAG"'
-COMPOSE_ENV
+            echo "$3" | docker login ghcr.io --username "$2" --password-stdin
 
-          	echo "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+            cd ~/app
+            docker compose pull
+            TAG="$1" docker compose up -d --remove-orphans --force-recreate
+            docker compose ps
+          EOF
 
-          	cd ~/app
-          	docker compose pull
-          	docker compose up -d --remove-orphans --force-recreate
-          	docker compose ps
-EOF
 
 
