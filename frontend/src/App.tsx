@@ -82,6 +82,7 @@ const AppLayout: React.FC = () => {
       display: 'grid',
       gridTemplateColumns: 'repeat(4, 1fr)', // 4 equal-width columns in one row
       gap: '16px',                           // spacing between columns
+      marginBottom: 200
       }}>
       <PLinkTile
         href="/D9bot"
