@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState, FormEvent } from 'react'
+import React, { ReactNode, useEffect, useState, FormEvent, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -9,7 +9,7 @@ import {
   PSpinner,
 } from '@porsche-design-system/components-react';
 import { useNavigate } from 'react-router-dom'
-
+import FullPageSpinner from './components/FullPageSpinner';
 
 import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
@@ -182,6 +182,17 @@ const AppLayout: React.FC = () => {
         </PTag>
         <img src="./assets/HCTF.png" alt="IaC" />
       </PLinkTile>
+            <PLinkTile
+        href="https://dash.cloudflare.com/login"
+        label="Cloudflare"
+        description="Routing/Analytic"
+        compact={true}
+      >
+        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+          ##Cloudflare
+        </PTag>
+        <img src="./assets/cloudflare.jpg" alt="CF" />
+      </PLinkTile>
     </div>
 
     {/* Main Content */}
@@ -224,7 +235,7 @@ function App() {
     <PorscheDesignSystemProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-
+        <Suspense fallback={<FullPageSpinner />}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
@@ -236,6 +247,7 @@ function App() {
             }
           />
         </Routes>
+        </Suspense>
         </BrowserRouter>
       </QueryClientProvider>
     </PorscheDesignSystemProvider>
