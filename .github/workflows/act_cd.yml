@@ -82,7 +82,8 @@ jobs:
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
           scp -p deploy/nginx-proxy/nginx-act.conf \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:/etc/nginx/sites-available/nginx-act.conf"
-          nginx -t && systemctl reload nginx
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "sudo nginx -t && sudo systemctl reload nginx"
+
  
       - name: Stage env + deploy on server
         env:
