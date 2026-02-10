@@ -129,7 +129,7 @@ const AppLayout: React.FC = () => {
         <img src="/assets/ACT-math.jpg" alt="Home" />
       </PLinkTile>
       <PLinkTile
-        href="https://analytical.dispelk9.de:8443/"
+        href="https://certcheck.dispelk9.de/"
         label="Certcheck"
         description="SMTP Certfetcher"
         compact={true}
