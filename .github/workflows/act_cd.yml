@@ -75,12 +75,14 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.IP }}" >> ~/.ssh/known_hosts
 
-      - name: Copy compose file to server
+      - name: Copy compose file and refresh nginx conf to server
         run: |
           ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app"
           scp -p deploy/docker-compose.yml \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
-
+          scp -p deploy/nginx-proxy/nginx-act.conf \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:/etc/nginx/sites-available/nginx-act.conf"
+          nginx -t && systemctl reload nginx
  
       - name: Stage env + deploy on server
         env:
