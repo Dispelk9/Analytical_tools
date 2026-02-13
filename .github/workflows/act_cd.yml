@@ -136,9 +136,6 @@ jobs:
           DB_PASSWORD=${DB_PASSWORD}
           TAG=${TAG}
 
-          REPO_URL=${REPO_URL}
-          BRANCH=${BRANCH}
-          SYNC_SECONDS=${SYNC_SECONDS}
           EOF
 
 
