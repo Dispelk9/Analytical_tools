@@ -77,7 +77,7 @@ jobs:
 
       - name: Copy compose file and refresh nginx conf to server
         run: |
-          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app"
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app ~/app/deploy"
           scp -p deploy/docker-compose.yml \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
           scp -p deploy/nginx-proxy/nginx-act.conf \
