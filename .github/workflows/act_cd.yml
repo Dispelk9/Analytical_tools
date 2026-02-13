@@ -82,6 +82,8 @@ jobs:
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
           scp -p deploy/nginx-proxy/nginx-act.conf \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:/etc/nginx/sites-available/nginx-act.conf"
+          scp -p deploy/handbook-sync.sh \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/handbook-sync.sh"
           ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "sudo nginx -t && sudo systemctl reload nginx"
 
  
@@ -147,9 +149,6 @@ jobs:
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/backend/.env"
           scp -p "$tmpdir/compose.env" \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/.env"
-          scp -p deploy/handbook-sync.sh \
-          "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/handbook-sync.sh"
-
 
           cat <<EOF | ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "docker login ghcr.io --username '$GHCR_USER' --password-stdin"
           ${GHCR_TOKEN}
