@@ -10,18 +10,60 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # Sync private vho-handbook repo
+  handbook-sync:
+    image: alpine/git:2.45.2
+    restart: unless-stopped
+    environment:
+      REPO_URL: git@github.com:Dispelk9/vho-handbook.git
+      BRANCH: master
+      SYNC_SECONDS: "300"
+    secrets:
+      - handbook_deploy_key
+      - handbook_known_hosts
+    volumes:
+      - handbook_data:/data
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      set -e;
+      mkdir -p /root/.ssh;
+      chmod 700 /root/.ssh;
+      cp /run/secrets/handbook_deploy_key /root/.ssh/id_ed25519;
+      chmod 600 /root/.ssh/id_ed25519;
+      cp /run/secrets/handbook_known_hosts /root/.ssh/known_hosts;
+      chmod 600 /root/.ssh/known_hosts;
+      if [ ! -d /data/.git ]; then
+        echo "Cloning vho-handbook...";
+        git clone --depth=1 --branch "$BRANCH" "$REPO_URL" /data;
+      fi;
+      while true; do
+        echo "Syncing vho-handbook...";
+        cd /data;
+        git fetch origin "$BRANCH" || true;
+        git reset --hard "origin/$BRANCH" || true;
+        git clean -fd || true;
+        sleep "$SYNC_SECONDS";
+      done
+
   backend:
     image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
     restart: unless-stopped
     depends_on:
       - postgres
+      - handbook-sync
     env_file:
       - backend/.env
     environment:
       DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
+
+      # 🔹 Where handbook appears inside container
+      HANDBOOK_ROOT: /data/vho-handbook
     secrets:
       - gemini_api_key
+    volumes:
+      # 🔹 Mount synced handbook read-only
+      - handbook_data:/data/vho-handbook:ro
     ports:
       - "8080:8080"
 
@@ -36,7 +78,13 @@ services:
 
 volumes:
   postgres_data:
+  handbook_data:
 
 secrets:
   gemini_api_key:
     file: ./secrets/gemini_api_key
+
+  handbook_deploy_key:
+    file: ./secrets/handbook_deploy_key
+  handbook_known_hosts:
+    file: ./secrets/handbook_known_hosts
