@@ -1,4 +1,4 @@
-Flask == 3.0.2
+Flask>=3.0.2
 gunicorn
 psycopg2-binary
 pyopenssl
