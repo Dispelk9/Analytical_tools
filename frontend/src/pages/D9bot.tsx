@@ -130,8 +130,8 @@ export default function D9bot() {
           <div className="d9-subtitle">Conversation mode</div>
 
           <div style={{ marginTop: 8 }}>
-            <PSwitch checked={handbookOnly} onUpdate={onModeToggle}>
-              Handbook-only (no Gemini)
+            <PSwitch theme="dark" checked={handbookOnly} onUpdate={onModeToggle}>
+              <h1>Handbook-only</h1>
             </PSwitch>
           </div>
         </div>

@@ -112,11 +112,17 @@ class HandbookVectorIndex:
 
     def is_index_empty(self) -> bool:
         try:
-            res = self.col.get(limit=1)
-            return len(res.get("ids", [])) == 0
+            col = self.client.get_collection(self.collection_name)
+            # Chroma supports count() in modern versions
+            try:
+                return col.count() == 0
+            except Exception:
+                # fallback: try a tiny get
+                out = col.get(limit=1)
+                return not out or not out.get("ids")
         except Exception:
             return True
-
+    
     def search(self, query: str, top_k: int = 5, section: Optional[str] = None) -> List[Snippet]:
         query = (query or "").strip()
         if not query:
