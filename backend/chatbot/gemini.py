@@ -24,13 +24,22 @@ HANDBOOK_ROOT = os.getenv("HANDBOOK_ROOT", "/data/vho-handbook")
 HANDBOOK_INDEX_DIR = os.getenv("HANDBOOK_INDEX_DIR", "/tmp/handbook_chroma")
 handbook_index = HandbookVectorIndex(HANDBOOK_ROOT, HANDBOOK_INDEX_DIR)
 
-# if index empty, we can build it lazily once
+AUTO_INDEX = os.getenv("HANDBOOK_AUTO_INDEX", "false").lower() == "true"
+
 def _ensure_index():
+    """
+    CX22-safe:
+    - Never build index during normal requests unless explicitly enabled.
+    - If index missing, raise a clear error.
+    """
     if handbook_index.is_index_empty():
-        logging.info("Handbook index empty, building now...")
+        if not AUTO_INDEX:
+            raise RuntimeError(
+                "Handbook index is empty and auto-index is disabled. "
+                "Run the reindex job/endpoint once, or set HANDBOOK_AUTO_INDEX=true temporarily."
+            )
         stats = handbook_index.reindex_all()
         logging.info("Handbook index built: %s", stats)
-
 
 @gemini_bp.route("/health/gemini", methods=["GET"])
 def gemini_health():
@@ -56,37 +65,46 @@ def gemini_request():
     top_k = int(data.get("TopK", os.getenv("HANDBOOK_TOPK", "5")))
     mode = str(data.get("Mode", "auto")).lower()  # "auto" | "handbook_only"
 
+    retrieval_error = None
     try:
         _ensure_index()
         snips = handbook_index.search(prompt, top_k=top_k, section=section)
         context_block, sources = build_context_block(snips, max_items=4)
-    except Exception:
+    except Exception as e:
+        retrieval_error = str(e)
         logging.exception("Handbook retrieval failed")
         snips, context_block, sources = [], "", []
 
     if mode == "handbook_only":
+        # Handbook-only should never call Gemini. Return what we have + error if any.
         return jsonify({
             "_mode": "handbook_only",
             "answer": "Handbook-only mode: returning relevant notes.",
+            "handbook_error": retrieval_error,
             "sources": sources,
             "results": [
-                {"path": s.path, "section": s.section, "score": s.score, "text": s.text[:1200] + ("..." if len(s.text) > 1200 else "")}
+                {"path": s.path, "section": s.section, "score": s.score,
+                 "text": s.text[:1200] + ("..." if len(s.text) > 1200 else "")}
                 for s in snips
             ],
         }), 200
 
     try:
-        # --- Gemini with handbook context ---
+        handbook_note = ""
+        if retrieval_error:
+            handbook_note = f"\n\nNOTE: Handbook retrieval unavailable: {retrieval_error}\n"
+
         final_prompt = f"""
-You are D9 Bot. Use the HANDBOOK CONTEXT as the primary source of truth.
-If the handbook does not contain the answer, say so and list the most relevant notes (with their source paths).
-Be concise and actionable.
+        You are D9 Bot. Use the HANDBOOK CONTEXT as the primary source of truth.
+        If the handbook does not contain the answer, say so and list the most relevant notes (with their source paths).
+        Be concise and actionable.
+        {handbook_note}
 
-{context_block}
+        {context_block}
 
-### USER QUESTION
-{prompt}
-""".strip()
+        ### USER QUESTION
+        {prompt}
+        """.strip()
 
         response_json = call_gemini(final_prompt)
         response_json["_mode"] = "gemini_with_vector_handbook"
