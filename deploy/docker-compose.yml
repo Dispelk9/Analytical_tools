@@ -41,6 +41,7 @@ services:
 
       # 🔹 Where handbook appears inside container
       HANDBOOK_ROOT: /data/vho-handbook
+      HANDBOOK_INDEX_DIR: /tmp/handbook_chromas
     secrets:
       - gemini_api_key
     volumes:
