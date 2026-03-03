@@ -1,4 +1,11 @@
-import { FormEvent } from 'react';
+import { ChangeEvent, FormEvent, useRef } from 'react';
+import {
+  PButton,
+  PTextFieldWrapper,
+  PTextarea,
+  PSwitch,
+  type SwitchUpdateEventDetail,
+} from '@porsche-design-system/components-react';
 
 type Props = {
   prompt: string;
@@ -8,8 +15,6 @@ type Props = {
   onPromptChange: (v: string) => void;
   onRecipientChange: (v: string) => void;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
-
-  // ✅ new
   useGemini: boolean;
   onUseGeminiChange: (v: boolean) => void;
 };
@@ -25,56 +30,92 @@ export default function ChatComposer({
   useGemini,
   onUseGeminiChange,
 }: Props) {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSwitchUpdate = (
+    e: CustomEvent<SwitchUpdateEventDetail>
+  ) => {
+    onUseGeminiChange(e.detail.checked);
+  };
+
   return (
-    <form className="d9-composer" onSubmit={onSubmit}>
-      {/* ... your existing inputs ... */}
+    <div className="d9-composer">
+      <form ref={formRef} onSubmit={onSubmit} className="d9-composer-form">
+        {/* MAIN MESSAGE AREA */}
+        <div className="d9-composer-main">
+          <PTextarea
+            name="Prompt-box"
+            theme="dark"
+            label="Message"
+            description="Enter to send • Shift+Enter for newline"
+            value={prompt}
+            onChange={(e) => onPromptChange((e.target as any).value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
 
-      {/* Email input (existing) */}
-      <input
-        className="d9-input"
-        type="email"
-        placeholder="Email (optional)"
-        value={recipient}
-        onChange={(e) => onRecipientChange(e.target.value)}
-      />
+                const v = (e.target as HTMLTextAreaElement).value;
+                onPromptChange(v);
 
-      {/* ✅ Porsche-design-ish switch under email */}
-      <div className="d9-mode-row">
-        <span className="d9-mode-label">Mode</span>
+                queueMicrotask(() =>
+                  formRef.current?.requestSubmit()
+                );
+              }
+            }}
+          />
+        </div>
 
-        <button
-          type="button"
-          className={`pd-switch ${useGemini ? 'is-on' : 'is-off'}`}
-          role="switch"
-          aria-checked={useGemini}
-          onClick={() => onUseGeminiChange(!useGemini)}
-          disabled={isThinking}
-          title={useGemini ? 'Gemini mode' : 'Handbook grep mode'}
-        >
-          <span className="pd-switch-track" />
-          <span className="pd-switch-thumb" />
-          <span className="pd-switch-text">
-            <span className={`pd-switch-pill ${useGemini ? 'active' : ''}`}>Gemini</span>
-            <span className={`pd-switch-pill ${!useGemini ? 'active' : ''}`}>Grep</span>
-          </span>
-        </button>
-      </div>
+        {/* SIDE PANEL */}
+        <div className="d9-composer-side">
+          {/* EMAIL FIELD */}
+          <PTextFieldWrapper
+            theme="dark"
+            label="Recipient (optional)"
+            description="Email the result"
+          >
+            <input
+              type="email"
+              value={recipient}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onRecipientChange(e.target.value)
+              }
+              placeholder="Enter address"
+              className="form-input"
+            />
+          </PTextFieldWrapper>
 
-      {/* Prompt textarea/input (existing) */}
-      <textarea
-        className="d9-textarea"
-        placeholder="Type your message..."
-        value={prompt}
-        onChange={(e) => onPromptChange(e.target.value)}
-      />
+          {/* MODE SWITCH */}
+          <div style={{ marginTop: 20 }}>
+            <PSwitch
+              theme="dark"
+              checked={useGemini}
+              onUpdate={handleSwitchUpdate}
+              disabled={isThinking}
+            >
+              AI Mode
+            </PSwitch>
 
-      {/* Error (existing) */}
-      {error ? <div className="d9-error">{error}</div> : null}
+            <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>
+              {useGemini ? 'Gemini LLM active' : 'Local handbook search active'}
+            </div>
+          </div>
 
-      {/* Submit (existing) */}
-      <button className="d9-send" type="submit" disabled={isThinking}>
-        {isThinking ? 'Thinking…' : 'Send'}
-      </button>
-    </form>
+          {/* SPACING */}
+          <div style={{ height: 40 }} />
+
+          {/* SUBMIT BUTTON */}
+          <PButton
+            theme="dark"
+            variant="secondary"
+            type="submit"
+            disabled={isThinking}
+          >
+            {isThinking ? 'Sending…' : 'Prompt'}
+          </PButton>
+
+          {error && <div className="d9-error">{error}</div>}
+        </div>
+      </form>
+    </div>
   );
 }
