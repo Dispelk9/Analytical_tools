@@ -6,9 +6,6 @@ import requests
 from dotenv import load_dotenv
 from utils.send_log import send_email
 
-# --- HANDBOOK VECTOR RAG ---
-from chatbot.handbook_vector import HandbookVectorIndex, build_context_block
-
 load_dotenv()
 
 logging.basicConfig(
@@ -18,18 +15,6 @@ logging.basicConfig(
 )
 
 gemini_bp = Blueprint('gemini', __name__)
-
-# --- HANDBOOK VECTOR RAG (init once) ---
-HANDBOOK_ROOT = os.getenv("HANDBOOK_ROOT", "/data/vho-handbook")
-HANDBOOK_INDEX_DIR = os.getenv("HANDBOOK_INDEX_DIR", "/tmp/handbook_chroma")
-handbook_index = HandbookVectorIndex(HANDBOOK_ROOT, HANDBOOK_INDEX_DIR)
-
-# if index empty, we can build it lazily once
-def _ensure_index():
-    if handbook_index.is_index_empty():
-        logging.info("Handbook index empty, building now...")
-        stats = handbook_index.reindex_all()
-        logging.info("Handbook index built: %s", stats)
 
 
 @gemini_bp.route("/health/gemini", methods=["GET"])
@@ -42,6 +27,7 @@ def gemini_request():
     data = request.get_json(silent=True)
     logging.info("Incoming JSON: %s", data)
 
+    # Basic payload validation
     if not isinstance(data, dict):
         return jsonify({"error": "Invalid JSON body"}), 400
 
@@ -51,91 +37,36 @@ def gemini_request():
     if not prompt:
         return jsonify({"error": "Please enter a prompt for D9 Bot"}), 400
 
-    # --- HANDBOOK VECTOR RAG (retrieve first) ---
-    section = str(data.get("Section", "")).strip() or None
-    top_k = int(data.get("TopK", os.getenv("HANDBOOK_TOPK", "5")))
-    mode = str(data.get("Mode", "auto")).lower()  # "auto" | "handbook_only"
-
     try:
-        _ensure_index()
-        snips = handbook_index.search(prompt, top_k=top_k, section=section)
-        context_block, sources = build_context_block(snips, max_items=4)
-    except Exception:
-        logging.exception("Handbook retrieval failed")
-        snips, context_block, sources = [], "", []
-
-    if mode == "handbook_only":
-        return jsonify({
-            "_mode": "handbook_only",
-            "answer": "Handbook-only mode: returning relevant notes.",
-            "sources": sources,
-            "results": [
-                {"path": s.path, "section": s.section, "score": s.score, "text": s.text[:1200] + ("..." if len(s.text) > 1200 else "")}
-                for s in snips
-            ],
-        }), 200
-
-    try:
-        # --- Gemini with handbook context ---
-        final_prompt = f"""
-You are D9 Bot. Use the HANDBOOK CONTEXT as the primary source of truth.
-If the handbook does not contain the answer, say so and list the most relevant notes (with their source paths).
-Be concise and actionable.
-
-{context_block}
-
-### USER QUESTION
-{prompt}
-""".strip()
-
-        response_json = call_gemini(final_prompt)
-        response_json["_mode"] = "gemini_with_vector_handbook"
-        response_json["_handbook_sources"] = sources
+        # Call Gemini
+        response_json = call_gemini(prompt)
 
         # Email (optional)
         if recipient:
+            # You might want a nicer email body than raw dict
             texts = extract_texts(response_json)
-            send_email([f"Prompt: {prompt}", "Response:", *texts], recipient)
+            send_email([f"Prompt: {prompt}", "Response:", *texts],recipient)
 
+        # Return JSON back to the frontend
         logging.info("Response JSON: %s", response_json)
         return jsonify(response_json), 200
 
     except requests.HTTPError as e:
-        # --- Fallback: handbook-only ---
         status = getattr(e.response, "status_code", None)
-        logging.exception("Gemini HTTP error - returning handbook fallback")
-        return jsonify({
-            "_mode": "handbook_fallback",
-            "error": "Gemini unavailable, returning handbook matches",
-            "upstream_http": status,
-            "sources": sources,
-            "results": [
-                {"path": s.path, "section": s.section, "score": s.score, "text": s.text[:1200] + ("..." if len(s.text) > 1200 else "")}
-                for s in snips
-            ],
-        }), 200
-
+        logging.exception("Gemini HTTP error")
+        if status == 429:
+            return jsonify({"error": "Gemini rate limited. Please retry."}), 429
+        return jsonify({"error": "Upstream error from Gemini", "details": str(e)}), 502
     except Exception as e:
-        logging.exception("Unhandled error - returning handbook fallback")
-        return jsonify({
-            "_mode": "handbook_fallback",
-            "error": "Internal server error, returning handbook matches",
-            "details": str(e),
-            "sources": sources,
-            "results": [
-                {"path": s.path, "section": s.section, "score": s.score, "text": s.text[:1200] + ("..." if len(s.text) > 1200 else "")}
-                for s in snips
-            ],
-        }), 200
-
-
+        logging.exception("Unhandled error")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+    
 def _read_secret_file(path: str) -> str | None:
     try:
         with open(path, "r", encoding="utf-8") as f:
             return f.read().strip()
     except FileNotFoundError:
         return None
-
 
 def gemini_health_check_basic() -> dict:
     try:
@@ -161,7 +92,12 @@ def gemini_health_check_basic() -> dict:
         return {"status": "error", "reason": "exception", "details": str(e)}
 
 
+
 def get_gemini_api_key() -> str:
+    """
+    Prefer file-based secret (Docker secret) over env var.
+    Fallback to env for dev.
+    """
     path = os.getenv("GEMINI_API_KEY_FILE", "/run/secrets/gemini_api_key")
     key = _read_secret_file(path)
     if not key:
@@ -169,7 +105,6 @@ def get_gemini_api_key() -> str:
     if not key:
         raise RuntimeError("Gemini API key is not configured")
     return key
-
 
 def extract_texts(resp: dict) -> list[str]:
     texts: list[str] = []
@@ -180,7 +115,6 @@ def extract_texts(resp: dict) -> list[str]:
             if isinstance(t, str):
                 texts.append(t)
     return texts
-
 
 def call_gemini(request_prompt: str) -> dict:
     api_key = get_gemini_api_key()
