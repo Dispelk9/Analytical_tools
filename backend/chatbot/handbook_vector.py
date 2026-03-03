@@ -6,8 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import chromadb
 from chromadb.config import Settings
-
-from fastembed import TextEmbedding
+from sentence_transformers import SentenceTransformer
 
 
 SUPPORTED_EXT = (".md", ".txt", ".rst")
@@ -42,7 +41,8 @@ class Snippet:
 
 class HandbookVectorIndex:
     """
-    Persistent vector index of your handbook using ChromaDB + fastembed (no PyTorch).
+    Persistent vector index of your handbook folder using ChromaDB.
+    Stores chunks with metadata: path, section, content_hash.
     """
 
     def __init__(self, handbook_root: str, persist_dir: str, collection: str = "vho_handbook"):
@@ -50,9 +50,9 @@ class HandbookVectorIndex:
         self.persist_dir = persist_dir
         self.collection_name = collection
 
-        # Small, fast, good default. No torch.
-        model_name = os.getenv("HANDBOOK_EMBED_MODEL", "BAAI/bge-small-en-v1.5")
-        self.embedder = TextEmbedding(model_name=model_name)
+        # Embedding model (small + good baseline)
+        model_name = os.getenv("HANDBOOK_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+        self.embedder = SentenceTransformer(model_name)
 
         self.client = chromadb.PersistentClient(
             path=self.persist_dir,
@@ -64,6 +64,7 @@ class HandbookVectorIndex:
         files: List[str] = []
         for ext in SUPPORTED_EXT:
             files.extend(glob.glob(os.path.join(self.handbook_root, "**", f"*{ext}"), recursive=True))
+        # skip .git and junk
         files = [f for f in files if "/.git/" not in f and "/__pycache__/" not in f]
         return sorted(set(files))
 
@@ -76,13 +77,14 @@ class HandbookVectorIndex:
         with open(abs_path, "r", encoding="utf-8", errors="ignore") as f:
             return f.read()
 
-    def _embed(self, texts: List[str]) -> List[List[float]]:
-        # fastembed returns an iterator of numpy arrays
-        return [v.tolist() for v in self.embedder.embed(texts)]
-
     def reindex_all(self) -> Dict[str, int]:
+        """
+        Simple + reliable: rebuild the whole index.
+        Your repo is small, so this is fine.
+        """
         files = self._iter_files()
 
+        # Drop + recreate collection
         try:
             self.client.delete_collection(self.collection_name)
         except Exception:
@@ -98,20 +100,22 @@ class HandbookVectorIndex:
             text = self._read_file(abs_path)
             content_hash = _sha1(text)
 
-            for i, ch in enumerate(chunk_text(text)):
+            chunks = chunk_text(text)
+            for i, ch in enumerate(chunks):
                 doc_id = f"{rel}::chunk::{i}"
                 ids.append(doc_id)
                 docs.append(ch)
                 metas.append({"path": rel, "section": section, "content_hash": content_hash})
 
         if docs:
-            embs = self._embed(docs)
+            embs = self.embedder.encode(docs, normalize_embeddings=True).tolist()
             self.col.add(ids=ids, documents=docs, metadatas=metas, embeddings=embs)
 
         return {"files": len(files), "chunks": len(docs)}
 
     def is_index_empty(self) -> bool:
         try:
+            # chroma doesn't have a direct "count" in all versions; query small
             res = self.col.get(limit=1)
             return len(res.get("ids", [])) == 0
         except Exception:
@@ -122,7 +126,7 @@ class HandbookVectorIndex:
         if not query:
             return []
 
-        q_emb = self._embed([query])
+        q_emb = self.embedder.encode([query], normalize_embeddings=True).tolist()
 
         where = {"section": section} if section else None
         res = self.col.query(
@@ -138,6 +142,7 @@ class HandbookVectorIndex:
         dists = res["distances"][0] if res.get("distances") else []
 
         for doc, meta, dist in zip(docs, metas, dists):
+            # Chroma returns distance; smaller is closer. Convert to similarity-ish score.
             score = float(1.0 / (1.0 + float(dist))) if dist is not None else 0.0
             out.append(
                 Snippet(
