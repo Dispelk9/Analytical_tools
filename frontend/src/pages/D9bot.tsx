@@ -13,6 +13,7 @@ function newId(prefix: string) {
 export default function D9bot() {
   const [prompt, setPrompt] = useState('');
   const [recipient, setRecipient] = useState('');
+  const [useGemini, setUseGemini] = useState(true); // ✅ new
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'bot', text: 'Hi! Ask me anything.', createdAt: Date.now() },
@@ -25,8 +26,8 @@ export default function D9bot() {
     e.preventDefault();
     setError(null);
 
-    const raw = prompt;          // keep exactly what user typed
-    const check = raw.trim();    // only for empty-check
+    const raw = prompt;
+    const check = raw.trim();
 
     if (!check) {
       setError('Please enter a prompt for D9 Bot');
@@ -43,11 +44,13 @@ export default function D9bot() {
     try {
       setIsThinking(true);
 
-      const response = await fetch('/api/gemini', {
+      const endpoint = useGemini ? '/api/gemini' : '/api/handbook'; // ✅ switch here
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          Prompt_string: raw,     // <-- send raw, untrimmed
+          Prompt_string: raw,
           Email: recipient,
         }),
       });
@@ -85,29 +88,32 @@ export default function D9bot() {
 
   return (
     <div>
-    <div className="d9-chat-page">
-      <div className="d9-chat-header">
-        <a href="https://info.dispelk9.de" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="Act logo" />
-        </a>
-        <div>
-          <h1 className="d9-title">D9bot</h1>
-          <div className="d9-subtitle">Conversation mode</div>
+      <div className="d9-chat-page">
+        <div className="d9-chat-header">
+          <a href="https://info.dispelk9.de" target="_blank" rel="noreferrer">
+            <img src={reactLogo} className="logo react" alt="Act logo" />
+          </a>
+          <div>
+            <h1 className="d9-title">D9bot</h1>
+            <div className="d9-subtitle">Conversation mode</div>
+          </div>
         </div>
+
+        <ChatList messages={messages} isThinking={isThinking} />
+
+        <ChatComposer
+          prompt={prompt}
+          recipient={recipient}
+          isThinking={isThinking}
+          error={error}
+          onPromptChange={setPrompt}
+          onRecipientChange={setRecipient}
+          onSubmit={handleSubmit}
+          // ✅ new props
+          useGemini={useGemini}
+          onUseGeminiChange={setUseGemini}
+        />
       </div>
-
-      <ChatList messages={messages} isThinking={isThinking} />
-
-      <ChatComposer
-        prompt={prompt}
-        recipient={recipient}
-        isThinking={isThinking}
-        error={error}
-        onPromptChange={setPrompt}
-        onRecipientChange={setRecipient}
-        onSubmit={handleSubmit}
-      />
-    </div>
     </div>
   );
 }
