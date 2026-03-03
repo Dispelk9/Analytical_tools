@@ -4,9 +4,7 @@ import '../components/D9bot/d9bot.css';
 
 import ChatList from '../components/D9bot/ChatList';
 import ChatComposer from '../components/D9bot/ChatComposer';
-import { ChatMessage } from '../components/D9bot/type';
-
-import { PSwitch, type SwitchUpdateEventDetail } from '@porsche-design-system/components-react';
+import { ChatMessage, D9Response } from '../components/D9bot/type';
 
 function newId(prefix: string) {
   return (crypto?.randomUUID?.() ?? `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -15,7 +13,6 @@ function newId(prefix: string) {
 export default function D9bot() {
   const [prompt, setPrompt] = useState('');
   const [recipient, setRecipient] = useState('');
-  const [handbookOnly, setHandbookOnly] = useState(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'bot', text: 'Hi! Ask me anything.', createdAt: Date.now() },
@@ -24,16 +21,12 @@ export default function D9bot() {
   const [error, setError] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
 
-  const onModeToggle = (e: CustomEvent<SwitchUpdateEventDetail>) => {
-    setHandbookOnly(e.detail.checked);
-  };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
-    const raw = prompt;
-    const check = raw.trim();
+    const raw = prompt;          // keep exactly what user typed
+    const check = raw.trim();    // only for empty-check
 
     if (!check) {
       setError('Please enter a prompt for D9 Bot');
@@ -54,49 +47,20 @@ export default function D9bot() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          Prompt_string: raw,
+          Prompt_string: raw,     // <-- send raw, untrimmed
           Email: recipient,
-          Mode: handbookOnly ? 'handbook_only' : 'auto',
-          TopK: 5,
         }),
       });
 
       if (!response.ok) throw new Error('Server error');
 
-      const data: any = await response.json();
-
-      const isHandbook =
-        data?._mode === 'handbook_only' ||
-        data?._mode === 'handbook_fallback';
-
-      let botText = '';
-
-      if (isHandbook) {
-        const results = Array.isArray(data?.results) ? data.results : [];
-        if (results.length === 0) {
-          botText =
-            data?.handbook_error
-              ? `No handbook results.\n\n${data.handbook_error}`
-              : 'No handbook results found.';
-        } else {
-          botText = results
-            .slice(0, 5)
-            .map((r: any, i: number) => {
-              const src = r.path ? `\nsource: ${r.path}` : '';
-              return `[#${i + 1}]${src}\n${(r.text ?? '').trim()}`;
-            })
-            .join('\n\n---\n\n');
-        }
-      } else {
-        // Gemini
-        botText =
-          (data?.candidates ?? [])
-            .flatMap((c: any) => c.content?.parts ?? [])
-            .map((p: any) => p.text)
-            .filter(Boolean)
-            .join('\n\n') ||
-          'No response received.';
-      }
+      const data: D9Response = await response.json();
+      const botText =
+        (data?.candidates ?? [])
+          .flatMap((c) => c.content?.parts ?? [])
+          .map((p) => p.text)
+          .join('\n\n') ||
+        'No response received.';
 
       setMessages((prev) => [
         ...prev,
@@ -120,20 +84,15 @@ export default function D9bot() {
   };
 
   return (
+    <div>
     <div className="d9-chat-page">
       <div className="d9-chat-header">
-        <a href="https://dispelk9.de" target="_blank" rel="noreferrer">
+        <a href="https://info.dispelk9.de" target="_blank" rel="noreferrer">
           <img src={reactLogo} className="logo react" alt="Act logo" />
         </a>
         <div>
           <h1 className="d9-title">D9bot</h1>
           <div className="d9-subtitle">Conversation mode</div>
-
-          <div style={{ marginTop: 8 }}>
-            <PSwitch theme="dark" checked={handbookOnly} onUpdate={onModeToggle}>
-              <h1>Handbook-only</h1>
-            </PSwitch>
-          </div>
         </div>
       </div>
 
@@ -148,6 +107,7 @@ export default function D9bot() {
         onRecipientChange={setRecipient}
         onSubmit={handleSubmit}
       />
+    </div>
     </div>
   );
 }

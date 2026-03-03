@@ -10,6 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # Sync private vho-handbook repo
   handbook-sync:
     image: alpine/git:2.45.2
     restart: unless-stopped
@@ -25,6 +26,7 @@ services:
       - ./deploy/handbook-sync.sh:/usr/local/bin/handbook-sync.sh:ro
     entrypoint: ["/bin/sh", "/usr/local/bin/handbook-sync.sh"]
 
+
   backend:
     image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
     restart: unless-stopped
@@ -37,13 +39,13 @@ services:
       DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
 
+      # 🔹 Where handbook appears inside container
       HANDBOOK_ROOT: /data/vho-handbook
-      HANDBOOK_INDEX_DIR: /data/handbook_index/chroma
     secrets:
       - gemini_api_key
     volumes:
+      # 🔹 Mount synced handbook read-only
       - handbook_data:/data/vho-handbook:ro
-      - /mnt/HC_Volume_100493552/handbook_index:/data/handbook_index
     ports:
       - "8080:8080"
 
@@ -63,6 +65,7 @@ volumes:
 secrets:
   gemini_api_key:
     file: ./secrets/gemini_api_key
+
   handbook_deploy_key:
     file: ./secrets/handbook_deploy_key
   handbook_known_hosts:
