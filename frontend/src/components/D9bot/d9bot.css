@@ -112,3 +112,28 @@
 @media (max-width: 980px) { .d9-composer-form { grid-template-columns: 1fr; } }
 
 .d9-error { margin-top: 10px; color: #ff6b6b; font-size: 13px; }
+
+/*Scroll bar in chatbox*/
+/* Full height layout */
+.d9-chat-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header stays fixed */
+.d9-chat-header {
+  flex: 0 0 auto;
+}
+
+/* Scrollable message area */
+.d9-chat-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* Composer stays at bottom */
+.d9-composer {
+  flex: 0 0 auto;
+}

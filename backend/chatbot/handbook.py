@@ -36,13 +36,14 @@ def handbook_search():
     if not os.path.isdir(root):
         return jsonify({"error": "HANDBOOK_ROOT is not available in container", "handbook_root": root}), 500
 
-    # NOTE: use argv list (no shell=True). Add "--" so patterns starting with "-" are not treated as options.
     cmd = [
         "grep",
-        "-R",              # recursive
-        "-n",              # show line numbers
-        "-I",              # ignore binary
-        "-C", "4",         # 4 lines before/after
+        "-R",                  # recursive
+        "-n",                  # line numbers
+        "-I",                  # ignore binary files
+        "-C", "4",             # 4 lines before/after
+        "-h",                  # hide filename prefix
+        "--group-separator=",  # remove ---- separators
         "--color=never",
         "--",
         query,
