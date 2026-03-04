@@ -90,7 +90,7 @@ export default function D9bot() {
     <div>
       <div className="d9-chat-page">
         <div className="d9-chat-header">
-          <a href="https://info.dispelk9.de" target="_blank" rel="noreferrer">
+          <a href="https://dispelk9.de" target="_blank" rel="noreferrer">
             <img src={reactLogo} className="logo react" alt="Act logo" />
           </a>
           <div>
@@ -98,8 +98,9 @@ export default function D9bot() {
             <div className="d9-subtitle">Conversation mode</div>
           </div>
         </div>
-
-        <ChatList messages={messages} isThinking={isThinking} />
+        <div className="d9-chat-body">
+          <ChatList messages={messages} isThinking={isThinking} />
+        </div>
 
         <ChatComposer
           prompt={prompt}

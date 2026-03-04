@@ -10,6 +10,12 @@ export default function ChatList({ messages, isThinking }: { messages: ChatMessa
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages.length, isThinking]);
 
+
+  const bottomRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
     <div className="d9-chat-list" ref={listRef}>
       {messages.map((m) => (
@@ -23,6 +29,7 @@ export default function ChatList({ messages, isThinking }: { messages: ChatMessa
           </div>
         </div>
       )}
+      <div ref={bottomRef} />
     </div>
   );
 }
