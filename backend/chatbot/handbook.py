@@ -37,15 +37,13 @@ def handbook_search():
         return jsonify({"error": "HANDBOOK_ROOT is not available in container", "handbook_root": root}), 500
 
     cmd = [
-        "grep",
-        "-R",                  # recursive
-        "-n",                  # line numbers
-        "-I",                  # ignore binary files
-        "-C", "4",             # 4 lines before/after
-        "-h",                  # hide filename prefix
-        "--group-separator=",  # remove ---- separators
-        "--color=never",
-        "--",
+        "rg",
+        "-C", "4",                 # 4 lines before/after
+        "--heading",               # filename once as header
+        "--no-line-number",        # no 14- 15- prefixes
+        "--color", "never",        # no ANSI colors
+        "--hidden",                # optional: search hidden files
+        "--glob", "!.git/*",       # exclude .git
         query,
         root,
     ]
