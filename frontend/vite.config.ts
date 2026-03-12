@@ -28,6 +28,11 @@ const transformIndexHtmlPlugin = () => ({
 
 export default defineConfig({
   plugins: [react(), transformIndexHtmlPlugin()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.tsx',
+    css: true,
+  },
   server: {
     proxy: {
       '/api': {
