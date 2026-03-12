@@ -3,10 +3,10 @@ name: Continuous Integration ACT
 on:
   push:
     branches:
-      - docker_react
+      - master
   pull_request:
     branches:
-      - docker_react
+      - master
 
 jobs:
   build:
