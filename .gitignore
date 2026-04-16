@@ -5,6 +5,7 @@ Thumbs.db
 # Editor and IDE directories/files
 .vscode/
 .idea/
+.codex/
 *.suo
 *.ntvs*
 *.njsproj

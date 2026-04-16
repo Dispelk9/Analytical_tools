@@ -15,6 +15,7 @@ os.environ.setdefault("SESSION_SECRET", "test-secret")
 from adduct import adduct_bp
 from act_math import math_bp
 from auth_backend.login_user import User, auth_user_bp, db, login_manager
+from chatbot.chat import chat_bp
 from chatbot.gemini import gemini_bp
 from chatbot.handbook import handbook_bp
 from compound import compound_bp
@@ -39,6 +40,7 @@ def app():
     app.register_blueprint(adduct_bp)
     app.register_blueprint(math_bp)
     app.register_blueprint(smtp_bp)
+    app.register_blueprint(chat_bp)
     app.register_blueprint(gemini_bp)
     app.register_blueprint(handbook_bp)
 

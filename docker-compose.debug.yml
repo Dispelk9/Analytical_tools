@@ -26,16 +26,32 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      hermes:
+        condition: service_started
     env_file:
       - backend/.env        # ✅ load exactly your env file
     environment:
       DB_PASSWORD: postgres # ✅ override empty value in .env
       DB_HOST: postgres_db  # matches your .env
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
+      HERMES_BASE_URL: http://hermes:8642
     ports:
       - "8080:8080"
     volumes:
     - /home/vho/Gemini/gemini_api_key:/run/secrets/gemini_api_key:ro
+
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+    environment:
+      API_SERVER_ENABLED: "true"
+      API_SERVER_HOST: 0.0.0.0
+    expose:
+      - "8642"
+    volumes:
+      - hermes_data:/opt/data
 
   frontend:
     build:
@@ -50,3 +66,4 @@ services:
 
 volumes:
   postgres_data:
+  hermes_data:

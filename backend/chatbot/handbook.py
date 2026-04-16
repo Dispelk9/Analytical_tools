@@ -10,6 +10,42 @@ def _handbook_root() -> str:
     # Must be a path that exists inside the backend container
     return os.getenv("HANDBOOK_ROOT", "/data/vho-handbook")
 
+
+def search_handbook_text(query: str) -> str:
+    root = _handbook_root()
+    if not os.path.isdir(root):
+        raise FileNotFoundError(root)
+
+    cmd = [
+        "rg",
+        "-C", "4",                 # 4 lines before/after
+        "--heading",               # filename once as header
+        "--no-line-number",        # no 14- 15- prefixes
+        "--color", "never",        # no ANSI colors
+        "--hidden",                # optional: search hidden files
+        "--glob", "!.git/*",       # exclude .git
+        query,
+        root,
+    ]
+
+    proc = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        timeout=20,
+    )
+
+    # grep exit codes: 0 found, 1 not found, 2 error
+    if proc.returncode == 2:
+        logging.error("grep error: %s", proc.stderr)
+        raise RuntimeError(proc.stderr.strip() or "grep_failed")
+
+    output = (proc.stdout or "").strip()
+    if not output:
+        output = "No matches found in handbook."
+
+    return output
+
 @handbook_bp.route("/health/handbook", methods=["GET"])
 def handbook_health():
     root = _handbook_root()
@@ -32,38 +68,8 @@ def handbook_search():
     if not query:
         return jsonify({"error": "Please enter a prompt for D9 Bot"}), 400
 
-    root = _handbook_root()
-    if not os.path.isdir(root):
-        return jsonify({"error": "HANDBOOK_ROOT is not available in container", "handbook_root": root}), 500
-
-    cmd = [
-        "rg",
-        "-C", "4",                 # 4 lines before/after
-        "--heading",               # filename once as header
-        "--no-line-number",        # no 14- 15- prefixes
-        "--color", "never",        # no ANSI colors
-        "--hidden",                # optional: search hidden files
-        "--glob", "!.git/*",       # exclude .git
-        query,
-        root,
-    ]
-
     try:
-        proc = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=20,
-        )
-
-        # grep exit codes: 0 found, 1 not found, 2 error
-        if proc.returncode == 2:
-            logging.error("grep error: %s", proc.stderr)
-            return jsonify({"error": "grep_failed", "details": proc.stderr.strip()}), 500
-
-        output = (proc.stdout or "").strip()
-        if not output:
-            output = "No matches found in handbook."
+        output = search_handbook_text(query)
 
         # Return in a Gemini-like shape so your frontend can reuse parsing logic if you want
         return jsonify({
@@ -74,6 +80,10 @@ def handbook_search():
                 }
             }]
         }), 200
-
+    except FileNotFoundError:
+        root = _handbook_root()
+        return jsonify({"error": "HANDBOOK_ROOT is not available in container", "handbook_root": root}), 500
+    except RuntimeError as e:
+        return jsonify({"error": "grep_failed", "details": str(e)}), 500
     except subprocess.TimeoutExpired:
         return jsonify({"error": "handbook_search_timeout"}), 504
