@@ -7,7 +7,7 @@ describe('pages/D9bot.tsx', () => {
     vi.stubGlobal('fetch', vi.fn());
   });
 
-  it('switches endpoint based on mode and appends the bot response', async () => {
+  it('sends chat requests through the unified backend endpoint and appends the bot response', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -25,12 +25,13 @@ describe('pages/D9bot.tsx', () => {
 
     expect(await screen.findByText('From handbook')).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
-      '/api/handbook',
+      '/api/chat',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
           Prompt_string: 'How do I deploy?',
           Email: '',
+          Mode: 'handbook',
         }),
       }),
     );

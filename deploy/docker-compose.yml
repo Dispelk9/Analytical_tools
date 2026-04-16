@@ -26,6 +26,19 @@ services:
       - ./deploy/handbook-sync.sh:/usr/local/bin/handbook-sync.sh:ro
     entrypoint: ["/bin/sh", "/usr/local/bin/handbook-sync.sh"]
 
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    restart: unless-stopped
+    command: gateway run
+    environment:
+      API_SERVER_ENABLED: "true"
+      API_SERVER_HOST: 0.0.0.0
+    volumes:
+      - hermes_data:/opt/data
+      - handbook_data:/workspace/handbook:ro
+    expose:
+      - "8642"
+
 
   backend:
     image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
@@ -33,11 +46,13 @@ services:
     depends_on:
       - postgres
       - handbook-sync
+      - hermes
     env_file:
       - backend/.env
     environment:
       DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
+      HERMES_BASE_URL: http://hermes:8642
 
       # 🔹 Where handbook appears inside container
       HANDBOOK_ROOT: /data/vho-handbook
@@ -61,6 +76,7 @@ services:
 volumes:
   postgres_data:
   handbook_data:
+  hermes_data:
 
 secrets:
   gemini_api_key:

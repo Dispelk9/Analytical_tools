@@ -44,14 +44,13 @@ export default function D9bot() {
     try {
       setIsThinking(true);
 
-      const endpoint = useGemini ? '/api/gemini' : '/api/handbook'; // ✅ switch here
-
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           Prompt_string: raw,
           Email: recipient,
+          Mode: useGemini ? 'gemini' : 'handbook',
         }),
       });
 
