@@ -95,7 +95,7 @@ jobs:
           GHCR_TOKEN: ${{ secrets.G_TOKEN }}
 
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-
+          HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -119,6 +119,11 @@ jobs:
           ${GEMINI_API_KEY}
           EOF
 
+          # staged alongside other secrets for parity with gemini_api_key
+          cat > "$tmpdir/hermes_api_key" <<EOF
+          ${HERMES_API_KEY}
+          EOF
+
           # backend env_file (backend/.env)
           cat > "$tmpdir/backend.env" <<EOF
           DB_USERNAME=${DB_USERNAME}
@@ -137,6 +142,7 @@ jobs:
           cat > "$tmpdir/compose.env" <<EOF
           DB_PASSWORD=${DB_PASSWORD}
           TAG=${TAG}
+          HERMES_API_KEY=${HERMES_API_KEY}
 
           EOF
 
@@ -145,6 +151,8 @@ jobs:
 
           scp -p "$tmpdir/gemini_api_key" \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/secrets/gemini_api_key"
+          scp -p "$tmpdir/hermes_api_key" \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/secrets/hermes_api_key"
           scp -p "$tmpdir/backend.env" \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/backend/.env"
           scp -p "$tmpdir/compose.env" \
