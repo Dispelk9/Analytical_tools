@@ -33,6 +33,7 @@ services:
     environment:
       API_SERVER_ENABLED: "true"
       API_SERVER_HOST: 0.0.0.0
+      API_SERVER_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
     volumes:
       - hermes_data:/opt/data
       - handbook_data:/workspace/handbook:ro
@@ -48,11 +49,12 @@ services:
       - handbook-sync
       - hermes
     env_file:
-      - backend/.env
+      - ../backend/.env
     environment:
       DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
       HERMES_BASE_URL: http://hermes:8642
+      HERMES_API_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
 
       # 🔹 Where handbook appears inside container
       HANDBOOK_ROOT: /data/vho-handbook
