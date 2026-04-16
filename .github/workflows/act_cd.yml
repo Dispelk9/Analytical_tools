@@ -143,6 +143,9 @@ jobs:
           DB_PASSWORD=${DB_PASSWORD}
           TAG=${TAG}
           HERMES_API_KEY=${HERMES_API_KEY}
+          HERMES_INFERENCE_PROVIDER=gemini
+          GOOGLE_API_KEY=${GEMINI_API_KEY}
+          HERMES_MODEL=gemini-2.5-flash-lite
 
           EOF
 
