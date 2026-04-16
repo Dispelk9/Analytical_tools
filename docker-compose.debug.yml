@@ -46,35 +46,18 @@ services:
     image: nousresearch/hermes-agent:latest
     container_name: hermes
     restart: unless-stopped
-    command:
-      - /bin/sh
-      - -lc
-      - |
-        cat > /opt/data/config.yaml <<EOF
-        # Hermes Agent configuration for the Analytical Tools stack.
-        # Environment variables still take precedence for credentials.
-        model:
-          default: "${HERMES_MODEL:-gemini-2.5-flash-lite}"
-          provider: "${HERMES_INFERENCE_PROVIDER:-gemini}"
-        terminal:
-          backend: "local"
-          cwd: "."
-          timeout: 180
-          docker_mount_cwd_to_workspace: false
-          lifetime_seconds: 300
-        EOF
-        exec gateway run
+    command: gateway run
     environment:
       API_SERVER_ENABLED: "true"
       API_SERVER_HOST: 0.0.0.0
       API_SERVER_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
       HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-gemini}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
-      HERMES_MODEL: ${HERMES_MODEL:-gemini-2.5-flash-lite}
     expose:
       - "8642"
     volumes:
       - hermes_data:/opt/data
+      - ./deploy/hermes/config.yaml:/opt/data/config.yaml:ro
 
   frontend:
     build:
