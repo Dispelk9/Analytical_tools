@@ -44,14 +44,21 @@ export default function D9bot() {
     try {
       setIsThinking(true);
 
-      const response = await fetch('/api/chat', {
+      const endpoint = useGemini ? '/api/chat' : '/api/handbook';
+      const body = useGemini
+        ? {
+            Prompt_string: raw,
+            Email: recipient,
+            Mode: 'gemini',
+          }
+        : {
+            Prompt_string: raw,
+          };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          Prompt_string: raw,
-          Email: recipient,
-          Mode: useGemini ? 'gemini' : 'handbook',
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) throw new Error('Server error');
