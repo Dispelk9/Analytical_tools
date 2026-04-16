@@ -10,7 +10,7 @@ Thumbs.db
 *.ntvs*
 *.njsproj
 *.sln
-
+.codex
 # Python / Flask artifacts
 __pycache__/
 .tox/
