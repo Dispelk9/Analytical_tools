@@ -35,10 +35,10 @@ services:
       API_SERVER_HOST: 0.0.0.0
       API_SERVER_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
       HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-gemini}
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
     volumes:
       - hermes_data:/opt/data
+      - ./deploy/hermes/config.yaml:/opt/data/config.yaml:ro
       - handbook_data:/workspace/handbook:ro
     expose:
       - "8642"
