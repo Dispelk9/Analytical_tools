@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jre-jammy
 
-ARG SIGNAL_CLI_VERSION=0.13.18
+ARG SIGNAL_CLI_VERSION=0.13.24
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl tini \
