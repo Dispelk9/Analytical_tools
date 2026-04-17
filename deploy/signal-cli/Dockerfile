@@ -6,14 +6,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl tini \
     && rm -rf /var/lib/apt/lists/*
 
-RUN arch="$(dpkg --print-architecture)" \
-    && case "$arch" in \
-        amd64) signal_arch="x86_64" ;; \
-        arm64) signal_arch="aarch64" ;; \
-        *) echo "Unsupported architecture: $arch" >&2; exit 1 ;; \
-      esac \
-    && curl -fsSL -o /tmp/signal-cli.tar.gz \
-      "https://github.com/AsamK/signal-cli/releases/download/v${SIGNAL_CLI_VERSION}/signal-cli-${SIGNAL_CLI_VERSION}-Linux-${signal_arch}.tar.gz" \
+RUN curl -fsSL -o /tmp/signal-cli.tar.gz \
+      "https://github.com/AsamK/signal-cli/releases/download/v${SIGNAL_CLI_VERSION}/signal-cli-${SIGNAL_CLI_VERSION}.tar.gz" \
     && mkdir -p /opt \
     && tar -xzf /tmp/signal-cli.tar.gz -C /opt \
     && ln -s "/opt/signal-cli-${SIGNAL_CLI_VERSION}/bin/signal-cli" /usr/local/bin/signal-cli \
