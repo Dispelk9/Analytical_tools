@@ -168,6 +168,7 @@ Important values:
 - `GOOGLE_API_KEY`
 - `HERMES_MODEL`
 - `SIGNAL_ACCOUNT`
+- `SIGNAL_DEVICE_NAME`
 - `SIGNAL_ALLOWED_USERS`
 
 ### Backend Env

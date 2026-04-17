@@ -77,11 +77,15 @@ jobs:
 
       - name: Copy compose file and refresh nginx conf to server
         run: |
-          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app ~/app/deploy ~/app/deploy/hermes"
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app ~/app/deploy ~/app/deploy/hermes ~/app/deploy/signal-cli"
           scp -p deploy/docker-compose.yml \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
           scp -p deploy/hermes/config.yaml \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/hermes/config.yaml"
+          scp -p deploy/signal-cli/Dockerfile \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/signal-cli/Dockerfile"
+          scp -p deploy/signal-cli/entrypoint.sh \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/signal-cli/entrypoint.sh"
           scp -p deploy/nginx-proxy/nginx-act.conf \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:/etc/nginx/sites-available/nginx-act.conf"
           scp -p deploy/handbook-sync.sh \
@@ -151,6 +155,7 @@ jobs:
           GOOGLE_API_KEY=${GEMINI_API_KEY}
           HERMES_MODEL=gemini-2.5-flash-lite
           SIGNAL_ACCOUNT=${SIGNAL_ACCOUNT}
+          SIGNAL_DEVICE_NAME=HermesAgent
           SIGNAL_ALLOWED_USERS=${SIGNAL_ALLOWED_USERS}
 
           EOF

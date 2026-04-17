@@ -66,11 +66,14 @@ services:
       - ./deploy/hermes/config.yaml:/opt/data/config.yaml:ro
 
   signal-cli:
-    image: bbernhard/signal-cli-rest-api:latest
+    build:
+      context: ./deploy/signal-cli
+      dockerfile: Dockerfile
     container_name: signal_cli
     restart: unless-stopped
     environment:
-      MODE: json-rpc
+      SIGNAL_ACCOUNT: ${SIGNAL_ACCOUNT:-}
+      SIGNAL_DEVICE_NAME: ${SIGNAL_DEVICE_NAME:-HermesAgent}
     expose:
       - "8080"
     volumes:
