@@ -47,17 +47,34 @@ services:
     container_name: hermes
     restart: unless-stopped
     command: gateway run
+    depends_on:
+      signal-cli:
+        condition: service_started
     environment:
       API_SERVER_ENABLED: "true"
       API_SERVER_HOST: 0.0.0.0
       API_SERVER_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
       HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-gemini}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      SIGNAL_HTTP_URL: ${SIGNAL_HTTP_URL:-http://signal-cli:8080}
+      SIGNAL_ACCOUNT: ${SIGNAL_ACCOUNT:-}
+      SIGNAL_ALLOWED_USERS: ${SIGNAL_ALLOWED_USERS:-}
     expose:
       - "8642"
     volumes:
       - hermes_data:/opt/data
       - ./deploy/hermes/config.yaml:/opt/data/config.yaml:ro
+
+  signal-cli:
+    image: bbernhard/signal-cli-rest-api:latest
+    container_name: signal_cli
+    restart: unless-stopped
+    environment:
+      MODE: json-rpc
+    expose:
+      - "8080"
+    volumes:
+      - signal_cli_data:/home/.local/share/signal-cli
 
   frontend:
     build:
@@ -73,3 +90,4 @@ services:
 volumes:
   postgres_data:
   hermes_data:
+  signal_cli_data:
