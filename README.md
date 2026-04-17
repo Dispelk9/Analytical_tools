@@ -152,6 +152,9 @@ Handbook mounts:
 Hermes config:
 - mounted from [deploy/hermes/config.yaml](/home/vho/Codebase/Analytical_tools/deploy/hermes/config.yaml:1)
 
+Telegram setup and troubleshooting:
+- [docs/hermes_telegram_setup.md](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/docs/hermes_telegram_setup.md:1)
+
 ---
 
 ## Environment Layout

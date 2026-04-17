@@ -7,7 +7,7 @@ model:
 
 terminal:
   backend: "local"
-  cwd: "."
+  cwd: "/workspace/handbook"
   timeout: 180
   docker_mount_cwd_to_workspace: false
   lifetime_seconds: 300

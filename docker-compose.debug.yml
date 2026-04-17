@@ -17,6 +17,22 @@ services:
       timeout: 3s
       retries: 20
 
+  handbook-sync:
+    image: alpine/git:2.45.2
+    container_name: handbook_sync
+    restart: unless-stopped
+    environment:
+      REPO_URL: ${HANDBOOK_REPO_URL:-git@github.com:Dispelk9/vho-handbook.git}
+      BRANCH: ${HANDBOOK_BRANCH:-master}
+      SYNC_SECONDS: "300"
+    secrets:
+      - handbook_deploy_key
+      - handbook_known_hosts
+    volumes:
+      - handbook_data:/data
+      - ./deploy/handbook-sync.sh:/usr/local/bin/handbook-sync.sh:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/handbook-sync.sh"]
+
   backend:
     build:
       context: ./backend
@@ -60,6 +76,7 @@ services:
     volumes:
       - hermes_data:/opt/data
       - ./deploy/hermes/config.yaml:/opt/data/config.yaml:ro
+      - handbook_data:/workspace/handbook:ro
 
   frontend:
     build:
@@ -74,4 +91,11 @@ services:
 
 volumes:
   postgres_data:
+  handbook_data:
   hermes_data:
+
+secrets:
+  handbook_deploy_key:
+    file: ./secrets/handbook_deploy_key
+  handbook_known_hosts:
+    file: ./secrets/handbook_known_hosts
