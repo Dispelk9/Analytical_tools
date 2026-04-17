@@ -98,6 +98,8 @@ jobs:
 
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ALLOWED_USERS: ${{ secrets.TELEGRAM_ALLOWED_USERS }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -148,6 +150,8 @@ jobs:
           HERMES_INFERENCE_PROVIDER=gemini
           GOOGLE_API_KEY=${GEMINI_API_KEY}
           HERMES_MODEL=gemini-2.5-flash-lite
+          TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+          TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
 
           EOF
 

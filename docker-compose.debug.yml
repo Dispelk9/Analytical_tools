@@ -53,6 +53,8 @@ services:
       API_SERVER_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
       HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-gemini}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS:-}
     expose:
       - "8642"
     volumes:

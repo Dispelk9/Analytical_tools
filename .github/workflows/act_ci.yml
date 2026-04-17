@@ -54,6 +54,8 @@ jobs:
           HERMES_INFERENCE_PROVIDER: gemini
           GOOGLE_API_KEY: test-google-api-key
           HERMES_MODEL: gemini-2.5-flash-lite
+          TELEGRAM_BOT_TOKEN: 123456789:test-telegram-token
+          TELEGRAM_ALLOWED_USERS: 123456789
         run: docker compose -f docker-compose.debug.yml config
 
       - name: Validate deploy Compose config
@@ -64,6 +66,8 @@ jobs:
           HERMES_INFERENCE_PROVIDER: gemini
           GOOGLE_API_KEY: test-google-api-key
           HERMES_MODEL: gemini-2.5-flash-lite
+          TELEGRAM_BOT_TOKEN: 123456789:test-telegram-token
+          TELEGRAM_ALLOWED_USERS: 123456789
         run: |
           mkdir -p deploy/backend deploy/secrets
           cat > deploy/backend/.env <<EOF
