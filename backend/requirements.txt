@@ -1,6 +1,7 @@
 fastapi
 gunicorn
 uvicorn
+itsdangerous
 psycopg2-binary
 pyopenssl
 pubchempy
