@@ -1,12 +1,22 @@
 # Hermes Telegram Setup
 
-This repository already runs Hermes inside Docker. Telegram support only needs bot credentials added to the existing `hermes` service. No extra Telegram container is required.
+This repository already runs Hermes inside Docker. Telegram support now uses a dedicated backend polling worker, so handbook retrieval happens before the prompt is sent to Hermes and the backend API does not need to be exposed publicly for Telegram callbacks.
 
-Hermes also reads the synced handbook/text volume directly at `/workspace/handbook`, so Telegram-side Hermes searches can inspect the same text corpus that the backend handbook mode uses.
+Current flow:
+
+```text
+Telegram
+-> backend polling worker
+-> compact handbook retrieval
+-> Hermes
+-> Telegram reply
+```
+
+Hermes also reads the synced handbook/text volume directly at `/workspace/handbook`, while the backend and polling worker read the same synced repository from `HANDBOOK_ROOT`.
 
 ## Required Environment Variables
 
-Hermes reads these from the Compose-level `.env`:
+The backend reads these from the Compose-level `.env`:
 
 ```env
 TELEGRAM_BOT_TOKEN=123456789:your_bot_token
@@ -52,10 +62,11 @@ docker compose up -d --force-recreate hermes
 
 ## Verification
 
-Check that Hermes received the Telegram config:
+Check that the backend and polling worker received the Telegram config:
 
 ```bash
-docker compose exec hermes sh -lc 'env | sort | grep -E "TELEGRAM|HERMES"'
+docker compose exec backend sh -lc 'env | sort | grep -E "TELEGRAM|HERMES|HANDBOOK"'
+docker compose exec telegram-poller sh -lc 'env | sort | grep -E "TELEGRAM|HERMES|HANDBOOK"'
 ```
 
 Check that the handbook/text files are visible inside Hermes:
@@ -67,6 +78,7 @@ docker compose exec hermes sh -lc 'pwd && find /workspace/handbook -type f | hea
 Expected values:
 
 ```text
+HANDBOOK_ROOT=/data/vho-handbook
 TELEGRAM_BOT_TOKEN=...
 TELEGRAM_ALLOWED_USERS=123456789
 ```
@@ -77,13 +89,20 @@ Check backend to Hermes:
 curl http://localhost:8080/health/hermes
 ```
 
-Then send the bot a direct message on Telegram and watch Hermes logs:
+Check that handbook/text files are visible inside both services:
 
 ```bash
-docker compose logs -f hermes
+docker compose exec backend sh -lc 'find /data/vho-handbook -type f | head -50'
+docker compose exec hermes sh -lc 'find /workspace/handbook -type f | head -50'
 ```
 
-## Prove It Is Using Hermes
+Then watch the polling worker and Hermes logs together:
+
+```bash
+docker compose logs -f telegram-poller hermes
+```
+
+## Prove It Is Using Handbook Then Hermes
 
 If Telegram is replying, you can verify that the reply is coming through Hermes with this sequence:
 
@@ -93,17 +112,21 @@ If Telegram is replying, you can verify that the reply is coming through Hermes 
 curl http://localhost:8080/health/hermes
 ```
 
-2. Watch Hermes logs in one terminal:
+2. Watch the polling worker and Hermes logs in one terminal:
 
 ```bash
-docker compose logs -f hermes
+docker compose logs -f telegram-poller hermes
 ```
 
 3. Send a fresh Telegram message to the bot.
 
-4. Confirm Hermes logs show Telegram activity close to the message timestamp.
+4. Confirm the polling worker logs show it handling a fresh update.
 
-5. Optionally stop Hermes briefly and confirm Telegram replies stop:
+5. Confirm Hermes logs show a fresh `/v1/responses` call close to the message timestamp.
+
+6. Ask a question containing a very specific handbook keyword such as `BlueCat DDI` and check that the answer reflects the matching handbook snippet rather than a generic model answer.
+
+7. Optionally stop Hermes briefly and confirm Telegram replies stop:
 
 ```bash
 docker compose stop hermes
@@ -117,7 +140,7 @@ Bring Hermes back:
 docker compose up -d hermes
 ```
 
-That is the clearest practical proof that Telegram is flowing through Hermes rather than the Flask backend chat endpoint.
+That is the clearest practical proof that Telegram is flowing through backend retrieval first and then through Hermes for answer generation.
 
 ## Troubleshooting
 
@@ -126,46 +149,26 @@ That is the clearest practical proof that Telegram is flowing through Hermes rat
 Check Hermes logs first:
 
 ```bash
-docker compose logs hermes --tail=200
+docker compose logs telegram-poller hermes --tail=200
 ```
 
 Common causes:
 
 - `TELEGRAM_BOT_TOKEN` is missing or invalid
 - `TELEGRAM_ALLOWED_USERS` does not contain your numeric Telegram user ID
-- Hermes was not recreated after env changes
+- polling worker was not recreated after env changes
 
-Recreate Hermes after changing Telegram secrets:
-
-```bash
-docker compose up -d --force-recreate hermes
-```
-
-### `getUpdates` is empty
-
-If you are checking Telegram manually and this returns no updates:
+Recreate backend, polling worker, and Hermes after changing Telegram secrets:
 
 ```bash
-curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates"
+docker compose up -d --force-recreate backend telegram-poller hermes
 ```
 
-Then:
+### Another consumer is draining Telegram updates
 
-1. Message your bot directly
-2. Press `Start`
-3. Send a plain text message like `hello`
+Polling uses `getUpdates`, so only one consumer should read the bot queue. If another process or script is also calling `getUpdates`, the worker may appear idle.
 
-If it is still empty, check webhook status:
-
-```bash
-curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getWebhookInfo"
-```
-
-If a webhook is set unexpectedly, clear it:
-
-```bash
-curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/deleteWebhook"
-```
+Stop any ad-hoc `getUpdates` scripts before testing the poller.
 
 ### Wrong allowed user value
 
@@ -187,6 +190,8 @@ Check:
 
 ```bash
 curl http://localhost:8080/health/hermes
+curl http://localhost:8080/health/telegram
+docker compose logs telegram-poller --tail=200
 docker compose logs hermes --tail=200
 ```
 

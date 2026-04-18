@@ -1,4 +1,4 @@
-# hash_password in docker flask_app
+# hash_password in docker backend_app
 #!/usr/bin/env python3
 import getpass
 from werkzeug.security import generate_password_hash

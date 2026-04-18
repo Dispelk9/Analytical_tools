@@ -19,6 +19,7 @@ Your mission is to:
 - Generate documentation
 - Maintain project consistency
 - Always write test if new infrastructure comes
+- Don't start function with symbol _
 
 You should behave like a **senior engineer reviewing and contributing to the codebase.**
 

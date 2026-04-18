@@ -1,28 +1,44 @@
-import subprocess
+import json
+
+from services.chatbot.handbook_search import compact_match_lines
 
 
-def test_handbook_validates_and_handles_missing_root(client, monkeypatch):
-    response = client.post("/api/handbook", data="[]", content_type="application/json")
-    assert response.status_code == 400
-    assert response.get_json() == {"error": "Invalid JSON body"}
+def test_compact_match_lines_returns_small_context():
+    root = "/tmp/handbook"
+    payload = "\n".join([
+        json.dumps({
+            "type": "match",
+            "data": {
+                "path": {"text": f"{root}/common/ddi.txt"},
+                "lines": {"text": "BlueCat DDI runbook with operational notes and migration checklist.\n"},
+                "submatches": [{"match": {"text": "BlueCat"}}],
+            },
+        }),
+        json.dumps({
+            "type": "match",
+            "data": {
+                "path": {"text": f"{root}/common/ddi.txt"},
+                "lines": {"text": "BlueCat DDI runbook with operational notes and migration checklist.\n"},
+                "submatches": [{"match": {"text": "BlueCat"}}],
+            },
+        }),
+        json.dumps({
+            "type": "match",
+            "data": {
+                "path": {"text": f"{root}/README.md"},
+                "lines": {"text": "BlueCat migration and DNS support background.\n"},
+                "submatches": [{"match": {"text": "BlueCat"}}],
+            },
+        }),
+    ])
 
-    monkeypatch.setattr("chatbot.handbook.os.path.isdir", lambda path: False)
-    response = client.post("/api/handbook", json={"Prompt_string": "deploy"})
-    assert response.status_code == 500
-    assert response.get_json()["error"] == "HANDBOOK_ROOT is not available in container"
+    output = compact_match_lines(payload, root, max_matches=6, max_chars=90)
+
+    assert output.startswith("Handbook matches:")
+    assert "- common/ddi.txt: BlueCat DDI runbook" in output
+    assert "- README.md: BlueCat migration and DNS support background." in output
+    assert output.count("common/ddi.txt") == 1
 
 
-def test_handbook_returns_matches(client, monkeypatch):
-    monkeypatch.setattr("chatbot.handbook.os.path.isdir", lambda path: True)
-    monkeypatch.setattr(
-        "chatbot.handbook.subprocess.run",
-        lambda *args, **kwargs: subprocess.CompletedProcess(args[0], 0, stdout="docs/runbook.md\nmatch", stderr=""),
-    )
-
-    response = client.post("/api/handbook", json={"Prompt_string": "deploy"})
-
-    assert response.status_code == 200
-    assert response.get_json() == {
-        "mode": "handbook",
-        "candidates": [{"content": {"parts": [{"text": "docs/runbook.md\nmatch"}]}}],
-    }
+def test_compact_match_lines_handles_empty_result():
+    assert compact_match_lines("", "/tmp/handbook") == "No matches found in handbook."

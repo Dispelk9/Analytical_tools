@@ -1,10 +1,9 @@
-from flask import Blueprint, request, jsonify
 import logging
 import sys
 import os
 import requests
 from dotenv import load_dotenv
-from utils.send_log import send_email
+from services.utils.send_log import send_email
 
 load_dotenv()
 
@@ -13,55 +12,8 @@ logging.basicConfig(
     stream=sys.stdout,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
-
-gemini_bp = Blueprint('gemini', __name__)
-
-
-@gemini_bp.route("/health/gemini", methods=["GET"])
-def gemini_health():
-    return jsonify(gemini_health_check_basic())
-
-
-@gemini_bp.route('/api/gemini', methods=['POST'])
-def gemini_request():
-    data = request.get_json(silent=True)
-    logging.info("Incoming JSON: %s", data)
-
-    # Basic payload validation
-    if not isinstance(data, dict):
-        return jsonify({"error": "Invalid JSON body"}), 400
-
-    prompt = str(data.get("Prompt_string", "")).strip()
-    recipient = str(data.get("Email", "")).strip()
-
-    if not prompt:
-        return jsonify({"error": "Please enter a prompt for D9 Bot"}), 400
-
-    try:
-        # Call Gemini
-        response_json = call_gemini(prompt)
-
-        # Email (optional)
-        if recipient:
-            # You might want a nicer email body than raw dict
-            texts = extract_texts(response_json)
-            send_email([f"Prompt: {prompt}", "Response:", *texts],recipient)
-
-        # Return JSON back to the frontend
-        logging.info("Response JSON: %s", response_json)
-        return jsonify(response_json), 200
-
-    except requests.HTTPError as e:
-        status = getattr(e.response, "status_code", None)
-        logging.exception("Gemini HTTP error")
-        if status == 429:
-            return jsonify({"error": "Gemini rate limited. Please retry."}), 429
-        return jsonify({"error": "Upstream error from Gemini", "details": str(e)}), 502
-    except Exception as e:
-        logging.exception("Unhandled error")
-        return jsonify({"error": "Internal server error", "details": str(e)}), 500
     
-def _read_secret_file(path: str) -> str | None:
+def read_secret_file(path: str) -> str | None:
     try:
         with open(path, "r", encoding="utf-8") as f:
             return f.read().strip()
@@ -99,7 +51,7 @@ def get_gemini_api_key() -> str:
     Fallback to env for dev.
     """
     path = os.getenv("GEMINI_API_KEY_FILE", "/run/secrets/gemini_api_key")
-    key = _read_secret_file(path)
+    key = read_secret_file(path)
     if not key:
         key = os.getenv("GOOGLE_API_KEY")  # dev fallback
     if not key:

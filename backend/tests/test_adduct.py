@@ -2,15 +2,15 @@ def test_adduct_requires_required_fields(client):
     response = client.post("/api/adduct", json={"NM": "100"})
 
     assert response.status_code == 400
-    assert response.get_json() == {"error": "Missing one or more numbers"}
+    assert response.json() == {"error": "Missing one or more numbers"}
 
 
 def test_adduct_returns_combined_results_and_sends_email(client, monkeypatch):
-    monkeypatch.setattr("adduct.DB_CONNECT", lambda: {"username": "u"})
-    monkeypatch.setattr("adduct.without_hydro", lambda value_list, db_config: [{"Element Set": ["Na+"], "Sum": ["22.99"]}])
-    monkeypatch.setattr("adduct.m_calculation", lambda value_list, db_config: [{"Adduct Combinations": [["H+"]]}])
+    monkeypatch.setattr("api.tools.adduct.DB_CONNECT", lambda: {"username": "u"})
+    monkeypatch.setattr("api.tools.adduct.without_hydro", lambda value_list, db_config: [{"Element Set": ["Na+"], "Sum": ["22.99"]}])
+    monkeypatch.setattr("api.tools.adduct.m_calculation", lambda value_list, db_config: [{"Adduct Combinations": [["H+"]]}])
     sent_emails = []
-    monkeypatch.setattr("adduct.send_email", lambda logs, recipient: sent_emails.append((logs, recipient)))
+    monkeypatch.setattr("api.tools.adduct.send_email", lambda logs, recipient: sent_emails.append((logs, recipient)))
 
     response = client.post(
         "/api/adduct",
@@ -18,7 +18,7 @@ def test_adduct_returns_combined_results_and_sends_email(client, monkeypatch):
     )
 
     assert response.status_code == 200
-    assert response.get_json() == {
+    assert response.json() == {
         "result": {
             "Results without Hydro": [{"Element Set": ["Na+"], "Sum": ["22.99"]}],
             "Results with Hydro": [{"Adduct Combinations": [["H+"]]}],

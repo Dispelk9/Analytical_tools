@@ -44,7 +44,7 @@ User Browser
 Frontend (React + Vite + Porsche Design System)
     |
     v
-Backend API (Flask)
+Backend API (FastAPI)
     |
     +---------------------------> PostgreSQL
     |
@@ -123,7 +123,8 @@ AI mode is Hermes-backed.
 - Frontend calls `/api/chat`
 - Backend calls Hermes at `HERMES_BASE_URL`
 - Hermes uses the configured provider, currently Gemini
-- Conversation state is preserved through a Hermes conversation id stored in the Flask session
+- Conversation state is preserved through a Hermes conversation id stored in the backend session
+- Telegram now enters through a dedicated backend polling worker, which adds compact handbook context before calling Hermes
 
 This mode is the one that uses external model quota.
 
@@ -135,7 +136,8 @@ The production Docker stack is defined in [deploy/docker-compose.yml](/home/vho/
 
 Main services:
 - `frontend`: Apache-served frontend
-- `backend`: Flask API service
+- `backend`: FastAPI service
+- `telegram-poller`: long-polling Telegram worker using backend retrieval + Hermes
 - `postgres`: application database
 - `hermes`: Hermes Gateway API service
 - `handbook-sync`: sync job for the private handbook repository
@@ -194,7 +196,7 @@ Typical values:
 ## Project Structure
 
 ```text
-backend/    Flask API, chat logic, handbook search, analytical tools
+backend/    FastAPI service, chat logic, handbook search, analytical tools
 frontend/   React UI
 deploy/     Docker Compose, deploy scripts, Hermes config
 docs/       Project documentation
@@ -204,6 +206,7 @@ Important backend endpoints:
 - `/api/chat`: Hermes-backed AI mode
 - `/api/handbook`: local handbook search mode
 - `/health/hermes`
+- `/health/telegram`
 - `/health/handbook`
 - `/api/gemini`: older direct Gemini path still present in backend
 
@@ -219,7 +222,7 @@ Important backend endpoints:
 
 ### Backend
 - Python
-- Flask
+- FastAPI
 - PostgreSQL
 - ripgrep for handbook lookup
 
@@ -240,7 +243,7 @@ Useful references for the main technologies used in this stack:
 - Gemini API docs: https://ai.google.dev/docs
 - React docs: https://react.dev/
 - Vite docs: https://vite.dev/
-- Flask docs: https://flask.palletsprojects.com/
+- FastAPI docs: https://fastapi.tiangolo.com/
 - PostgreSQL docs: https://www.postgresql.org/docs/
 - Porsche Design System React docs: https://designsystem.porsche.com/v3/developing/react/getting-started/
 
@@ -248,9 +251,9 @@ Useful references for the main technologies used in this stack:
 
 ## Notes
 
-- Hermes is mounted with handbook data, but handbook mode currently does **not** use Hermes.
+- Browser handbook mode and Telegram polling both use backend-side handbook retrieval before Hermes answer generation.
 - The handbook is synced from the private `vho-handbook` repository into the Docker volume `handbook_data`.
-- If handbook mode returns no results, that is currently a local text-search limitation rather than an AI limitation.
+- If handbook mode or Telegram returns no relevant results, that is currently a retrieval limitation rather than an AI limitation.
 
 ---
 
