@@ -4,6 +4,8 @@ import os
 import subprocess
 from pathlib import Path
 
+NO_HANDBOOK_MATCHES = "No matches found in handbook."
+
 
 def get_handbook_root() -> str:
     return os.getenv("HANDBOOK_ROOT", "/data/vho-handbook")
@@ -71,7 +73,7 @@ def compact_match_lines(stdout: str, root: str, max_matches: int = 6, max_chars:
             break
 
     if not matches:
-        return "No matches found in handbook."
+        return NO_HANDBOOK_MATCHES
 
     rendered = ["Handbook matches:"]
     for rel_path, line in matches:
@@ -96,3 +98,7 @@ def search_handbook_text(query: str) -> str:
         raise RuntimeError(proc.stderr.strip() or "grep_failed")
 
     return compact_match_lines(proc.stdout or "", root)
+
+
+def has_handbook_matches(output: str) -> bool:
+    return output.strip().startswith("Handbook matches:")

@@ -12,7 +12,10 @@ def test_chat_routes_handbook_mode_through_hermes_and_persists_session(client, m
     posted = {}
     sent = []
 
-    monkeypatch.setattr("services.chatbot.prompting.search_handbook_text", lambda prompt: f"handbook context for {prompt}")
+    monkeypatch.setattr(
+        "api.chatbot.api_routes.search_handbook_text",
+        lambda prompt: f"Handbook matches:\n- docs/runbook.md: handbook context for {prompt}",
+    )
     monkeypatch.setattr("api.chatbot.api_routes.send_email", lambda lines, recipient: sent.append((lines, recipient)))
 
     class DummyResponse:
@@ -76,6 +79,28 @@ def test_chat_routes_handbook_mode_through_hermes_and_persists_session(client, m
     assert posted["json"]["conversation"] == body["conversation_id"]
 
 
+def test_chat_falls_back_to_gemini_when_handbook_has_no_matches(client, monkeypatch):
+    monkeypatch.setattr(
+        "api.chatbot.api_routes.search_handbook_text",
+        lambda prompt: "No matches found in handbook.",
+    )
+    monkeypatch.setattr(
+        "services.chatbot.gemini.call_gemini",
+        lambda prompt: {"candidates": [{"content": {"parts": [{"text": f"gemini:{prompt}"}]}}]},
+    )
+
+    hermes_calls = []
+    monkeypatch.setattr("services.chatbot.hermes.requests.post", lambda *args, **kwargs: hermes_calls.append((args, kwargs)))
+
+    response = client.post("/api/chat", json={"Prompt_string": "What is Kubernetes?", "Mode": "handbook"})
+
+    assert response.status_code == 200
+    assert response.json()["mode"] == "gemini_fallback"
+    assert response.json()["conversation_id"] is None
+    assert response.json()["candidates"][0]["content"]["parts"][0]["text"] == "gemini:What is Kubernetes?"
+    assert hermes_calls == []
+
+
 def test_chat_handles_hermes_unavailable(client, monkeypatch):
     monkeypatch.setattr(
         "services.chatbot.hermes.requests.post",
@@ -94,7 +119,7 @@ def test_telegram_poller_routes_through_handbook_then_hermes(monkeypatch):
     monkeypatch.setenv("TELEGRAM_ALLOWED_USERS", "8638591553")
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token-123")
     monkeypatch.setattr(
-        "services.chatbot.prompting.search_handbook_text",
+        "services.chatbot.telegram_poller.search_handbook_text",
         lambda prompt: "Handbook matches:\n- common/ddi.txt: BlueCat DDI runbook",
     )
 
@@ -150,6 +175,68 @@ def test_telegram_poller_routes_through_handbook_then_hermes(monkeypatch):
     assert posted[1]["url"] == "https://api.telegram.org/bottoken-123/sendMessage"
     assert posted[1]["json"]["chat_id"] == 8638591553
     assert "BlueCat DDI" in posted[1]["json"]["text"]
+
+
+def test_telegram_poller_falls_back_to_gemini_when_handbook_has_no_match(monkeypatch):
+    posted = []
+
+    monkeypatch.setenv("TELEGRAM_ALLOWED_USERS", "8638591553")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token-123")
+    monkeypatch.setattr(
+        "services.chatbot.telegram_poller.search_handbook_text",
+        lambda prompt: "No matches found in handbook.",
+    )
+    monkeypatch.setattr(
+        "services.chatbot.telegram_poller.call_gemini",
+        lambda prompt: {"candidates": [{"content": {"parts": [{"text": f"gemini:{prompt}"}]}}]},
+    )
+
+    class DummyResponse:
+        def __init__(self, payload=None, status_code=200):
+            self._payload = payload or {}
+            self.status_code = status_code
+            self.ok = status_code < 400
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return self._payload
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        posted.append({
+            "url": url,
+            "headers": headers,
+            "json": json,
+            "timeout": timeout,
+        })
+        return DummyResponse({"ok": True})
+
+    monkeypatch.setattr("services.chatbot.hermes.requests.post", fake_post)
+    monkeypatch.setattr("services.chatbot.telegram_gateway.requests.post", fake_post)
+
+    from services.chatbot.telegram_poller import handle_telegram_update
+
+    handle_telegram_update(
+        {
+            "update_id": 1,
+            "message": {
+                "message_id": 2,
+                "from": {"id": 8638591553},
+                "chat": {"id": 8638591553, "type": "private"},
+                "text": "What is Kubernetes?",
+            },
+        },
+    )
+
+    assert posted == [
+        {
+            "url": "https://api.telegram.org/bottoken-123/sendMessage",
+            "headers": None,
+            "json": {"chat_id": 8638591553, "text": "gemini:What is Kubernetes?"},
+            "timeout": 15,
+        }
+    ]
 
 
 def test_telegram_poller_ignores_unauthorized_user(monkeypatch):

@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from services.chatbot import gemini, hermes, prompting
-from services.chatbot.handbook_search import get_handbook_root, search_handbook_text
+from services.chatbot.handbook_search import get_handbook_root, has_handbook_matches, search_handbook_text
 from services.utils.send_log import send_email
 
 
@@ -30,17 +30,36 @@ def chat_request(payload: ChatRequest, request: Request):
     if not prompt:
         raise HTTPException(status_code=400, detail="Please enter a prompt for D9 Bot")
 
+    response_mode = mode
     try:
-        conversation_id = hermes.get_session_conversation_id(request.session)
-        hermes_prompt = prompting.build_chat_prompt(prompt, mode)
-        response_json = hermes.call_hermes(hermes_prompt, conversation_id)
+        if mode == "handbook":
+            handbook_context = search_handbook_text(prompt)
+            if has_handbook_matches(handbook_context):
+                conversation_id = hermes.get_session_conversation_id(request.session)
+                hermes_prompt = prompting.HANDBOOK_INSTRUCTIONS.format(
+                    prompt=prompt,
+                    context=handbook_context,
+                )
+                response_json = hermes.call_hermes(hermes_prompt, conversation_id)
+                texts = hermes.extract_response_text(response_json)
+                response_mode = mode
+            else:
+                conversation_id = None
+                response_json = gemini.call_gemini(prompt)
+                texts = gemini.extract_texts(response_json)
+                response_mode = "gemini_fallback"
+        else:
+            conversation_id = hermes.get_session_conversation_id(request.session)
+            hermes_prompt = prompting.build_chat_prompt(prompt, mode)
+            response_json = hermes.call_hermes(hermes_prompt, conversation_id)
+            texts = hermes.extract_response_text(response_json)
+            response_mode = mode
 
-        texts = hermes.extract_response_text(response_json)
         if recipient and texts:
-            send_email([f"Prompt: {prompt}", f"Mode: {mode}", "Response:", *texts], recipient)
+            send_email([f"Prompt: {prompt}", f"Mode: {response_mode}", "Response:", *texts], recipient)
 
         return {
-            "mode": mode,
+            "mode": response_mode,
             "conversation_id": conversation_id,
             "candidates": [
                 {
@@ -62,6 +81,21 @@ def chat_request(payload: ChatRequest, request: Request):
         raise HTTPException(status_code=500, detail={"error": "handbook_search_failed", "details": str(exc)}) from exc
     except requests.HTTPError as exc:
         status = getattr(exc.response, "status_code", None)
+        if response_mode == "gemini_fallback":
+            logging.exception("Gemini HTTP error")
+            if status == 429:
+                raise HTTPException(
+                    status_code=429,
+                    detail={"error": "Gemini rate limited. Please retry."},
+                ) from exc
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "error": "Upstream error from Gemini",
+                    "details": str(exc),
+                    "upstream_http": status,
+                },
+            ) from exc
         logging.exception("Hermes HTTP error")
         raise HTTPException(
             status_code=502,

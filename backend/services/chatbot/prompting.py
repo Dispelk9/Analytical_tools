@@ -1,4 +1,4 @@
-from services.chatbot.handbook_search import search_handbook_text
+from services.chatbot.handbook_search import has_handbook_matches, search_handbook_text
 
 
 HANDBOOK_INSTRUCTIONS = """You are answering a user question with handbook context.
@@ -26,4 +26,6 @@ def build_chat_prompt(prompt: str, mode: str) -> str:
         return prompt
 
     context = search_handbook_text(prompt)
+    if not has_handbook_matches(context):
+        return prompt
     return HANDBOOK_INSTRUCTIONS.format(prompt=prompt, context=context)
