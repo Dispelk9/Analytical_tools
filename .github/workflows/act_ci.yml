@@ -34,41 +34,6 @@ jobs:
 
       - name: Create CI env files for Compose
         run: |
-          mkdir -p backend
-          cat > backend/.env <<EOF
-          DB_USERNAME=postgres
-          DB_PASSWORD=postgres
-          DB_HOST=postgres_db
-          DB_PORT=5432
-          DB_NAME=postgres
-          SESSION_SECRET=test-session-secret
-          SENDER=test@example.com
-          MAIL_PW=test-mail-password
-          SMTP_RELAY=smtp.example.com
-          GEMINI_MODEL=gemini-2.5-flash-lite
-          EOF
-
-      - name: Validate debug Compose config
-        env:
-          HERMES_API_KEY: test-hermes-key
-          HERMES_INFERENCE_PROVIDER: gemini
-          GOOGLE_API_KEY: test-google-api-key
-          HERMES_MODEL: gemini-2.5-flash-lite
-          TELEGRAM_BOT_TOKEN: 123456789:test-telegram-token
-          TELEGRAM_ALLOWED_USERS: 123456789
-        run: docker compose -f docker-compose.debug.yml config
-
-      - name: Validate deploy Compose config
-        env:
-          TAG: test-tag
-          DB_PASSWORD: postgres
-          HERMES_API_KEY: test-hermes-key
-          HERMES_INFERENCE_PROVIDER: gemini
-          GOOGLE_API_KEY: test-google-api-key
-          HERMES_MODEL: gemini-2.5-flash-lite
-          TELEGRAM_BOT_TOKEN: 123456789:test-telegram-token
-          TELEGRAM_ALLOWED_USERS: 123456789
-        run: |
           mkdir -p deploy/backend deploy/secrets
           cat > deploy/backend/.env <<EOF
           DB_USERNAME=postgres
@@ -85,7 +50,29 @@ jobs:
           printf 'test-gemini-api-key\n' > deploy/secrets/gemini_api_key
           printf 'test-handbook-deploy-key\n' > deploy/secrets/handbook_deploy_key
           printf 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAITestKnownHost\n' > deploy/secrets/handbook_known_hosts
-          docker compose -f deploy/docker-compose.yml config
+
+      - name: Validate deployed prod Compose config
+        env:
+          TAG: test-tag
+          DB_PASSWORD: postgres
+          HERMES_API_KEY: test-hermes-key
+          HERMES_INFERENCE_PROVIDER: gemini
+          GOOGLE_API_KEY: test-google-api-key
+          HERMES_MODEL: gemini-2.5-flash-lite
+          TELEGRAM_BOT_TOKEN: 123456789:test-telegram-token
+          TELEGRAM_ALLOWED_USERS: 123456789
+        run: |
+          tmpdir="$(mktemp -d)"
+          trap 'rm -rf "$tmpdir"' EXIT
+          mkdir -p "$tmpdir/deploy/hermes" "$tmpdir/backend" "$tmpdir/secrets"
+          cp deploy/docker-compose.yml "$tmpdir/docker-compose.yml"
+          cp deploy/handbook-sync.sh "$tmpdir/deploy/handbook-sync.sh"
+          cp deploy/hermes/config.yaml "$tmpdir/deploy/hermes/config.yaml"
+          cp deploy/backend/.env "$tmpdir/backend/.env"
+          cp deploy/secrets/gemini_api_key "$tmpdir/secrets/gemini_api_key"
+          cp deploy/secrets/handbook_deploy_key "$tmpdir/secrets/handbook_deploy_key"
+          cp deploy/secrets/handbook_known_hosts "$tmpdir/secrets/handbook_known_hosts"
+          docker compose -f "$tmpdir/docker-compose.yml" config
 
   frontend-tests:
     name: Frontend Tests

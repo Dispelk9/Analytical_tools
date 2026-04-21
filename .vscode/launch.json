@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Analytical Tools: Up Local Stack",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose -f deploy/docker-compose.debug.yml up --build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Analytical Tools: Down Local Stack",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose -f deploy/docker-compose.debug.yml down",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Analytical Tools: Up Local Stack With Handbook Sync",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose --profile handbook-sync -f deploy/docker-compose.debug.yml up --build",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

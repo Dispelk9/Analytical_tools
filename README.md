@@ -193,6 +193,63 @@ Typical values:
 
 ---
 
+## Local Debug Setup
+
+For local development, the Docker debug stack is defined in [deploy/docker-compose.debug.yml](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/deploy/docker-compose.debug.yml:1).
+
+### Backend Env For Local Debug
+
+Start by creating a local backend env file from [backend/.env.example](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/backend/.env.example:1).
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+This file is intentionally safe to commit as an example. Keep `backend/.env` local and do not commit real credentials.
+
+### Start The Local Stack
+
+From the repository root:
+
+```bash
+docker compose -f deploy/docker-compose.debug.yml up --build
+```
+
+The default local stack starts:
+- `postgres`
+- `backend`
+- `frontend`
+- `hermes`
+- `telegram-poller`
+
+The private handbook sync service is optional in local development.
+
+To start it too:
+
+```bash
+docker compose --profile handbook-sync -f deploy/docker-compose.debug.yml up --build
+```
+
+### VS Code F5
+
+This repository includes VS Code launch configs in [.vscode/launch.json](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/.vscode/launch.json:1).
+
+Press `F5` and choose one of:
+- `Analytical Tools: Up Local Stack`
+- `Analytical Tools: Up Local Stack With Handbook Sync`
+- `Analytical Tools: Down Local Stack`
+
+### Optional Local Overrides
+
+`deploy/docker-compose.debug.yml` also supports these optional local environment variables:
+- `GEMINI_API_KEY_PATH`: host path to your Gemini API key file
+- `HERMES_API_KEY`: API key used by the local Hermes container
+- `GOOGLE_API_KEY`: dev fallback if no Gemini key file is mounted
+- `HANDBOOK_DEPLOY_KEY_PATH`: host path to the handbook SSH deploy key
+- `HANDBOOK_KNOWN_HOSTS_PATH`: host path to the handbook known_hosts file
+
+---
+
 ## Project Structure
 
 ```text

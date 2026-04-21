@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres   # ✅ must match DB_PASSWORD
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
       - "5432:5432"
@@ -20,22 +20,22 @@ services:
   handbook-sync:
     image: alpine/git:2.45.2
     container_name: handbook_sync
+    profiles: ["handbook-sync"]
     restart: unless-stopped
     environment:
       REPO_URL: ${HANDBOOK_REPO_URL:-git@github.com:Dispelk9/vho-handbook.git}
       BRANCH: ${HANDBOOK_BRANCH:-master}
       SYNC_SECONDS: "300"
-    secrets:
-      - handbook_deploy_key
-      - handbook_known_hosts
     volumes:
       - handbook_data:/data
-      - ./deploy/handbook-sync.sh:/usr/local/bin/handbook-sync.sh:ro
+      - ./handbook-sync.sh:/usr/local/bin/handbook-sync.sh:ro
+      - ${HANDBOOK_DEPLOY_KEY_PATH:-./secrets/handbook_deploy_key}:/run/secrets/handbook_deploy_key:ro
+      - ${HANDBOOK_KNOWN_HOSTS_PATH:-./secrets/handbook_known_hosts}:/run/secrets/handbook_known_hosts:ro
     entrypoint: ["/bin/sh", "/usr/local/bin/handbook-sync.sh"]
 
   backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile.debug
     container_name: backend_app
     restart: unless-stopped
@@ -45,10 +45,10 @@ services:
       hermes:
         condition: service_started
     env_file:
-      - backend/.env        # ✅ load exactly your env file
+      - ../backend/.env
     environment:
-      DB_PASSWORD: postgres # ✅ override empty value in .env
-      DB_HOST: postgres_db  # matches your .env
+      DB_PASSWORD: postgres
+      DB_HOST: postgres_db
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
       HERMES_BASE_URL: http://hermes:8642
       HERMES_API_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
@@ -58,11 +58,11 @@ services:
     ports:
       - "8080:8080"
     volumes:
-    - /home/vho/Gemini/gemini_api_key:/run/secrets/gemini_api_key:ro
+      - ${GEMINI_API_KEY_PATH:-/home/vho/Gemini/gemini_api_key}:/run/secrets/gemini_api_key:ro
 
   telegram-poller:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile.debug
     container_name: telegram_poller
     restart: unless-stopped
@@ -70,7 +70,7 @@ services:
       hermes:
         condition: service_started
     env_file:
-      - backend/.env
+      - ../backend/.env
     environment:
       HERMES_BASE_URL: http://hermes:8642
       HERMES_API_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
@@ -97,12 +97,12 @@ services:
       - "8642"
     volumes:
       - hermes_data:/opt/data
-      - ./deploy/hermes/config.yaml:/opt/data/config.yaml:ro
+      - ./hermes/config.yaml:/opt/data/config.yaml:ro
       - handbook_data:/workspace/handbook:ro
 
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile.debug
     container_name: apache_frontend
     restart: unless-stopped
@@ -115,9 +115,3 @@ volumes:
   postgres_data:
   handbook_data:
   hermes_data:
-
-secrets:
-  handbook_deploy_key:
-    file: ./secrets/handbook_deploy_key
-  handbook_known_hosts:
-    file: ./secrets/handbook_known_hosts

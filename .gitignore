@@ -4,6 +4,9 @@ Thumbs.db
 
 # Editor and IDE directories/files
 .vscode/
+!.vscode/
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea/
 .codex/
 *.suo
@@ -27,6 +30,7 @@ instance/                # Flask instance folder
 *.env
 .env
 *.env.*
+!backend/.env.example
 .flaskenv                # Flask configuration file
 .coverage
 .coverage.*
