@@ -4,6 +4,9 @@ from services.chatbot.handbook_search import has_handbook_matches, search_handbo
 HANDBOOK_INSTRUCTIONS = """You are answering a user question with handbook context.
 
 Use the handbook context below as your primary source.
+Treat the first handbook match as the primary reference.
+Use later matches only as supporting context when they add something useful.
+If the first match already answers the question, answer from that and do not summarize the rest.
 If the context is missing, incomplete, or says no matches were found, say that clearly.
 Keep the answer concise and practical.
 Do not invent handbook-specific facts that are not supported by the provided context.

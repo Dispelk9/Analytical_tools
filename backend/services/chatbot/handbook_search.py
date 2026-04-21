@@ -76,8 +76,14 @@ def compact_match_lines(stdout: str, root: str, max_matches: int = 6, max_chars:
         return NO_HANDBOOK_MATCHES
 
     rendered = ["Handbook matches:"]
-    for rel_path, line in matches:
-        rendered.append(f"- {rel_path}: {line}")
+    first_path, first_line = matches[0]
+    rendered.append("Primary match:")
+    rendered.append(f"- {first_path}: {first_line}")
+
+    if len(matches) > 1:
+        rendered.append("Additional matches:")
+        for rel_path, line in matches[1:]:
+            rendered.append(f"- {rel_path}: {line}")
     return "\n".join(rendered)
 
 

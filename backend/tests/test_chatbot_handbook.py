@@ -35,7 +35,9 @@ def test_compact_match_lines_returns_small_context():
     output = compact_match_lines(payload, root, max_matches=6, max_chars=90)
 
     assert output.startswith("Handbook matches:")
+    assert "Primary match:" in output
     assert "- common/ddi.txt: BlueCat DDI runbook" in output
+    assert "Additional matches:" in output
     assert "- README.md: BlueCat migration and DNS support background." in output
     assert output.count("common/ddi.txt") == 1
 
