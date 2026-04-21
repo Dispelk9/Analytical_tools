@@ -233,8 +233,11 @@ def test_telegram_poller_falls_back_to_gemini_when_handbook_has_no_match(monkeyp
         {
             "url": "https://api.telegram.org/bottoken-123/sendMessage",
             "headers": None,
-            "json": {"chat_id": 8638591553, "text": "gemini:What is Kubernetes?"},
-            "timeout": 15,
+            "json": {
+                "chat_id": 8638591553,
+                "text": "No handbook match found. Using Gemini knowledge instead.\n\ngemini:What is Kubernetes?",
+            },
+            "timeout": 30,
         }
     ]
 
