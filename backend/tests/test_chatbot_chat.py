@@ -247,6 +247,84 @@ def test_telegram_poller_uses_hermes_when_handbook_has_no_match(monkeypatch):
     }
 
 
+def test_telegram_poller_falls_back_to_handbook_snippet_on_hermes_rate_limit(monkeypatch):
+    posted = []
+
+    monkeypatch.setenv("TELEGRAM_ALLOWED_USERS", "8638591553")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token-123")
+    monkeypatch.setattr(
+        "services.chatbot.telegram_poller.search_handbook_text",
+        lambda prompt: "Handbook matches:\nPrimary match:\n- common/ddi.txt: BlueCat DDI runbook",
+    )
+    monkeypatch.setattr(
+        "services.chatbot.telegram_poller.search_handbook_paragraphs",
+        lambda prompt: "Handbook fallback:\nPrimary snippet:\n- common/ddi.txt: BlueCat DDI handles DNS and IPAM for core services.",
+    )
+
+    class DummyResponse:
+        def __init__(self, payload=None, status_code=200, text=""):
+            self._payload = payload or {}
+            self.status_code = status_code
+            self.ok = status_code < 400
+            self.text = text
+            self.reason = "RESOURCE_EXHAUSTED" if status_code == 429 else ""
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise requests.HTTPError(
+                    f"Gemini HTTP {self.status_code} (RESOURCE_EXHAUSTED): quota exceeded",
+                    response=self,
+                )
+            return None
+
+        def json(self):
+            return self._payload
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        posted.append({
+            "url": url,
+            "headers": headers,
+            "json": json,
+            "timeout": timeout,
+        })
+        if url == "http://hermes:8642/v1/responses":
+            return DummyResponse(status_code=429, text="RESOURCE_EXHAUSTED quota exceeded")
+        return DummyResponse({"ok": True})
+
+    monkeypatch.setattr("services.chatbot.hermes.requests.post", fake_post)
+    monkeypatch.setattr("services.chatbot.telegram_gateway.requests.post", fake_post)
+
+    from services.chatbot.telegram_poller import handle_telegram_update
+
+    handle_telegram_update(
+        {
+            "update_id": 1,
+            "message": {
+                "message_id": 2,
+                "from": {"id": 8638591553},
+                "chat": {"id": 8638591553, "type": "private"},
+                "text": "BlueCat DDI",
+            },
+        },
+    )
+
+    assert posted[0]["url"] == "http://hermes:8642/v1/responses"
+    assert posted[1] == {
+        "url": "https://api.telegram.org/bottoken-123/sendMessage",
+        "headers": None,
+        "json": {
+            "chat_id": 8638591553,
+            "text": (
+                "Hermes is currently rate limited, so here is the closest handbook snippet instead.\n"
+                "Handbook fallback:\n"
+                "Primary snippet:\n"
+                "- common/ddi.txt: BlueCat DDI handles DNS and IPAM for core services."
+            ),
+        },
+        "timeout": 30,
+    }
+
+
 def test_telegram_poller_ignores_unauthorized_user(monkeypatch):
     monkeypatch.setenv("TELEGRAM_ALLOWED_USERS", "111")
     posted = []

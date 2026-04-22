@@ -1,6 +1,6 @@
 import json
 
-from services.chatbot.handbook_search import compact_match_lines
+from services.chatbot.handbook_search import compact_match_lines, extract_handbook_paragraphs
 
 
 def test_compact_match_lines_returns_small_context():
@@ -44,3 +44,23 @@ def test_compact_match_lines_returns_small_context():
 
 def test_compact_match_lines_handles_empty_result():
     assert compact_match_lines("", "/tmp/handbook") == "No matches found in handbook."
+
+
+def test_extract_handbook_paragraphs_returns_snippet_blocks():
+    root = "/tmp/handbook"
+    payload = "\n".join([
+        f"{root}/common/ddi.txt-10-Header line",
+        f"{root}/common/ddi.txt:11:BlueCat DDI handles DNS and IPAM for core services.",
+        f"{root}/common/ddi.txt-12-Follow the migration checklist before changing records.",
+        "--",
+        f"{root}/README.md-20-Overview",
+        f"{root}/README.md:21:BlueCat support notes for operational troubleshooting.",
+    ])
+
+    output = extract_handbook_paragraphs(payload, root, max_blocks=2, max_chars=220)
+
+    assert output.startswith("Handbook fallback:")
+    assert "Primary snippet:" in output
+    assert "- common/ddi.txt: Header line BlueCat DDI handles DNS and IPAM for core services." in output
+    assert "Additional snippet 1:" in output
+    assert "- README.md: Overview BlueCat support notes for operational troubleshooting." in output

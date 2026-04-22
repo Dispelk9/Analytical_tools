@@ -3,7 +3,12 @@ import time
 
 import requests
 
-from services.chatbot.handbook_search import has_handbook_matches, search_handbook_text
+from services.chatbot.handbook_search import (
+    NO_HANDBOOK_MATCHES,
+    has_handbook_matches,
+    search_handbook_paragraphs,
+    search_handbook_text,
+)
 from services.chatbot.hermes import build_telegram_conversation_id, call_hermes, extract_response_text
 from services.chatbot.prompting import HANDBOOK_INSTRUCTIONS
 from services.chatbot.telegram_gateway import (
@@ -14,6 +19,34 @@ from services.chatbot.telegram_gateway import (
     get_telegram_user_id,
     send_telegram_message,
 )
+
+
+def is_hermes_rate_limited(exc: requests.HTTPError) -> bool:
+    status_code = getattr(exc.response, "status_code", None)
+    if status_code == 429:
+        return True
+
+    details = " ".join(
+        part for part in [
+            str(exc),
+            getattr(exc.response, "text", ""),
+            getattr(exc.response, "reason", ""),
+        ]
+        if part
+    ).lower()
+    return "resource_exhausted" in details or "quota exceeded" in details or "rate limit" in details
+
+
+def build_rate_limited_handbook_reply(query: str) -> str:
+    handbook_paragraph = search_handbook_paragraphs(query)
+    if handbook_paragraph == NO_HANDBOOK_MATCHES:
+        return "Hermes is currently rate limited, and no matching handbook snippet was found."
+    return "\n".join(
+        [
+            "Hermes is currently rate limited, so here is the closest handbook snippet instead.",
+            handbook_paragraph,
+        ]
+    )
 
 
 def get_telegram_updates(offset: int | None, timeout_seconds: int = 25) -> list[dict]:
@@ -53,8 +86,14 @@ def handle_telegram_update(update: dict) -> None:
     else:
         prompt = text
 
-    response_json = call_hermes(prompt, build_telegram_conversation_id(chat_id))
-    texts = extract_response_text(response_json)
+    try:
+        response_json = call_hermes(prompt, build_telegram_conversation_id(chat_id))
+        texts = extract_response_text(response_json)
+    except requests.HTTPError as exc:
+        if not is_hermes_rate_limited(exc):
+            raise
+        logging.warning("Hermes rate limited for Telegram chat_id=%s", chat_id)
+        texts = [build_rate_limited_handbook_reply(text)]
 
     send_telegram_message(chat_id, "\n\n".join(texts) or "No response received.")
 
