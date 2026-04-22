@@ -3,7 +3,6 @@ import time
 
 import requests
 
-from services.chatbot.gemini import call_gemini, extract_texts as extract_gemini_texts
 from services.chatbot.handbook_search import has_handbook_matches, search_handbook_text
 from services.chatbot.hermes import build_telegram_conversation_id, call_hermes, extract_response_text
 from services.chatbot.prompting import HANDBOOK_INSTRUCTIONS
@@ -51,15 +50,11 @@ def handle_telegram_update(update: dict) -> None:
     handbook_context = search_handbook_text(text)
     if has_handbook_matches(handbook_context):
         prompt = HANDBOOK_INSTRUCTIONS.format(prompt=text, context=handbook_context)
-        response_json = call_hermes(prompt, build_telegram_conversation_id(chat_id))
-        texts = extract_response_text(response_json)
     else:
-        response_json = call_gemini(text)
-        texts = extract_gemini_texts(response_json)
-        if texts:
-            texts.insert(0, "No handbook match found. Using Gemini knowledge instead.")
-        else:
-            texts = ["No handbook match found. Using Gemini knowledge instead."]
+        prompt = text
+
+    response_json = call_hermes(prompt, build_telegram_conversation_id(chat_id))
+    texts = extract_response_text(response_json)
 
     send_telegram_message(chat_id, "\n\n".join(texts) or "No response received.")
 

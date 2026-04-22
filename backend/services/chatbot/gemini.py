@@ -47,15 +47,15 @@ def gemini_health_check_basic() -> dict:
 
 def get_gemini_api_key() -> str:
     """
-    Prefer file-based secret (Docker secret) over env var.
-    Fallback to env for dev.
+    Prefer GOOGLE_API_KEY from the environment.
+    Fall back to the legacy Gemini secret file for older deployments.
     """
-    path = os.getenv("GEMINI_API_KEY_FILE", "/run/secrets/gemini_api_key")
-    key = read_secret_file(path)
+    key = os.getenv("GOOGLE_API_KEY", "").strip()
     if not key:
-        key = os.getenv("GOOGLE_API_KEY")  # dev fallback
+        path = os.getenv("GEMINI_API_KEY_FILE", "/run/secrets/gemini_api_key")
+        key = read_secret_file(path)
     if not key:
-        raise RuntimeError("Gemini API key is not configured")
+        raise RuntimeError("Google API key is not configured. Set GOOGLE_API_KEY.")
     return key
 
 def extract_texts(resp: dict) -> list[str]:

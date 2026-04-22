@@ -177,7 +177,7 @@ def test_telegram_poller_routes_through_handbook_then_hermes(monkeypatch):
     assert "BlueCat DDI" in posted[1]["json"]["text"]
 
 
-def test_telegram_poller_falls_back_to_gemini_when_handbook_has_no_match(monkeypatch):
+def test_telegram_poller_uses_hermes_when_handbook_has_no_match(monkeypatch):
     posted = []
 
     monkeypatch.setenv("TELEGRAM_ALLOWED_USERS", "8638591553")
@@ -185,10 +185,6 @@ def test_telegram_poller_falls_back_to_gemini_when_handbook_has_no_match(monkeyp
     monkeypatch.setattr(
         "services.chatbot.telegram_poller.search_handbook_text",
         lambda prompt: "No matches found in handbook.",
-    )
-    monkeypatch.setattr(
-        "services.chatbot.telegram_poller.call_gemini",
-        lambda prompt: {"candidates": [{"content": {"parts": [{"text": f"gemini:{prompt}"}]}}]},
     )
 
     class DummyResponse:
@@ -210,6 +206,14 @@ def test_telegram_poller_falls_back_to_gemini_when_handbook_has_no_match(monkeyp
             "json": json,
             "timeout": timeout,
         })
+        if url == "http://hermes:8642/v1/responses":
+            return DummyResponse({
+                "output_text": "hermes:What is Kubernetes?",
+                "output": [{
+                    "type": "message",
+                    "content": [{"text": "hermes:What is Kubernetes?"}],
+                }],
+            })
         return DummyResponse({"ok": True})
 
     monkeypatch.setattr("services.chatbot.hermes.requests.post", fake_post)
@@ -229,17 +233,18 @@ def test_telegram_poller_falls_back_to_gemini_when_handbook_has_no_match(monkeyp
         },
     )
 
-    assert posted == [
-        {
-            "url": "https://api.telegram.org/bottoken-123/sendMessage",
-            "headers": None,
-            "json": {
-                "chat_id": 8638591553,
-                "text": "No handbook match found. Using Gemini knowledge instead.\n\ngemini:What is Kubernetes?",
-            },
-            "timeout": 30,
-        }
-    ]
+    assert posted[0]["url"] == "http://hermes:8642/v1/responses"
+    assert posted[0]["json"]["conversation"] == "telegram-8638591553"
+    assert posted[0]["json"]["input"] == "What is Kubernetes?"
+    assert posted[1] == {
+        "url": "https://api.telegram.org/bottoken-123/sendMessage",
+        "headers": None,
+        "json": {
+            "chat_id": 8638591553,
+            "text": "hermes:What is Kubernetes?",
+        },
+        "timeout": 30,
+    }
 
 
 def test_telegram_poller_ignores_unauthorized_user(monkeypatch):
