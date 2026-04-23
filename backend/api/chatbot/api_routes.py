@@ -23,16 +23,26 @@ def chat_request(payload: ChatRequest, request: Request):
     data = payload.model_dump()
     logging.info("Incoming JSON: %s", data)
 
-    prompt = str(data.get("Prompt_string", "")).strip()
+    raw_prompt = str(data.get("Prompt_string", "")).strip()
     recipient = str(data.get("Email", "")).strip()
     mode = prompting.get_chat_mode(data)
+    prompt, direct_handbook = prompting.parse_prompt_controls(raw_prompt)
 
     if not prompt:
         raise HTTPException(status_code=400, detail="Please enter a prompt for D9 Bot")
 
     response_mode = mode
     try:
-        if mode == "handbook":
+        if direct_handbook:
+            conversation_id = None
+            output = search_handbook_text(prompt)
+            response_json = {
+                "mode": "handbook_direct",
+                "candidates": [{"content": {"role": "assistant", "parts": [{"text": output}]}}],
+            }
+            texts = [output]
+            response_mode = "handbook_direct"
+        elif mode == "handbook":
             handbook_context = search_handbook_text(prompt)
             if has_handbook_matches(handbook_context):
                 conversation_id = hermes.get_session_conversation_id(request.session)
@@ -83,7 +93,7 @@ def chat_request(payload: ChatRequest, request: Request):
         status = getattr(exc.response, "status_code", None)
         if response_mode == "gemini_fallback":
             logging.exception("Gemini HTTP error")
-            if status == 429:
+            if status == 429 or hermes.is_rate_limited_error(exc):
                 raise HTTPException(
                     status_code=429,
                     detail={"error": "Gemini rate limited. Please retry."},
@@ -97,6 +107,11 @@ def chat_request(payload: ChatRequest, request: Request):
                 },
             ) from exc
         logging.exception("Hermes HTTP error")
+        if hermes.is_rate_limited_error(exc):
+            raise HTTPException(
+                status_code=429,
+                detail={"error": "Hermes is rate limited. Please retry."},
+            ) from exc
         raise HTTPException(
             status_code=502,
             detail={

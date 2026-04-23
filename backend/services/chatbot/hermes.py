@@ -56,6 +56,41 @@ def extract_response_text(response_json: dict) -> list[str]:
     return unique_texts
 
 
+def is_rate_limited_error(exc: Exception) -> bool:
+    response = getattr(exc, "response", None)
+    status_code = getattr(response, "status_code", None)
+    if status_code == 429:
+        return True
+
+    details: list[str] = [str(exc)]
+    if response is not None:
+        response_text = getattr(response, "text", "")
+        response_reason = getattr(response, "reason", "")
+        if response_text:
+            details.append(response_text)
+        if response_reason:
+            details.append(response_reason)
+        try:
+            payload = response.json()
+        except Exception:
+            payload = None
+        if payload is not None:
+            details.append(str(payload))
+
+    combined = " ".join(part for part in details if part).lower()
+    markers = (
+        "resource_exhausted",
+        "quota exceeded",
+        "rate limit",
+        "rate limited",
+        "too many requests",
+        "failed after 3 retries",
+        "retry in ",
+        "generate_content_free_tier_input_token_count",
+    )
+    return any(marker in combined for marker in markers)
+
+
 def call_hermes(prompt: str, conversation_id: str) -> dict:
     payload = {
         "model": os.getenv("HERMES_MODEL", "hermes"),

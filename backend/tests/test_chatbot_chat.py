@@ -113,6 +113,29 @@ def test_chat_handles_hermes_unavailable(client, monkeypatch):
     assert response.json()["error"] == "Hermes unavailable"
 
 
+def test_chat_uses_direct_handbook_search_when_prompt_has_off_flag(client, monkeypatch):
+    monkeypatch.setattr(
+        "api.chatbot.api_routes.search_handbook_text",
+        lambda prompt: f"Handbook matches:\n- docs/runbook.md: direct result for {prompt}",
+    )
+
+    hermes_calls = []
+    gemini_calls = []
+    monkeypatch.setattr("services.chatbot.hermes.requests.post", lambda *args, **kwargs: hermes_calls.append((args, kwargs)))
+    monkeypatch.setattr("services.chatbot.gemini.call_gemini", lambda prompt: gemini_calls.append(prompt))
+
+    response = client.post("/api/chat", json={"Prompt_string": "How do I deploy? #off"})
+
+    assert response.status_code == 200
+    assert response.json()["mode"] == "handbook_direct"
+    assert response.json()["conversation_id"] is None
+    assert response.json()["candidates"][0]["content"]["parts"][0]["text"] == (
+        "Handbook matches:\n- docs/runbook.md: direct result for How do I deploy?"
+    )
+    assert hermes_calls == []
+    assert gemini_calls == []
+
+
 def test_telegram_poller_routes_through_handbook_then_hermes(monkeypatch):
     posted = []
 
@@ -175,6 +198,74 @@ def test_telegram_poller_routes_through_handbook_then_hermes(monkeypatch):
     assert posted[1]["url"] == "https://api.telegram.org/bottoken-123/sendMessage"
     assert posted[1]["json"]["chat_id"] == 8638591553
     assert "BlueCat DDI" in posted[1]["json"]["text"]
+
+
+def test_telegram_poller_uses_direct_handbook_search_when_prompt_has_off_flag(monkeypatch):
+    posted = []
+
+    monkeypatch.setenv("TELEGRAM_ALLOWED_USERS", "8638591553")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token-123")
+    monkeypatch.setattr(
+        "services.chatbot.telegram_poller.search_handbook_text",
+        lambda prompt: f"Handbook matches:\n- docs/runbook.md: direct result for {prompt}",
+    )
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        posted.append({
+            "url": url,
+            "headers": headers,
+            "json": json,
+            "timeout": timeout,
+        })
+        raise AssertionError("Hermes should not be called for #off prompts")
+
+    def fake_send(url, headers=None, json=None, timeout=None):
+        posted.append({
+            "url": url,
+            "headers": headers,
+            "json": json,
+            "timeout": timeout,
+        })
+
+        class DummyResponse:
+            status_code = 200
+
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {"ok": True}
+
+        return DummyResponse()
+
+    monkeypatch.setattr("services.chatbot.hermes.requests.post", fake_post)
+    monkeypatch.setattr("services.chatbot.telegram_gateway.requests.post", fake_send)
+
+    from services.chatbot.telegram_poller import handle_telegram_update
+
+    handle_telegram_update(
+        {
+            "update_id": 1,
+            "message": {
+                "message_id": 2,
+                "from": {"id": 8638591553},
+                "chat": {"id": 8638591553, "type": "private"},
+                "text": "How do I deploy? #off",
+            },
+        },
+    )
+
+    assert posted == [
+        {
+            "url": "https://api.telegram.org/bottoken-123/sendMessage",
+            "headers": None,
+            "json": {
+                "chat_id": 8638591553,
+                "text": "Handbook matches:\n- docs/runbook.md: direct result for How do I deploy?",
+            },
+            "timeout": 30,
+        }
+    ]
 
 
 def test_telegram_poller_uses_hermes_when_handbook_has_no_match(monkeypatch):
@@ -319,6 +410,94 @@ def test_telegram_poller_falls_back_to_handbook_snippet_on_hermes_rate_limit(mon
                 "Handbook fallback:\n"
                 "Primary snippet:\n"
                 "- common/ddi.txt: BlueCat DDI handles DNS and IPAM for core services."
+            ),
+        },
+        "timeout": 30,
+    }
+
+
+def test_telegram_poller_falls_back_when_hermes_wraps_quota_error_after_retries(monkeypatch):
+    posted = []
+
+    monkeypatch.setenv("TELEGRAM_ALLOWED_USERS", "8638591553")
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token-123")
+    monkeypatch.setattr(
+        "services.chatbot.telegram_poller.search_handbook_text",
+        lambda prompt: "No matches found in handbook.",
+    )
+    monkeypatch.setattr(
+        "services.chatbot.telegram_poller.search_handbook_paragraphs",
+        lambda prompt: "Handbook fallback:\nPrimary snippet:\n- docs/k8s.txt: Kubernetes clusters are managed via the platform team.",
+    )
+
+    class DummyResponse:
+        def __init__(self, payload=None, status_code=200, text="", reason=""):
+            self._payload = payload or {}
+            self.status_code = status_code
+            self.ok = status_code < 400
+            self.text = text
+            self.reason = reason
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise requests.HTTPError(
+                    "API call failed after 3 retries: HTTP 429: Gemini HTTP 429 "
+                    "(RESOURCE_EXHAUSTED): quota exceeded. "
+                    "Quota exceeded for metric: "
+                    "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count. "
+                    "Please retry in 15.0s.",
+                    response=self,
+                )
+            return None
+
+        def json(self):
+            return self._payload
+
+    def fake_post(url, headers=None, json=None, timeout=None):
+        posted.append({
+            "url": url,
+            "headers": headers,
+            "json": json,
+            "timeout": timeout,
+        })
+        if url == "http://hermes:8642/v1/responses":
+            return DummyResponse(
+                status_code=502,
+                text=(
+                    "API call failed after 3 retries: HTTP 429: Gemini HTTP 429 "
+                    "(RESOURCE_EXHAUSTED): quota exceeded"
+                ),
+                reason="Bad Gateway",
+            )
+        return DummyResponse({"ok": True})
+
+    monkeypatch.setattr("services.chatbot.hermes.requests.post", fake_post)
+    monkeypatch.setattr("services.chatbot.telegram_gateway.requests.post", fake_post)
+
+    from services.chatbot.telegram_poller import handle_telegram_update
+
+    handle_telegram_update(
+        {
+            "update_id": 1,
+            "message": {
+                "message_id": 2,
+                "from": {"id": 8638591553},
+                "chat": {"id": 8638591553, "type": "private"},
+                "text": "What is Kubernetes?",
+            },
+        },
+    )
+
+    assert posted[1] == {
+        "url": "https://api.telegram.org/bottoken-123/sendMessage",
+        "headers": None,
+        "json": {
+            "chat_id": 8638591553,
+            "text": (
+                "Hermes is currently rate limited, so here is the closest handbook snippet instead.\n"
+                "Handbook fallback:\n"
+                "Primary snippet:\n"
+                "- docs/k8s.txt: Kubernetes clusters are managed via the platform team."
             ),
         },
         "timeout": 30,

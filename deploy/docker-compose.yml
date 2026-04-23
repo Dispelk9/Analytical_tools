@@ -9,6 +9,15 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      default:
+        aliases:
+          - postgres_db
 
   # Sync private vho-handbook repo
   handbook-sync:
@@ -48,9 +57,12 @@ services:
     image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
     restart: unless-stopped
     depends_on:
-      - postgres
-      - handbook-sync
-      - hermes
+      postgres:
+        condition: service_healthy
+      handbook-sync:
+        condition: service_started
+      hermes:
+        condition: service_started
     env_file:
       - backend/.env
     environment:

@@ -24,6 +24,12 @@ def get_chat_mode(data: dict) -> str:
     return "handbook" if mode == "handbook" else "gemini"
 
 
+def parse_prompt_controls(prompt: str) -> tuple[str, bool]:
+    direct_handbook = "#off" in prompt.lower()
+    cleaned_prompt = " ".join(part for part in prompt.split() if part.lower() != "#off").strip()
+    return cleaned_prompt, direct_handbook
+
+
 def build_chat_prompt(prompt: str, mode: str) -> str:
     if mode != "handbook":
         return prompt
