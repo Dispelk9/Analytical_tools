@@ -15,6 +15,7 @@ def get_handbook_root() -> str:
 def build_handbook_search_command(query: str, root: str) -> list[str]:
     return [
         "rg",
+        "-F",
         "--json",
         "--ignore-case",
         "--hidden",
@@ -30,6 +31,7 @@ def build_handbook_search_command(query: str, root: str) -> list[str]:
 def build_handbook_context_command(query: str, root: str, context_lines: int = 2) -> list[str]:
     return [
         "rg",
+        "-F",
         "--ignore-case",
         "--hidden",
         "--line-number",
