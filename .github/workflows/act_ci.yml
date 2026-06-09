@@ -61,11 +61,13 @@ jobs:
           HERMES_MODEL: gemini-2.5-flash-lite
           TELEGRAM_BOT_TOKEN: 123456789:test-telegram-token
           TELEGRAM_ALLOWED_USERS: 123456789
+          GRAFANA_ADMIN_PASSWORD: test-grafana-password
         run: |
           tmpdir="$(mktemp -d)"
           trap 'rm -rf "$tmpdir"' EXIT
           mkdir -p "$tmpdir/deploy/hermes" "$tmpdir/backend" "$tmpdir/secrets"
           cp deploy/docker-compose.yml "$tmpdir/docker-compose.yml"
+          cp -r deploy/monitoring "$tmpdir/deploy/monitoring"
           cp deploy/handbook-sync.sh "$tmpdir/deploy/handbook-sync.sh"
           cp deploy/hermes/config.yaml "$tmpdir/deploy/hermes/config.yaml"
           cp deploy/backend/.env "$tmpdir/backend/.env"

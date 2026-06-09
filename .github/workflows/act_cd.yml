@@ -82,6 +82,8 @@ jobs:
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
           scp -p deploy/hermes/config.yaml \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/hermes/config.yaml"
+          scp -rp deploy/monitoring \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/"
           scp -p deploy/nginx-proxy/nginx-act.conf \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:/etc/nginx/sites-available/nginx-act.conf"
           scp -p deploy/handbook-sync.sh \
@@ -105,6 +107,7 @@ jobs:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           SENDER: ${{ secrets.SENDER }}
           MAIL_PW: ${{ secrets.MAIL_PW }}
@@ -112,6 +115,7 @@ jobs:
 
         run: |
           set -euo pipefail
+          : "${GRAFANA_ADMIN_PASSWORD:?Set the GRAFANA_ADMIN_PASSWORD GitHub Actions secret}"
 
           tmpdir="$(mktemp -d)"
           trap 'rm -rf "$tmpdir"' EXIT
@@ -152,7 +156,7 @@ jobs:
           HERMES_MODEL=gemini-2.5-flash-lite
           TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
           TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
-
+          GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
           EOF
 
 
@@ -171,10 +175,10 @@ jobs:
           ${GHCR_TOKEN}
           EOF
 
-          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" bash -lc '
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" 'bash -s' <<'EOF'
             set -euo pipefail
             cd ~/app
             docker compose pull
             docker compose up -d --remove-orphans --force-recreate
             docker compose ps
-          '
+          EOF

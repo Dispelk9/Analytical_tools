@@ -182,6 +182,7 @@ Important values:
 - `HERMES_MODEL`
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_ALLOWED_USERS`
+- `GRAFANA_ADMIN_PASSWORD`
 
 ### Backend Env
 

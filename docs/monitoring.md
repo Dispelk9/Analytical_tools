@@ -31,6 +31,8 @@ GRAFANA_ADMIN_USER=admin GRAFANA_ADMIN_PASSWORD=strong-local-password docker com
 
 Set `GRAFANA_ADMIN_PASSWORD` before starting the production compose stack. The production compose file is intended to run from the deployment root used by `deploy/deploy.sh`, where it is available as `docker-compose.yml` alongside `backend/`, `deploy/`, and `secrets/`.
 
+In GitHub Actions CD, add `GRAFANA_ADMIN_PASSWORD` as a production environment secret.
+
 ```bash
 GRAFANA_ADMIN_PASSWORD=your-strong-password TAG=your-image-tag docker compose up -d
 ```
