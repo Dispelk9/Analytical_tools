@@ -14,6 +14,7 @@ from api.tools.adduct import router as adduct_router
 from api.tools.compound import router as compound_router
 from api.tools.smtp_handler import router as smtp_router
 from services.utils.db_connection import DB_CONNECT
+from services.utils.metrics import configure_metrics
 
 
 load_dotenv()
@@ -75,6 +76,7 @@ def create_app(
     app.include_router(smtp_router)
     app.include_router(chatbot_api_router)
     app.include_router(health_router)
+    configure_metrics(app)
 
     @app.exception_handler(HTTPException)
     async def http_exception_handler(request: Request, exc: HTTPException):

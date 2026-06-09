@@ -12,3 +12,4 @@ matplotlib
 SQLAlchemy>=2.0
 Werkzeug>=2.0
 ripgrep
+prometheus-client>=0.20

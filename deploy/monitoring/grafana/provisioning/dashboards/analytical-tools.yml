@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Analytical Tools
+    orgId: 1
+    folder: Analytical Tools
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

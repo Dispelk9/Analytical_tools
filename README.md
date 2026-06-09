@@ -74,6 +74,14 @@ Hermes container
     +--> reads config from /opt/data/config.yaml
     +--> reads handbook mount at /workspace/handbook
     +--> serves API at port 8642 inside the Docker network
+
+Prometheus
+    |
+    +--> scrapes backend /metrics
+
+Grafana
+    |
+    +--> uses Prometheus as the default provisioned data source
 ```
 
 ### D9bot Request Paths
@@ -247,6 +255,10 @@ Press `F5` and choose one of:
 - `GOOGLE_API_KEY`: dev fallback if no Gemini key file is mounted
 - `HANDBOOK_DEPLOY_KEY_PATH`: host path to the handbook SSH deploy key
 - `HANDBOOK_KNOWN_HOSTS_PATH`: host path to the handbook known_hosts file
+- `PROMETHEUS_BIND`: Prometheus host bind address, default `127.0.0.1:9090`
+- `GRAFANA_BIND`: Grafana host bind address, default `127.0.0.1:3000`
+- `GRAFANA_ADMIN_USER`: local Grafana admin username, default `admin`
+- `GRAFANA_ADMIN_PASSWORD`: local Grafana admin password, default `admin`
 
 ---
 
@@ -265,6 +277,7 @@ Important backend endpoints:
 - `/health/hermes`
 - `/health/telegram`
 - `/health/handbook`
+- `/metrics`
 - `/api/gemini`: older direct Gemini path still present in backend
 
 ---
@@ -286,6 +299,8 @@ Important backend endpoints:
 ### Infrastructure
 - Docker Compose
 - Hermes Gateway
+- Prometheus
+- Grafana
 - Gemini provider
 - GitHub Actions CD
 

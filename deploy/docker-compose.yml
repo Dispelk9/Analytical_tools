@@ -52,10 +52,10 @@ services:
     expose:
       - "8642"
 
-
   backend:
     image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
     restart: unless-stopped
+    command: ["/bin/sh", "-c", "rm -rf /tmp/prometheus_multiproc && mkdir -p /tmp/prometheus_multiproc && gunicorn --config services/gunicorn_config.py main:app"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,6 +74,7 @@ services:
       HERMES_MODEL: ${HERMES_MODEL:-gemini-2.5-flash-lite}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS:-}
+      PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus_multiproc
 
       # 🔹 Where handbook appears inside container
       HANDBOOK_ROOT: /data/vho-handbook
@@ -114,10 +115,44 @@ services:
       - /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem:/usr/local/apache2/conf/fullchain.pem:ro
       - /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem:/usr/local/apache2/conf/privkey.pem:ro
 
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    depends_on:
+      - backend
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+    ports:
+      - "${PROMETHEUS_BIND:-127.0.0.1:9090}:9090"
+    volumes:
+      - ./deploy/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "${GRAFANA_BIND:-127.0.0.1:3000}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deploy/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+
 volumes:
   postgres_data:
   handbook_data:
   hermes_data:
+  prometheus_data:
+  grafana_data:
 
 secrets:
   gemini_api_key:
