@@ -100,6 +100,58 @@
   color: red;
 }
 
+.tool-theme-list {
+  width: min(100%, 1120px);
+  margin: 2rem auto 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  text-align: left;
+}
+
+.tool-theme-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tool-theme-title {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.tool-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 240px));
+  gap: 16px;
+  justify-content: start;
+  align-items: stretch;
+}
+
+.tool-theme-grid p-link-tile,
+.tool-theme-grid a {
+  width: 100%;
+}
+
+.tool-theme-grid img {
+  display: block;
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+@media (max-width: 640px) {
+  .tool-theme-list {
+    margin: 1.5rem auto 3rem;
+    gap: 1.5rem;
+  }
+
+  .tool-theme-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Result CSS */
 
 .result-container {

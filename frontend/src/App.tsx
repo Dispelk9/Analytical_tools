@@ -22,6 +22,165 @@ interface RequireAuthProps {
   children: ReactNode
 }
 
+interface ToolTile {
+  href: string
+  label: string
+  description: string
+  tags: string
+  imageSrc: string
+  imageAlt: string
+}
+
+interface ToolTheme {
+  id: string
+  title: string
+  tiles: ToolTile[]
+}
+
+const toolThemes: ToolTheme[] = [
+  {
+    id: 'infrastructure',
+    title: 'Infrastructure',
+    tiles: [
+      {
+        href: 'https://analytical.dispelk9.de/check_mk/',
+        label: 'Checkmk',
+        description: 'Checkmk',
+        tags: '#Monitoring',
+        imageSrc: './assets/checkmk.png',
+        imageAlt: 'Monitoring',
+      },
+      {
+        href: 'https://app.terraform.io/app/dispelk9_org/workspaces',
+        label: 'HCP Terraform',
+        description: 'Remote State TF Management',
+        tags: '#HCP Terraform',
+        imageSrc: './assets/HCTF.png',
+        imageAlt: 'IaC',
+      },
+    ],
+  },
+  {
+    id: 'smtp',
+    title: 'SMTP',
+    tiles: [
+      {
+        href: 'https://certcheck.dispelk9.de/',
+        label: 'Certcheck',
+        description: 'SMTP Certfetcher',
+        tags: '#Go#Js#Certs',
+        imageSrc: './assets/ssl.jpg',
+        imageAlt: 'Certcheck',
+      },
+      {
+        href: 'https://mail.dispelk9.de',
+        label: 'Mailing',
+        description: 'MX Postfix/Dovecot',
+        tags: '#Docker#Mailcow',
+        imageSrc: './assets/sogo.png',
+        imageAlt: 'Mailing',
+      },
+      {
+        href: '/smtpcheck',
+        label: 'SMTP Check',
+        description: 'SMTP/SMTPS/SMTPstarttls',
+        tags: '#Port 25,465 or 587',
+        imageSrc: './assets/in_dev.png',
+        imageAlt: 'SMTP check',
+      },
+    ],
+  },
+  {
+    id: 'dns',
+    title: 'DNS',
+    tiles: [
+      {
+        href: 'https://dash.cloudflare.com/login',
+        label: 'Cloudflare',
+        description: 'Routing/Analytic',
+        tags: '#Cloudflare',
+        imageSrc: './assets/cloudflare.jpg',
+        imageAlt: 'Cloudflare',
+      },
+    ],
+  },
+  {
+    id: 'ai-agent',
+    title: 'AI / Agent',
+    tiles: [
+      {
+        href: '/D9bot',
+        label: 'D9bot',
+        description: 'Dispelk9 Bot',
+        tags: '#Gemini#LLM#AI',
+        imageSrc: './assets/AI.jpg',
+        imageAlt: 'D9bot',
+      },
+    ],
+  },
+  {
+    id: 'act',
+    title: 'ACT Chemistry',
+    tiles: [
+      {
+        href: '/adduct',
+        label: 'Adduct',
+        description: 'ACT Adduct',
+        tags: '#Python#React#Js',
+        imageSrc: './assets/adduct.jpg',
+        imageAlt: 'Adduct',
+      },
+      {
+        href: '/compound',
+        label: 'Compound',
+        description: 'ACT Compound',
+        tags: '#Python#React#Js',
+        imageSrc: './assets/compound.png',
+        imageAlt: 'Compound',
+      },
+      {
+        href: '/math',
+        label: 'Math',
+        description: 'ACT Math',
+        tags: '#Math#Equation',
+        imageSrc: '/assets/ACT-math.jpg',
+        imageAlt: 'ACT Math',
+      },
+    ],
+  },
+]
+
+const ToolThemeTile: React.FC<{ tile: ToolTile }> = ({ tile }) => (
+  <PLinkTile
+    href={tile.href}
+    label={tile.label}
+    description={tile.description}
+    compact={true}
+  >
+    <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
+      {tile.tags}
+    </PTag>
+    <img src={tile.imageSrc} alt={tile.imageAlt} />
+  </PLinkTile>
+)
+
+const ToolThemeSection: React.FC<{ theme: ToolTheme }> = ({ theme }) => (
+  <section
+    className="tool-theme-section"
+    aria-labelledby={`${theme.id}-heading`}
+    data-testid={`${theme.id}-theme`}
+  >
+    <h2 id={`${theme.id}-heading`} className="tool-theme-title">
+      {theme.title}
+    </h2>
+    <div className="tool-theme-grid">
+      {theme.tiles.map(tile => (
+        <ToolThemeTile key={`${theme.id}-${tile.href}`} tile={tile} />
+      ))}
+    </div>
+  </section>
+)
+
 const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true)
   const [authed, setAuthed] = useState<boolean>(false)
@@ -77,123 +236,10 @@ const AppLayout: React.FC = () => {
       <h1 className="text-white text-xl">Dispelk9 Tools</h1>
     </header>
 
-    <div   
-      style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)', // 4 equal-width columns in one row
-      gap: '16px',                           // spacing between columns
-      marginBottom: 200
-      }}>
-      <PLinkTile
-        href="/D9bot"
-        label="D9bot"
-        description="Dispelk9 Bot"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Gemini#LLM#AI
-        </PTag>
-        <img src="./assets/AI.jpg" alt="Adduct" />
-      </PLinkTile>
-      <PLinkTile
-        href="/adduct"
-        label="Adduct"
-        description="ACT Adduct"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Python#React#Js
-        </PTag>
-        <img src="./assets/adduct.jpg" alt="Adduct" />
-      </PLinkTile>
-      <PLinkTile
-        href="/compound"
-        label="Compound"
-        description="ACT Compound"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Python#React#Js
-        </PTag>
-        <img src="./assets/compound.png" alt="Compound" />
-      </PLinkTile>
-      <PLinkTile
-        href="/math"
-        label="Math"
-        description="ACT Math"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Math#Equation
-        </PTag>
-        <img src="/assets/ACT-math.jpg" alt="Home" />
-      </PLinkTile>
-      <PLinkTile
-        href="https://certcheck.dispelk9.de/"
-        label="Certcheck"
-        description="SMTP Certfetcher"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Go#Js#Certs
-        </PTag>
-        <img src="./assets/ssl.jpg" alt="Certcheck" />
-      </PLinkTile>
-      <PLinkTile
-        href="https://mail.dispelk9.de"
-        label="Mailing"
-        description="MX Postfix/Dovecot"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Docker#Mailcow
-        </PTag>
-        <img src="./assets/sogo.png" alt="Mailing" />
-      </PLinkTile>
-      <PLinkTile
-        href="https://analytical.dispelk9.de/check_mk/"
-        label="Checkmk"
-        description="Checkmk"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          #Monitoring
-        </PTag>
-        <img src="./assets/checkmk.png" alt="Monitoring" />
-      </PLinkTile>
-      <PLinkTile
-        href="/smtpcheck"
-        label=""
-        description="SMTP/SMTPS/SMTPstarttls"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          ##Port 25,465 or 587
-        </PTag>
-        <img src="./assets/in_dev.png" alt="Mailing" />
-      </PLinkTile>
-      <PLinkTile
-        href="https://app.terraform.io/app/dispelk9_org/workspaces"
-        label="HCP Terraform"
-        description="Remote State TF Management"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          ##HCP Terraform
-        </PTag>
-        <img src="./assets/HCTF.png" alt="IaC" />
-      </PLinkTile>
-            <PLinkTile
-        href="https://dash.cloudflare.com/login"
-        label="Cloudflare"
-        description="Routing/Analytic"
-        compact={true}
-      >
-        <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-          ##Cloudflare
-        </PTag>
-        <img src="./assets/cloudflare.jpg" alt="CF" />
-      </PLinkTile>
+    <div className="tool-theme-list">
+      {toolThemes.map(theme => (
+        <ToolThemeSection key={theme.id} theme={theme} />
+      ))}
     </div>
 
     {/* Main Content */}
@@ -256,6 +302,5 @@ function App() {
 }
 
 export default App;
-
 
 
