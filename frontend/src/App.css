@@ -111,7 +111,9 @@
 
 .tool-theme-section {
   display: grid;
-  gap: 0.75rem;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
 }
 
 .tool-theme-title {
@@ -122,16 +124,20 @@
 }
 
 .tool-theme-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 240px));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 16px;
-  justify-content: start;
   align-items: stretch;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
 }
 
 .tool-theme-grid p-link-tile,
 .tool-theme-grid a {
-  width: 100%;
+  display: block;
+  flex: 0 0 clamp(180px, 22vw, 240px);
+  width: clamp(180px, 22vw, 240px);
 }
 
 .tool-theme-grid img {
@@ -147,8 +153,19 @@
     gap: 1.5rem;
   }
 
-  .tool-theme-grid {
-    grid-template-columns: 1fr;
+  .tool-theme-section {
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .tool-theme-title {
+    font-size: 1rem;
+  }
+
+  .tool-theme-grid p-link-tile,
+  .tool-theme-grid a {
+    flex-basis: 200px;
+    width: 200px;
   }
 }
 
