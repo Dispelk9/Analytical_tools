@@ -62,6 +62,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: 123456789:test-telegram-token
           TELEGRAM_ALLOWED_USERS: 123456789
           GRAFANA_ADMIN_PASSWORD: test-grafana-password
+          KEYCLOAK_ADMIN_PASSWORD: test-keycloak-password
         run: |
           tmpdir="$(mktemp -d)"
           trap 'rm -rf "$tmpdir"' EXIT

@@ -9,6 +9,12 @@ RUN npm install
 
 # Copy the rest of the source and build the app
 COPY . .
+ARG VITE_KEYCLOAK_URL=https://auth.dispelk9.de
+ARG VITE_KEYCLOAK_REALM=analytical-tools
+ARG VITE_KEYCLOAK_CLIENT_ID=analytical-tools-frontend
+ENV VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+ENV VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
+ENV VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID
 RUN npm run build
 
 # Stage 2: Serve the build with Apache

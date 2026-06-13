@@ -27,7 +27,7 @@ const RETURN_PATH_KEY = 'analytical-tools.auth.return-path';
 const EXPIRY_SKEW_MS = 30_000;
 
 export const getKeycloakConfig = (): KeycloakConfig => ({
-  url: (import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8082').replace(/\/$/, ''),
+  url: (import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8084').replace(/\/$/, ''),
   realm: import.meta.env.VITE_KEYCLOAK_REALM || 'analytical-tools',
   clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'analytical-tools-frontend',
 });
