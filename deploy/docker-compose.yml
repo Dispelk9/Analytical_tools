@@ -35,7 +35,7 @@ services:
       KC_HOSTNAME: https://auth.dispelk9.de
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
-      KC_PROXY: edge
+      KC_PROXY_HEADERS: xforwarded
     ports:
       - "127.0.0.1:8084:8080"
     volumes:
