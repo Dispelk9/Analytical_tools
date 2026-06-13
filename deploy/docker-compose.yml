@@ -37,7 +37,7 @@ services:
       KC_HOSTNAME_STRICT: "false"
       KC_PROXY: edge
     ports:
-      - "127.0.0.1:8083:8080"
+      - "127.0.0.1:8084:8080"
     volumes:
       - ./deploy/keycloak:/opt/keycloak/data/import:ro
     depends_on:

@@ -30,7 +30,7 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
     ports:
-      - "8082:8080"
+      - "8084:8080"
     volumes:
       - ./keycloak:/opt/keycloak/data/import:ro
 
@@ -78,7 +78,7 @@ services:
       TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS:-}
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus_multiproc
       AUTH_PROVIDER: keycloak
-      KEYCLOAK_ISSUER: http://localhost:8082/realms/analytical-tools
+      KEYCLOAK_ISSUER: http://localhost:8084/realms/analytical-tools
       KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/analytical-tools/protocol/openid-connect/certs
       KEYCLOAK_CLIENT_ID: analytical-tools-frontend
     ports:
@@ -132,7 +132,7 @@ services:
       context: ../frontend
       dockerfile: Dockerfile.debug
       args:
-        VITE_KEYCLOAK_URL: http://localhost:8082
+        VITE_KEYCLOAK_URL: http://localhost:8084
         VITE_KEYCLOAK_REALM: analytical-tools
         VITE_KEYCLOAK_CLIENT_ID: analytical-tools-frontend
     container_name: apache_frontend
