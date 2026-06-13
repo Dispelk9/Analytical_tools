@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState, FormEvent, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   PorscheDesignSystemProvider,
@@ -8,7 +8,6 @@ import {
   PButton,
   PSpinner,
 } from '@porsche-design-system/components-react';
-import { useNavigate } from 'react-router-dom'
 import FullPageSpinner from './components/FullPageSpinner';
 
 import Adduct from './pages/Adduct';
@@ -17,6 +16,7 @@ import CollisionPlot from './pages/ACT_Math';
 import Smtpcheck from './pages/Smtpcheck';
 import Login from './login/Login'
 import D9bot from './pages/D9bot'
+import { authFetch, logoutFromAuthProvider } from './auth/auth'
 
 interface RequireAuthProps {
   children: ReactNode
@@ -182,44 +182,48 @@ const ToolThemeSection: React.FC<{ theme: ToolTheme }> = ({ theme }) => (
 )
 
 const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
+  const location = useLocation()
   const [loading, setLoading] = useState<boolean>(true)
   const [authed, setAuthed] = useState<boolean>(false)
 
   useEffect(() => {
-    fetch('/api/check-auth', { credentials: 'include' })
+    authFetch('/api/check-auth')
       .then(res => {
         setAuthed(res.ok)
+        setLoading(false)
+      })
+      .catch(() => {
+        setAuthed(false)
         setLoading(false)
       })
   }, [])
 
   if (loading) return <div>Loading...</div>
-  return authed ? <>{children}</> : <Navigate to="/login" />
+  return authed ? (
+    <>{children}</>
+  ) : (
+    <Navigate
+      to="/login"
+      replace
+      state={{ returnPath: `${location.pathname}${location.search}` }}
+    />
+  )
 }
 
 
 const AppLayout: React.FC = () => {
 
 
-  const navigate = useNavigate()
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
   const [error, setError] = useState<string>('')
 
 
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+      e.preventDefault()
     try {
       setIsCalculating(true);
-      const res = await fetch('/api/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
-      if (res.ok) {
-        navigate('/login')
-      } else {
-        setError('Can not logout')
-      }
+      await logoutFromAuthProvider()
     } catch (err) {
       console.error('Error logout', err);
       setError('Failed to logout');
@@ -302,5 +306,3 @@ function App() {
 }
 
 export default App;
-
-

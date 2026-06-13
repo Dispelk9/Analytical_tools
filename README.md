@@ -140,7 +140,7 @@ This mode is the one that uses external model quota.
 
 ## Deployment Architecture
 
-The production Docker stack is defined in [deploy/docker-compose.yml](/home/vho/Codebase/Analytical_tools/deploy/docker-compose.yml:1).
+The production Docker stack is defined in [deploy/docker-compose.yml](deploy/docker-compose.yml).
 
 Main services:
 - `frontend`: Apache-served frontend
@@ -160,10 +160,10 @@ Handbook mounts:
 - Hermes reads handbook at `/workspace/handbook`
 
 Hermes config:
-- mounted from [deploy/hermes/config.yaml](/home/vho/Codebase/Analytical_tools/deploy/hermes/config.yaml:1)
+- mounted from [deploy/hermes/config.yaml](deploy/hermes/config.yaml)
 
 Telegram setup and troubleshooting:
-- [docs/hermes_telegram_setup.md](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/docs/hermes_telegram_setup.md:1)
+- [docs/hermes_telegram_setup.md](docs/hermes_telegram_setup.md)
 
 ---
 
@@ -172,6 +172,7 @@ Telegram setup and troubleshooting:
 ### Compose-Level Env
 
 The deploy pipeline writes `~/app/.env` for Docker Compose parse-time variables.
+For local debug, use shell variables or a repo-root `.env` file for the same Compose-level values.
 
 Important values:
 - `DB_PASSWORD`
@@ -200,15 +201,17 @@ Typical values:
 - `SMTP_RELAY`
 - `GEMINI_MODEL`
 
+Telegram values belong in the Compose-level environment, not only in `backend/.env`, because `deploy/docker-compose.debug.yml` passes them through its `environment:` block.
+
 ---
 
 ## Local Debug Setup
 
-For local development, the Docker debug stack is defined in [deploy/docker-compose.debug.yml](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/deploy/docker-compose.debug.yml:1).
+For local development, the Docker debug stack is defined in [deploy/docker-compose.debug.yml](deploy/docker-compose.debug.yml).
 
 ### Backend Env For Local Debug
 
-Start by creating a local backend env file from [backend/.env.example](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/backend/.env.example:1).
+Start by creating a local backend env file from [backend/.env.example](backend/.env.example).
 
 ```bash
 cp backend/.env.example backend/.env
@@ -231,6 +234,32 @@ The default local stack starts:
 - `hermes`
 - `telegram-poller`
 
+### Enable Telegram Locally
+
+Telegram is optional for local development. To enable it, create a repo-root `.env` file or export the variables in your shell before starting Compose:
+
+```env
+TELEGRAM_BOT_TOKEN=123456789:your_bot_token
+TELEGRAM_ALLOWED_USERS=123456789
+```
+
+`TELEGRAM_ALLOWED_USERS` must be your numeric Telegram user ID, not your username or phone number. You can get it by messaging `@userinfobot`.
+
+After changing Telegram values, recreate the services that consume them:
+
+```bash
+docker compose -f deploy/docker-compose.debug.yml up -d --force-recreate backend telegram-poller hermes
+```
+
+Useful checks:
+
+```bash
+curl http://localhost:8080/health/telegram
+docker compose -f deploy/docker-compose.debug.yml logs -f telegram-poller hermes
+```
+
+More setup and troubleshooting details are in [docs/hermes_telegram_setup.md](docs/hermes_telegram_setup.md).
+
 The private handbook sync service is optional in local development.
 
 To start it too:
@@ -241,7 +270,7 @@ docker compose --profile handbook-sync -f deploy/docker-compose.debug.yml up --b
 
 ### VS Code F5
 
-This repository includes VS Code launch configs in [.vscode/launch.json](/mnt/c/users/viethoang/downloads/vm_shared_folder/codebase/analytical_tools/.vscode/launch.json:1).
+This repository includes VS Code launch configs in [.vscode/launch.json](.vscode/launch.json).
 
 Press `F5` and choose one of:
 - `Analytical Tools: Up Local Stack`
@@ -254,6 +283,8 @@ Press `F5` and choose one of:
 - `GEMINI_API_KEY_PATH`: host path to your Gemini API key file
 - `HERMES_API_KEY`: API key used by the local Hermes container
 - `GOOGLE_API_KEY`: dev fallback if no Gemini key file is mounted
+- `TELEGRAM_BOT_TOKEN`: Telegram bot token for the local polling worker
+- `TELEGRAM_ALLOWED_USERS`: comma-separated numeric Telegram user IDs allowed to use the bot
 - `HANDBOOK_DEPLOY_KEY_PATH`: host path to the handbook SSH deploy key
 - `HANDBOOK_KNOWN_HOSTS_PATH`: host path to the handbook known_hosts file
 - `PROMETHEUS_BIND`: Prometheus host bind address, default `127.0.0.1:9090`

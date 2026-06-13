@@ -6,6 +6,7 @@ import {
   PText,
 } from "@porsche-design-system/components-react";
 import '../App.css';
+import { authFetch } from '../auth/auth';
 
 interface PortResult {
   port: number;
@@ -41,7 +42,7 @@ const SmtpTest: React.FC = () => {
 
     setRunning(true);
     try {
-      const resp = await fetch('/api/smtp', {
+      const resp = await authFetch('/api/smtp', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ host }),
@@ -53,8 +54,8 @@ const SmtpTest: React.FC = () => {
       }
 
       setData(payload);
-    } catch (err: any) {
-      setError(err.message || 'Unexpected error');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unexpected error');
     } finally {
       setRunning(false);
     }

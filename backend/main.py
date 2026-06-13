@@ -2,10 +2,11 @@ import os
 from datetime import timedelta
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 
+from api.auth_backend.keycloak import get_current_keycloak_user, is_auth_disabled
 from api.auth_backend.login_user import init_database, router as auth_router
 from api.chatbot.api_routes import router as chatbot_api_router
 from api.chatbot.health_routes import router as health_router
@@ -69,12 +70,16 @@ def create_app(
             connect_args=database_connect_args,
         )
 
+    protected_dependencies = []
+    if not is_auth_disabled():
+        protected_dependencies = [Depends(get_current_keycloak_user)]
+
     app.include_router(auth_router)
-    app.include_router(compound_router)
-    app.include_router(adduct_router)
-    app.include_router(math_router)
-    app.include_router(smtp_router)
-    app.include_router(chatbot_api_router)
+    app.include_router(compound_router, dependencies=protected_dependencies)
+    app.include_router(adduct_router, dependencies=protected_dependencies)
+    app.include_router(math_router, dependencies=protected_dependencies)
+    app.include_router(smtp_router, dependencies=protected_dependencies)
+    app.include_router(chatbot_api_router, dependencies=protected_dependencies)
     app.include_router(health_router)
     configure_metrics(app)
 

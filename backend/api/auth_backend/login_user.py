@@ -1,12 +1,16 @@
 import logging
 import sys
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
-from werkzeug.security import check_password_hash
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+from api.auth_backend.keycloak import (
+    AuthenticatedUser,
+    get_current_keycloak_user,
+    is_auth_disabled,
+)
 
 
 logging.basicConfig(
@@ -19,19 +23,6 @@ Base = declarative_base()
 router = APIRouter(tags=["auth"])
 
 
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
-
-
-class LoginRequest(BaseModel):
-    username: str | None = None
-    password: str | None = None
-
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False)
 
 
@@ -42,61 +33,35 @@ def init_database(app, database_url: str, connect_args: dict | None = None) -> N
     app.state.database_engine = engine
 
 
-def get_db_session() -> Session:
-    session = SessionLocal()
-    try:
-        yield session
-    finally:
-        session.close()
-
-
-def get_current_user(
-    request: Request,
-    db_session: Session = Depends(get_db_session),
-) -> User:
-    user_id = request.session.get("user_id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
-    user = db_session.get(User, int(user_id))
-    if user is None:
-        request.session.pop("user_id", None)
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    return user
+def get_current_user(request: Request) -> AuthenticatedUser:
+    if is_auth_disabled():
+        return AuthenticatedUser(
+            provider="disabled",
+            subject="disabled-auth",
+            username="disabled-auth",
+            claims={},
+        )
+    return get_current_keycloak_user(request)
 
 
 @router.post("/api/login")
-def api_login(payload: LoginRequest, request: Request, db_session: Session = Depends(get_db_session)):
-    username = (payload.username or "").strip()
-    password = payload.password or ""
-    logging.info("Login attempt for username: %s", username)
-
-    user = db_session.query(User).filter_by(username=username).first()
-    logging.info("User query result: %s", user)
-
-    if user and check_password_hash(user.password, password):
-        request.session["user_id"] = user.id
-        return {"message": "Logged in"}
-
-    logging.info("Invalid credentials provided.")
-    return JSONResponse(status_code=401, content={"message": "Invalid credentials"})
+def api_login():
+    return JSONResponse(
+        status_code=400,
+        content={"message": "Password login is disabled. Use Keycloak authentication."},
+    )
 
 
 @router.post("/api/logout")
-def api_logout(request: Request, current_user: User = Depends(get_current_user)):
+def api_logout(request: Request):
     request.session.pop("user_id", None)
     return {"message": "Logged out"}
 
 
 @router.get("/api/check-auth")
-def api_check_auth(request: Request, db_session: Session = Depends(get_db_session)):
-    user_id = request.session.get("user_id")
-    if not user_id:
+def api_check_auth(request: Request):
+    try:
+        user = get_current_user(request)
+    except HTTPException:
         return JSONResponse(status_code=401, content={"authenticated": False})
-
-    user = db_session.get(User, int(user_id))
-    if user is None:
-        request.session.pop("user_id", None)
-        return JSONResponse(status_code=401, content={"authenticated": False})
-
-    return {"authenticated": True}
+    return {"authenticated": True, "username": user.username}

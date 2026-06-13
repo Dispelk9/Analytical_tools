@@ -5,6 +5,7 @@ import '../components/D9bot/d9bot.css';
 import ChatList from '../components/D9bot/ChatList';
 import ChatComposer from '../components/D9bot/ChatComposer';
 import { ChatMessage, D9Response } from '../components/D9bot/type';
+import { authFetch } from '../auth/auth';
 
 function newId(prefix: string) {
   return (crypto?.randomUUID?.() ?? `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -55,7 +56,7 @@ export default function D9bot() {
             Prompt_string: raw,
           };
 
-      const response = await fetch(endpoint, {
+      const response = await authFetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

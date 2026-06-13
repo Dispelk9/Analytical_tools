@@ -1,33 +1,32 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { startKeycloakLogin } from '../../auth/auth';
 import Login from '../../login/Login';
+
+vi.mock('../../auth/auth', () => ({
+  completeKeycloakLogin: vi.fn(),
+  hasKeycloakCallbackParams: vi.fn(() => false),
+  startKeycloakLogin: vi.fn(() => Promise.resolve()),
+}));
 
 describe('login/Login.tsx', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn());
+    vi.clearAllMocks();
   });
 
-  it('submits login credentials and shows an error on failure', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(new Response('{}', { status: 401 }));
-
+  it('starts the Keycloak login flow from the login page', async () => {
     render(
       <MemoryRouter>
         <Login />
       </MemoryRouter>,
     );
 
-    fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'viet' } });
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrong' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+    expect(screen.queryByLabelText('Username')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
 
-    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledWith(
-      '/api/login',
-      expect.objectContaining({
-        method: 'POST',
-        credentials: 'include',
-      }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in with Keycloak' }));
+
+    expect(startKeycloakLogin).toHaveBeenCalledWith('/');
   });
 });

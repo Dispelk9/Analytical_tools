@@ -10,7 +10,7 @@ import {
 } from '@porsche-design-system/components-react';
 
 interface RenderObjectTableProps {
-  data: any;
+  data: unknown;
 }
 
 /**
@@ -45,7 +45,7 @@ const RenderObjectTable: React.FC<RenderObjectTableProps> = ({ data }) => {
   }
 
   // Handle objects as a table with "Key" and "Value" columns
-  const entries = Object.entries(data);
+  const entries = Object.entries(data as Record<string, unknown>);
 
   return (
     <PTable theme="dark">

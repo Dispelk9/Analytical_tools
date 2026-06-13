@@ -13,6 +13,7 @@ import {
   PButton,
 } from '@porsche-design-system/components-react';
 import '../App.css';
+import { authFetch } from '../auth/auth';
 
 interface Compound {
   molecular_formula: string;
@@ -44,7 +45,7 @@ const Compound: React.FC = () => {
     }
 
     try {
-      const response = await fetch('/api/compound', {
+      const response = await authFetch('/api/compound', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ AD: adduct, OB: observed, ME: massError }),
@@ -56,7 +57,7 @@ const Compound: React.FC = () => {
 
       const data = await response.json();
       setCompounds(data.compounds);
-    } catch (err) {
+    } catch {
       setError('Error fetching data from server.');
     }
   };
@@ -172,4 +173,3 @@ const Compound: React.FC = () => {
 };
 
 export default Compound;
-

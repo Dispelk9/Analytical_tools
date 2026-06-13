@@ -49,7 +49,7 @@ export default function ChatComposer({
             label="Message"
             description="Enter to send • Shift+Enter for newline"
             value={prompt}
-            onChange={(e) => onPromptChange((e.target as any).value)}
+            onChange={(e) => onPromptChange((e.target as HTMLTextAreaElement).value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();

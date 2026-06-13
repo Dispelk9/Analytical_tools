@@ -5,6 +5,7 @@ import {
   PTextFieldWrapper,
   PText,
 } from "@porsche-design-system/components-react";
+import { authFetch } from '../auth/auth';
 
 const CollisionPlot: React.FC = () => {
   const [xValues, setXValues] = useState<string>('0.1 0.2 0.3 0.5');
@@ -27,7 +28,7 @@ const CollisionPlot: React.FC = () => {
     try {
       setIsCalculating(true);
 
-      const response = await fetch('/api/collision', {
+      const response = await authFetch('/api/collision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ x, y })

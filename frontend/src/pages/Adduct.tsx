@@ -10,6 +10,7 @@ import {
   PText,
 } from "@porsche-design-system/components-react";
 import '../App.css';
+import { authFetch } from '../auth/auth';
 
 interface NumberResponse {
   result: number;
@@ -54,7 +55,7 @@ const Adduct: React.FC = () => {
     try {
       setIsCalculating(true);
 
-      const response = await fetch('/api/adduct', {
+      const response = await authFetch('/api/adduct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
