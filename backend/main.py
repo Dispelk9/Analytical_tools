@@ -54,12 +54,13 @@ def create_app(
     )
 
     secret = session_secret or os.getenv("SESSION_SECRET", "change-me")
+    https_only = os.getenv("HTTPS_ONLY", "true").lower() == "true"
     app.add_middleware(
         SessionMiddleware,
         secret_key=secret,
         max_age=int(timedelta(days=1).total_seconds()),
         same_site="lax",
-        https_only=False,
+        https_only=https_only,
     )
 
     resolved_database_url = resolve_database_url(database_url)
