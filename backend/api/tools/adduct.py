@@ -3,6 +3,7 @@ import logging
 import sys
 
 import psycopg2
+from psycopg2 import sql
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -32,6 +33,23 @@ logger.addHandler(list_handler)
 
 router = APIRouter(tags=["adduct"])
 
+ALLOWED_ADDUCT_TABLES = frozenset({"positive", "negative"})
+
+
+def fetch_adduct_table(table_name: str, db_config: dict) -> list:
+    if table_name not in ALLOWED_ADDUCT_TABLES:
+        raise ValueError(f"Table '{table_name}' is not an allowed adduct table")
+    with psycopg2.connect(
+        host=db_config["host"],
+        port=db_config["port"],
+        dbname=db_config["dbname"],
+        user=db_config["username"],
+        password=db_config["password"],
+    ) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(sql.SQL("SELECT * FROM {}").format(sql.Identifier(table_name)))
+            return [list(row) for row in cursor.fetchall()]
+
 
 class AdductRequest(BaseModel):
     NM: str | float | int | None = None
@@ -54,7 +72,7 @@ def process_number(payload: AdductRequest):
         logging.info("getting the db_config")
     except Exception as exc:
         logging.info("cannot access database")
-        raise HTTPException(status_code=500, detail=f"Database configuration unavailable: {exc}") from exc
+        raise HTTPException(status_code=500, detail="Database configuration unavailable") from exc
 
     value_list = {
         "neutralmass": convert_float(data["NM"]),
@@ -107,16 +125,8 @@ def without_hydro(value_list, db_config):
         raise ValueError("Invalid mode provided")
 
     try:
-        conn_string = (
-            "postgresql://"
-            f"{db_config['username']}:{db_config['password']}"
-            f"@{db_config['host']}:{db_config['port']}/{db_config['dbname']}"
-        )
-        with psycopg2.connect(conn_string) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(f"SELECT * FROM {table_name};")
-                rawdata = [list(item) for item in cursor.fetchall()]
-        logging.info("Get rawdata Successfully: %s", rawdata)
+        rawdata = fetch_adduct_table(table_name, db_config)
+        logging.info("Get rawdata successfully, %d rows", len(rawdata))
     except Exception as exc:
         logging.info("Cannot connect to the database or fetch data: %s", exc)
 
@@ -212,16 +222,8 @@ def adduct_using_mass(value_list, db_config):
         raise ValueError("Invalid mode provided")
 
     try:
-        conn_string = (
-            "postgresql://"
-            f"{db_config['username']}:{db_config['password']}"
-            f"@{db_config['host']}:{db_config['port']}/{db_config['dbname']}"
-        )
-        with psycopg2.connect(conn_string) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(f"SELECT * FROM {table_name};")
-                rawdata = [list(item) for item in cursor.fetchall()]
-        logging.info("Get rawdata Successfully: %s", rawdata)
+        rawdata = fetch_adduct_table(table_name, db_config)
+        logging.info("Get rawdata successfully, %d rows", len(rawdata))
     except Exception as exc:
         logging.info("Cannot connect to the database or fetch data: %s", exc)
 

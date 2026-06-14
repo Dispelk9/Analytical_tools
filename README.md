@@ -41,10 +41,22 @@ The platform combines:
 User Browser
     |
     v
-Frontend (React + Vite + Porsche Design System)
+Cloudflare (DNS + proxy, dispelk9.de — NS: emerie/camilo.ns.cloudflare.com)
+    |  (TLS termination, DDoS protection, CDN)
+    v
+nginx reverse proxy (auth.dispelk9.de / demo.dispelk9.de)
+    |
+    +---------------------------> Keycloak (auth.dispelk9.de)
+    |                               |
+    |                               v
+    |                         Issues JWT tokens
     |
     v
+Frontend (React + Vite + Porsche Design System)
+    |  (attaches Bearer token to every API request)
+    v
 Backend API (FastAPI)
+    |  (validates JWT against Keycloak JWKS)
     |
     +---------------------------> PostgreSQL
     |
@@ -63,6 +75,12 @@ Backend API (FastAPI)
 
 
 Supporting services
+
+Keycloak container
+    |
+    +--> postgres DB for realm/session persistence
+    +--> realm imported from deploy/keycloak/analytical-tools-realm.json
+    +--> exposed via nginx at https://auth.dispelk9.de (behind Cloudflare)
 
 handbook-sync container
     |
@@ -143,15 +161,16 @@ This mode is the one that uses external model quota.
 The production Docker stack is defined in [deploy/docker-compose.yml](deploy/docker-compose.yml).
 
 Main services:
-- `frontend`: Apache-served frontend
-- `backend`: FastAPI service
+- `frontend`: Apache-served React frontend (built with Keycloak URLs baked in at CI build time)
+- `backend`: FastAPI service (validates Keycloak JWTs)
+- `keycloak`: Keycloak 26 identity provider, proxied at `https://auth.dispelk9.de`
 - `telegram-poller`: long-polling Telegram worker using backend retrieval + Hermes
-- `postgres`: application database
+- `postgres`: application database and Keycloak session/realm store
 - `hermes`: Hermes Gateway API service
 - `handbook-sync`: sync job for the private handbook repository
 
 Shared volumes:
-- `postgres_data`: Postgres persistence
+- `postgres_data`: Postgres persistence (application data + Keycloak realm state)
 - `handbook_data`: synced handbook content
 - `hermes_data`: Hermes state/config storage
 
@@ -184,6 +203,7 @@ Important values:
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_ALLOWED_USERS`
 - `GRAFANA_ADMIN_PASSWORD`
+- `KEYCLOAK_ADMIN_PASSWORD`
 
 ### Backend Env
 
@@ -200,6 +220,10 @@ Typical values:
 - `MAIL_PW`
 - `SMTP_RELAY`
 - `GEMINI_MODEL`
+- `AUTH_PROVIDER` (set to `keycloak` in production)
+- `KEYCLOAK_ISSUER` (e.g. `https://auth.dispelk9.de/realms/analytical-tools`)
+- `KEYCLOAK_JWKS_URL` (internal container URL for JWT verification)
+- `KEYCLOAK_CLIENT_ID`
 
 Telegram values belong in the Compose-level environment, not only in `backend/.env`, because `deploy/docker-compose.debug.yml` passes them through its `environment:` block.
 
@@ -229,6 +253,7 @@ docker compose -f deploy/docker-compose.debug.yml up --build
 
 The default local stack starts:
 - `postgres`
+- `keycloak` (available at `http://localhost:8084`, admin UI at `http://localhost:8084/admin`)
 - `backend`
 - `frontend`
 - `hermes`
@@ -328,13 +353,17 @@ Important backend endpoints:
 - PostgreSQL
 - ripgrep for handbook lookup
 
+### Auth
+- Keycloak 26 (OIDC / PKCE)
+
 ### Infrastructure
 - Docker Compose
+- nginx reverse proxy (Cloudflare + Certbot)
 - Hermes Gateway
 - Prometheus
 - Grafana
 - Gemini provider
-- GitHub Actions CD
+- GitHub Actions CI/CD
 
 ---
 
@@ -349,6 +378,7 @@ Useful references for the main technologies used in this stack:
 - Vite docs: https://vite.dev/
 - FastAPI docs: https://fastapi.tiangolo.com/
 - PostgreSQL docs: https://www.postgresql.org/docs/
+- Keycloak docs: https://www.keycloak.org/documentation
 - Porsche Design System React docs: https://designsystem.porsche.com/v3/developing/react/getting-started/
 
 ---
