@@ -12,6 +12,7 @@ if str(BACKEND_DIR) not in sys.path:
 
 os.environ.setdefault("SESSION_SECRET", "test-secret")
 os.environ["AUTH_PROVIDER"] = "disabled"
+os.environ["HTTPS_ONLY"] = "false"
 
 from api.auth_backend.login_user import Base, SessionLocal
 from main import create_app
