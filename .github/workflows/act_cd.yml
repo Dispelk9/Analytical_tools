@@ -81,11 +81,9 @@ jobs:
 
       - name: Copy compose file and refresh nginx conf to server
         run: |
-          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app ~/app/deploy ~/app/deploy/hermes ~/app/deploy/keycloak"
+          ssh "${{ secrets.SERVER_USER }}@${{ secrets.IP }}" "mkdir -p ~/app ~/app/deploy ~/app/deploy/keycloak"
           scp -p deploy/docker-compose.yml \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/docker-compose.yml"
-          scp -p deploy/hermes/config.yaml \
-            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/hermes/config.yaml"
           scp -rp deploy/monitoring \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/deploy/"
           scp -p deploy/nginx-proxy/nginx-act.conf \
@@ -105,9 +103,6 @@ jobs:
           GHCR_TOKEN: ${{ secrets.G_TOKEN }}
 
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_ALLOWED_USERS: ${{ secrets.TELEGRAM_ALLOWED_USERS }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -134,11 +129,6 @@ jobs:
           ${GEMINI_API_KEY}
           EOF
 
-          # staged alongside other secrets for parity with gemini_api_key
-          cat > "$tmpdir/hermes_api_key" <<EOF
-          ${HERMES_API_KEY}
-          EOF
-
           # backend env_file (backend/.env)
           cat > "$tmpdir/backend.env" <<EOF
           DB_USERNAME=${DB_USERNAME}
@@ -161,12 +151,7 @@ jobs:
           cat > "$tmpdir/compose.env" <<EOF
           DB_PASSWORD=${DB_PASSWORD}
           TAG=${TAG}
-          HERMES_API_KEY=${HERMES_API_KEY}
-          HERMES_INFERENCE_PROVIDER=gemini
           GOOGLE_API_KEY=${GEMINI_API_KEY}
-          HERMES_MODEL=gemini-2.5-flash-lite
-          TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-          TELEGRAM_ALLOWED_USERS=${TELEGRAM_ALLOWED_USERS}
           GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
           KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
           EOF
@@ -176,8 +161,6 @@ jobs:
 
           scp -p "$tmpdir/gemini_api_key" \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/secrets/gemini_api_key"
-          scp -p "$tmpdir/hermes_api_key" \
-            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/secrets/hermes_api_key"
           scp -p "$tmpdir/backend.env" \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/backend/.env"
           scp -p "$tmpdir/compose.env" \

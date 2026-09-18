@@ -60,23 +60,6 @@ services:
       - ./deploy/handbook-sync.sh:/usr/local/bin/handbook-sync.sh:ro
     entrypoint: ["/bin/sh", "/usr/local/bin/handbook-sync.sh"]
 
-  hermes:
-    image: nousresearch/hermes-agent:latest
-    restart: unless-stopped
-    command: gateway run
-    environment:
-      API_SERVER_ENABLED: "true"
-      API_SERVER_HOST: 0.0.0.0
-      API_SERVER_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
-      HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-gemini}
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
-    volumes:
-      - hermes_data:/opt/data
-      - ./deploy/hermes/config.yaml:/opt/data/config.yaml:ro
-      - handbook_data:/workspace/handbook:ro
-    expose:
-      - "8642"
-
   backend:
     image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
     restart: unless-stopped
@@ -86,19 +69,12 @@ services:
         condition: service_healthy
       handbook-sync:
         condition: service_started
-      hermes:
-        condition: service_started
     env_file:
       - backend/.env
     environment:
       DATABASE_URL: postgres://postgres:${DB_PASSWORD}@postgres:5432/postgres
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
-      HERMES_BASE_URL: http://hermes:8642
-      HERMES_API_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
-      HERMES_MODEL: ${HERMES_MODEL:-gemini-2.5-flash-lite}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS:-}
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus_multiproc
 
       # 🔹 Where handbook appears inside container
@@ -110,26 +86,6 @@ services:
       - handbook_data:/data/vho-handbook:ro
     ports:
       - "8080:8080"
-
-  telegram-poller:
-    image: ghcr.io/dispelk9/analytical_tools_backend:${TAG}
-    restart: unless-stopped
-    depends_on:
-      - handbook-sync
-      - hermes
-    env_file:
-      - backend/.env
-    environment:
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
-      HERMES_BASE_URL: http://hermes:8642
-      HERMES_API_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
-      HERMES_MODEL: ${HERMES_MODEL:-gemini-2.5-flash-lite}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS:-}
-      HANDBOOK_ROOT: /data/vho-handbook
-    command: ["python", "-m", "services.chatbot.telegram_poller"]
-    volumes:
-      - handbook_data:/data/vho-handbook:ro
 
   frontend:
     image: ghcr.io/dispelk9/analytical_tools_frontend:${TAG}
@@ -175,7 +131,6 @@ services:
 volumes:
   postgres_data:
   handbook_data:
-  hermes_data:
   prometheus_data:
   grafana_data:
 

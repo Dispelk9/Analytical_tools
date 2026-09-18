@@ -35,11 +35,11 @@ describe('pages/D9bot.tsx', () => {
     );
   });
 
-  it('uses Hermes chat when AI mode is enabled', async () => {
+  it('uses Gemini chat when AI mode is enabled', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(
         JSON.stringify({
-          candidates: [{ content: { parts: [{ text: 'From Hermes' }] } }],
+          candidates: [{ content: { parts: [{ text: 'From Gemini' }] } }],
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       ),
@@ -47,16 +47,16 @@ describe('pages/D9bot.tsx', () => {
 
     render(<D9bot />);
 
-    fireEvent.change(screen.getByRole('textbox', { name: /^Message/ }), { target: { value: 'Summarize Hermes' } });
+    fireEvent.change(screen.getByRole('textbox', { name: /^Message/ }), { target: { value: 'Summarize this' } });
     fireEvent.click(screen.getByRole('button', { name: 'Prompt' }));
 
-    expect(await screen.findByText('From Hermes')).toBeInTheDocument();
+    expect(await screen.findByText('From Gemini')).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
       '/api/chat',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
-          Prompt_string: 'Summarize Hermes',
+          Prompt_string: 'Summarize this',
           Email: '',
           Mode: 'gemini',
         }),

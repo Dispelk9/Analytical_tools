@@ -11,7 +11,7 @@ The platform combines:
 - backend API services
 - D9bot chat with two operating modes:
   - local handbook search
-  - Hermes-powered AI chat backed by Gemini
+  - Gemini-powered AI chat
 
 ---
 
@@ -23,8 +23,8 @@ The platform combines:
 - **ACT Math**
 
 ### Chat & Knowledge Access
-- **D9bot Handbook Mode**: local handbook lookup through backend `rg` search, no Hermes/Gemini usage
-- **D9bot AI Mode**: backend forwards prompts to Hermes Gateway, which uses Gemini for responses and conversation memory
+- **D9bot Handbook Mode**: local handbook lookup through backend `rg` search, no Gemini usage
+- **D9bot AI Mode**: backend forwards prompts directly to Gemini for responses, optionally enriched with handbook context
 
 ### Infrastructure & Diagnostics
 - **SMTP Check**
@@ -66,12 +66,8 @@ Backend API (FastAPI)
     |                               |
     |                               v
     |                         handbook_data volume
-    |                               ^
-    |                               |
-    +---------------------------> Hermes Gateway API
-                                    |
-                                    v
-                               Gemini provider
+    |
+    +---------------------------> Gemini provider (direct API call)
 
 
 Supporting services
@@ -86,12 +82,6 @@ handbook-sync container
     |
     v
 Pulls vho-handbook repo into handbook_data volume
-
-Hermes container
-    |
-    +--> reads config from /opt/data/config.yaml
-    +--> reads handbook mount at /workspace/handbook
-    +--> serves API at port 8642 inside the Docker network
 
 Prometheus
     |
@@ -111,7 +101,6 @@ Frontend
   -> POST /api/handbook
   -> Backend searches HANDBOOK_ROOT with ripgrep
   -> Backend returns local matches
-  -> No Hermes call
   -> No Gemini quota usage
 
 
@@ -119,9 +108,8 @@ AI Mode
 
 Frontend
   -> POST /api/chat
-  -> Backend forwards request to Hermes
-  -> Hermes calls Gemini
-  -> Hermes returns response + conversation continuity
+  -> Backend calls Gemini directly (with handbook context when in handbook mode)
+  -> Backend returns response
 ```
 
 ---
@@ -135,7 +123,7 @@ Handbook mode is intentionally local-first.
 - Frontend calls `/api/handbook`
 - Backend searches the synced handbook under `HANDBOOK_ROOT`
 - Results are returned directly to the UI
-- This path does **not** consume Hermes or Gemini quota
+- This path does **not** consume Gemini quota
 
 Current implementation:
 - search is keyword-based via `rg`
@@ -144,13 +132,12 @@ Current implementation:
 
 ### AI Mode
 
-AI mode is Hermes-backed.
+AI mode calls Gemini directly.
 
 - Frontend calls `/api/chat`
-- Backend calls Hermes at `HERMES_BASE_URL`
-- Hermes uses the configured provider, currently Gemini
-- Conversation state is preserved through a Hermes conversation id stored in the backend session
-- Telegram now enters through a dedicated backend polling worker, which adds compact handbook context before calling Hermes
+- Backend calls Gemini using `GOOGLE_API_KEY` / `GEMINI_MODEL`
+- In handbook mode with matches, the handbook context is included in the prompt sent to Gemini
+- Each request is stateless; there is no server-side conversation memory
 
 This mode is the one that uses external model quota.
 
@@ -164,25 +151,15 @@ Main services:
 - `frontend`: Apache-served React frontend (built with Keycloak URLs baked in at CI build time)
 - `backend`: FastAPI service (validates Keycloak JWTs)
 - `keycloak`: Keycloak 26 identity provider, proxied at `https://auth.dispelk9.de`
-- `telegram-poller`: long-polling Telegram worker using backend retrieval + Hermes
 - `postgres`: application database and Keycloak session/realm store
-- `hermes`: Hermes Gateway API service
 - `handbook-sync`: sync job for the private handbook repository
 
 Shared volumes:
 - `postgres_data`: Postgres persistence (application data + Keycloak realm state)
 - `handbook_data`: synced handbook content
-- `hermes_data`: Hermes state/config storage
 
 Handbook mounts:
 - backend reads handbook at `/data/vho-handbook`
-- Hermes reads handbook at `/workspace/handbook`
-
-Hermes config:
-- mounted from [deploy/hermes/config.yaml](deploy/hermes/config.yaml)
-
-Telegram setup and troubleshooting:
-- [docs/hermes_telegram_setup.md](docs/hermes_telegram_setup.md)
 
 ---
 
@@ -196,12 +173,7 @@ For local debug, use shell variables or a repo-root `.env` file for the same Com
 Important values:
 - `DB_PASSWORD`
 - `TAG`
-- `HERMES_API_KEY`
-- `HERMES_INFERENCE_PROVIDER`
 - `GOOGLE_API_KEY`
-- `HERMES_MODEL`
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_ALLOWED_USERS`
 - `GRAFANA_ADMIN_PASSWORD`
 - `KEYCLOAK_ADMIN_PASSWORD`
 
@@ -224,8 +196,6 @@ Typical values:
 - `KEYCLOAK_ISSUER` (e.g. `https://auth.dispelk9.de/realms/analytical-tools`)
 - `KEYCLOAK_JWKS_URL` (internal container URL for JWT verification)
 - `KEYCLOAK_CLIENT_ID`
-
-Telegram values belong in the Compose-level environment, not only in `backend/.env`, because `deploy/docker-compose.debug.yml` passes them through its `environment:` block.
 
 ---
 
@@ -256,34 +226,6 @@ The default local stack starts:
 - `keycloak` (available at `http://localhost:8084`, admin UI at `http://localhost:8084/admin`)
 - `backend`
 - `frontend`
-- `hermes`
-- `telegram-poller`
-
-### Enable Telegram Locally
-
-Telegram is optional for local development. To enable it, create a repo-root `.env` file or export the variables in your shell before starting Compose:
-
-```env
-TELEGRAM_BOT_TOKEN=123456789:your_bot_token
-TELEGRAM_ALLOWED_USERS=123456789
-```
-
-`TELEGRAM_ALLOWED_USERS` must be your numeric Telegram user ID, not your username or phone number. You can get it by messaging `@userinfobot`.
-
-After changing Telegram values, recreate the services that consume them:
-
-```bash
-docker compose -f deploy/docker-compose.debug.yml up -d --force-recreate backend telegram-poller hermes
-```
-
-Useful checks:
-
-```bash
-curl http://localhost:8080/health/telegram
-docker compose -f deploy/docker-compose.debug.yml logs -f telegram-poller hermes
-```
-
-More setup and troubleshooting details are in [docs/hermes_telegram_setup.md](docs/hermes_telegram_setup.md).
 
 The private handbook sync service is optional in local development.
 
@@ -306,10 +248,7 @@ Press `F5` and choose one of:
 
 `deploy/docker-compose.debug.yml` also supports these optional local environment variables:
 - `GEMINI_API_KEY_PATH`: host path to your Gemini API key file
-- `HERMES_API_KEY`: API key used by the local Hermes container
 - `GOOGLE_API_KEY`: dev fallback if no Gemini key file is mounted
-- `TELEGRAM_BOT_TOKEN`: Telegram bot token for the local polling worker
-- `TELEGRAM_ALLOWED_USERS`: comma-separated numeric Telegram user IDs allowed to use the bot
 - `HANDBOOK_DEPLOY_KEY_PATH`: host path to the handbook SSH deploy key
 - `HANDBOOK_KNOWN_HOSTS_PATH`: host path to the handbook known_hosts file
 - `PROMETHEUS_BIND`: Prometheus host bind address, default `127.0.0.1:9090`
@@ -324,18 +263,17 @@ Press `F5` and choose one of:
 ```text
 backend/    FastAPI service, chat logic, handbook search, analytical tools
 frontend/   React UI
-deploy/     Docker Compose, deploy scripts, Hermes config
+deploy/     Docker Compose, deploy scripts
 docs/       Project documentation
 ```
 
 Important backend endpoints:
-- `/api/chat`: Hermes-backed AI mode
+- `/api/chat`: Gemini-backed AI mode
 - `/api/handbook`: local handbook search mode
-- `/health/hermes`
-- `/health/telegram`
 - `/health/handbook`
+- `/health/gemini`
 - `/metrics`
-- `/api/gemini`: older direct Gemini path still present in backend
+- `/api/gemini`: direct Gemini path used without handbook context
 
 ---
 
@@ -359,7 +297,6 @@ Important backend endpoints:
 ### Infrastructure
 - Docker Compose
 - nginx reverse proxy (Cloudflare + Certbot)
-- Hermes Gateway
 - Prometheus
 - Grafana
 - Gemini provider
@@ -371,8 +308,6 @@ Important backend endpoints:
 
 Useful references for the main technologies used in this stack:
 
-- Hermes Agent (GitHub): https://github.com/NousResearch/hermes-agent
-- Hermes Agent (docs): https://nousresearch.github.io/hermes-agent/
 - Gemini API docs: https://ai.google.dev/docs
 - React docs: https://react.dev/
 - Vite docs: https://vite.dev/
@@ -385,9 +320,9 @@ Useful references for the main technologies used in this stack:
 
 ## Notes
 
-- Browser handbook mode and Telegram polling both use backend-side handbook retrieval before Hermes answer generation.
+- Handbook mode uses backend-side handbook retrieval before Gemini answer generation.
 - The handbook is synced from the private `vho-handbook` repository into the Docker volume `handbook_data`.
-- If handbook mode or Telegram returns no relevant results, that is currently a retrieval limitation rather than an AI limitation.
+- If handbook mode returns no relevant results, that is currently a retrieval limitation rather than an AI limitation.
 
 ---
 

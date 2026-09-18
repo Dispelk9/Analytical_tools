@@ -62,8 +62,6 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
-      hermes:
-        condition: service_started
     env_file:
       - ../backend/.env
     environment:
@@ -71,11 +69,6 @@ services:
       DB_HOST: postgres_db
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
-      HERMES_BASE_URL: http://hermes:8642
-      HERMES_API_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
-      HERMES_MODEL: ${HERMES_MODEL:-gemini-2.5-flash-lite}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS:-}
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus_multiproc
       AUTH_PROVIDER: keycloak
       KEYCLOAK_ISSUER: http://localhost:8084/realms/analytical-tools
@@ -85,47 +78,6 @@ services:
       - "8080:8080"
     volumes:
       - ${GEMINI_API_KEY_PATH:-/home/vho/Gemini/gemini_api_key}:/run/secrets/gemini_api_key:ro
-
-  telegram-poller:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile.debug
-    container_name: telegram_poller
-    restart: unless-stopped
-    depends_on:
-      hermes:
-        condition: service_started
-    env_file:
-      - ../backend/.env
-    environment:
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
-      HERMES_BASE_URL: http://hermes:8642
-      HERMES_API_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
-      HERMES_MODEL: ${HERMES_MODEL:-gemini-2.5-flash-lite}
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-      TELEGRAM_ALLOWED_USERS: ${TELEGRAM_ALLOWED_USERS:-}
-      HANDBOOK_ROOT: /data/vho-handbook
-    command: ["python", "-m", "services.chatbot.telegram_poller"]
-    volumes:
-      - handbook_data:/data/vho-handbook:ro
-
-  hermes:
-    image: nousresearch/hermes-agent:latest
-    container_name: hermes
-    restart: unless-stopped
-    command: gateway run
-    environment:
-      API_SERVER_ENABLED: "true"
-      API_SERVER_HOST: 0.0.0.0
-      API_SERVER_KEY: ${HERMES_API_KEY:-local-dev-hermes-key}
-      HERMES_INFERENCE_PROVIDER: ${HERMES_INFERENCE_PROVIDER:-gemini}
-      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
-    expose:
-      - "8642"
-    volumes:
-      - hermes_data:/opt/data
-      - ./hermes/config.yaml:/opt/data/config.yaml:ro
-      - handbook_data:/workspace/handbook:ro
 
   frontend:
     build:
@@ -180,6 +132,5 @@ services:
 volumes:
   postgres_data:
   handbook_data:
-  hermes_data:
   prometheus_data:
   grafana_data:

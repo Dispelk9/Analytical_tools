@@ -1,10 +1,10 @@
 import logging
 
 import requests
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from services.chatbot import gemini, hermes, prompting
+from services.chatbot import gemini, prompting
 from services.chatbot.handbook_search import get_handbook_root, has_handbook_matches, search_handbook_text
 from services.utils.send_log import send_email
 
@@ -19,7 +19,7 @@ class ChatRequest(BaseModel):
 
 
 @router.post("/api/chat")
-def chat_request(payload: ChatRequest, request: Request):
+def chat_request(payload: ChatRequest):
     data = payload.model_dump()
     logging.info("Incoming JSON: %s", data)
 
@@ -34,7 +34,6 @@ def chat_request(payload: ChatRequest, request: Request):
     response_mode = mode
     try:
         if direct_handbook:
-            conversation_id = None
             output = search_handbook_text(prompt)
             response_json = {
                 "mode": "handbook_direct",
@@ -45,24 +44,21 @@ def chat_request(payload: ChatRequest, request: Request):
         elif mode == "handbook":
             handbook_context = search_handbook_text(prompt)
             if has_handbook_matches(handbook_context):
-                conversation_id = hermes.get_session_conversation_id(request.session)
-                hermes_prompt = prompting.HANDBOOK_INSTRUCTIONS.format(
+                gemini_prompt = prompting.HANDBOOK_INSTRUCTIONS.format(
                     prompt=prompt,
                     context=handbook_context,
                 )
-                response_json = hermes.call_hermes(hermes_prompt, conversation_id)
-                texts = hermes.extract_response_text(response_json)
+                response_json = gemini.call_gemini(gemini_prompt)
+                texts = gemini.extract_texts(response_json)
                 response_mode = mode
             else:
-                conversation_id = None
                 response_json = gemini.call_gemini(prompt)
                 texts = gemini.extract_texts(response_json)
                 response_mode = "gemini_fallback"
         else:
-            conversation_id = hermes.get_session_conversation_id(request.session)
-            hermes_prompt = prompting.build_chat_prompt(prompt, mode)
-            response_json = hermes.call_hermes(hermes_prompt, conversation_id)
-            texts = hermes.extract_response_text(response_json)
+            gemini_prompt = prompting.build_chat_prompt(prompt, mode)
+            response_json = gemini.call_gemini(gemini_prompt)
+            texts = gemini.extract_texts(response_json)
             response_mode = mode
 
         if recipient and texts:
@@ -70,7 +66,6 @@ def chat_request(payload: ChatRequest, request: Request):
 
         return {
             "mode": response_mode,
-            "conversation_id": conversation_id,
             "candidates": [
                 {
                     "content": {
@@ -79,7 +74,7 @@ def chat_request(payload: ChatRequest, request: Request):
                     }
                 }
             ],
-            "hermes_response": response_json,
+            "gemini_response": response_json,
         }
     except FileNotFoundError:
         root = get_handbook_root()
@@ -91,40 +86,25 @@ def chat_request(payload: ChatRequest, request: Request):
         raise HTTPException(status_code=500, detail={"error": "handbook_search_failed", "details": str(exc)}) from exc
     except requests.HTTPError as exc:
         status = getattr(exc.response, "status_code", None)
-        if response_mode == "gemini_fallback":
-            logging.exception("Gemini HTTP error")
-            if status == 429 or hermes.is_rate_limited_error(exc):
-                raise HTTPException(
-                    status_code=429,
-                    detail={"error": "Gemini rate limited. Please retry."},
-                ) from exc
-            raise HTTPException(
-                status_code=502,
-                detail={
-                    "error": "Upstream error from Gemini",
-                    "details": str(exc),
-                    "upstream_http": status,
-                },
-            ) from exc
-        logging.exception("Hermes HTTP error")
-        if hermes.is_rate_limited_error(exc):
+        logging.exception("Gemini HTTP error")
+        if status == 429:
             raise HTTPException(
                 status_code=429,
-                detail={"error": "Hermes is rate limited. Please retry."},
+                detail={"error": "Gemini rate limited. Please retry."},
             ) from exc
         raise HTTPException(
             status_code=502,
             detail={
-                "error": "Upstream error from Hermes",
+                "error": "Upstream error from Gemini",
                 "details": str(exc),
                 "upstream_http": status,
             },
         ) from exc
     except requests.RequestException as exc:
-        logging.exception("Hermes request failed")
+        logging.exception("Gemini request failed")
         raise HTTPException(
             status_code=502,
-            detail={"error": "Hermes unavailable", "details": str(exc)},
+            detail={"error": "Gemini unavailable", "details": str(exc)},
         ) from exc
 
 
