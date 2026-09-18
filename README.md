@@ -33,6 +33,18 @@ The platform combines:
 
 ---
 
+## Frontend UI
+
+The authenticated app shell (`AppLayout` in [frontend/src/App.tsx](frontend/src/App.tsx)) is laid out like a sysadmin admin console:
+
+- A sticky top navbar ([frontend/src/components/Navbar.tsx](frontend/src/components/Navbar.tsx)) with one dropdown per tool category (Infrastructure, SMTP, DNS, AI/Agent, ACT Chemistry). Internal tools navigate via React Router; external tools open in a new tab.
+- A `/` dashboard ([frontend/src/pages/Dashboard.tsx](frontend/src/pages/Dashboard.tsx)) showing the same categories as a widget grid, for a landing overview.
+- The main content area scales its width and padding with the browser window instead of being capped at a fixed width.
+
+Categories and tools are defined once in [frontend/src/data/toolThemes.ts](frontend/src/data/toolThemes.ts), and both the navbar and the dashboard read from it. Adding a new tool means adding a tile there (or a new theme entry for a new category) — no other wiring is required.
+
+---
+
 ## Architecture
 
 ### Whole System
@@ -263,6 +275,9 @@ Press `F5` and choose one of:
 ```text
 backend/    FastAPI service, chat logic, handbook search, analytical tools
 frontend/   React UI
+  src/components/  Shared UI (navbar, ...)
+  src/pages/        Routed tool pages + the dashboard
+  src/data/         Tool/category definitions shared by the navbar and dashboard
 deploy/     Docker Compose, deploy scripts
 docs/       Project documentation
 ```

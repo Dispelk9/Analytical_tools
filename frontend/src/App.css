@@ -1,8 +1,16 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
+}
+
+.login-screen {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 2rem;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .logo {
@@ -100,9 +108,54 @@
   color: red;
 }
 
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+.app-footer {
+  flex: 0 0 auto;
+  padding: 0.85rem 1.5rem;
+  text-align: center;
+  background: #12161c;
+  border-top: 1px solid #262c36;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+.dashboard-intro {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  text-align: left;
+}
+
+.dashboard-title {
+  margin: 0 0 0.25rem;
+  color: #f8fafc;
+}
+
+.dashboard-subtitle {
+  margin: 0;
+  color: #94a3b8;
+}
+
 .tool-theme-list {
   width: min(100%, 1120px);
-  margin: 2rem auto 4rem;
+  margin: 2rem auto 0;
   display: flex;
   flex-direction: column;
   gap: 2rem;
