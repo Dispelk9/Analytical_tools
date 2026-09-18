@@ -181,8 +181,53 @@ Handbook mounts:
 Both stay bound to `127.0.0.1` on the host in `docker-compose.yml` (`PROMETHEUS_BIND`/`GRAFANA_BIND`), and [deploy/nginx-proxy/nginx-act.conf](deploy/nginx-proxy/nginx-act.conf) reverse-proxies them from the same host at `grafana.dispelk9.de` and `prometheus.dispelk9.de`, the same pattern used for Checkmk and Certcheck.
 
 One-time setup on the server before the first deploy:
+- DNS: add `grafana` and `prometheus` A records in Cloudflare, proxied, pointing at the same origin IP as `analytical`/`auth`/`certcheck`.
 - Certificates: `certbot certonly --dns-cloudflare ... -d grafana.dispelk9.de` and `-d prometheus.dispelk9.de`
-- Prometheus has no login of its own, so its nginx block requires HTTP Basic Auth: `sudo htpasswd -c /etc/nginx/.htpasswd-prometheus <user>`. Grafana is left without this since it has its own login (`GRAFANA_ADMIN_USER`/`GRAFANA_ADMIN_PASSWORD`).
+
+#### Grafana credentials
+
+Grafana's admin login is driven by env vars in `docker-compose.yml`:
+```yaml
+GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD}
+```
+which the CD pipeline fills from the `GRAFANA_ADMIN_USER`/`GRAFANA_ADMIN_PASSWORD` GitHub Actions secrets (repo → Settings → Secrets and variables → Actions).
+
+- **First boot only:** Grafana applies `GF_SECURITY_ADMIN_PASSWORD` when its database is created, i.e. only the very first time the `grafana` container starts. Log in with `admin` (or `GRAFANA_ADMIN_USER`) and whatever `GRAFANA_ADMIN_PASSWORD` held at that point.
+- **Changing it later:** updating the GitHub secret and redeploying does *not* change an already-initialized password. Reset it directly on the server instead:
+  ```bash
+  ssh <user>@<server>
+  cd ~/app
+  docker compose exec grafana grafana-cli admin reset-admin-password '<new-password>'
+  ```
+  This takes effect immediately, with no redeploy or data loss.
+
+#### Prometheus credentials
+
+Prometheus has no login of its own, so `nginx-act.conf` puts it behind HTTP Basic Auth. That auth file doesn't exist until you create it once on the server:
+```bash
+ssh <user>@<server>
+sudo apt-get install -y apache2-utils   # provides `htpasswd`, if not already installed
+sudo htpasswd -c /etc/nginx/.htpasswd-prometheus <username>
+# enter the password twice when prompted
+sudo nginx -t && sudo systemctl reload nginx
+```
+`-c` creates (and overwrites) the file — only use it the first time. To add more users later, rerun `htpasswd` without `-c`.
+
+### Frontend metrics
+
+`/metrics` on the backend only ever covers backend HTTP traffic — the frontend is a static SPA served by plain Apache, so there's no application process there for Prometheus to scrape directly. Web-server-level frontend metrics come from Apache's `mod_status`, converted to Prometheus format by an `apache-exporter` sidecar:
+
+```
+Apache (mod_status, /server-status) -> apache-exporter:9117 -> Prometheus (analytical-tools-frontend job) -> Grafana ("Analytical Tools Frontend Overview" dashboard)
+```
+
+What this gives you right now: request rate, busy/idle worker counts, bytes sent, and an up/down status — traffic and health of the web server, not real user experience (page load times, JS errors, Core Web Vitals). Getting those would mean instrumenting the React app itself (e.g. the `web-vitals` library) and shipping the results to a new backend ingestion endpoint, since Prometheus can only scrape a server, never a browser directly.
+
+`/server-status` is enabled in [frontend/apache/httpd.conf](frontend/apache/httpd.conf) (and `httpd.debug.conf`) but isn't proxied by nginx — it's still password-protected with HTTP Basic Auth since it isn't a routed app path either. One-time setup:
+
+- **Production:** set the `FRONTEND_STATUS_PASSWORD` GitHub Actions secret. The CD pipeline hashes it (`openssl passwd -apr1`) into the `frontend_status_htpasswd` docker-compose secret on every deploy, and passes the same plaintext password to `apache-exporter`'s `--scrape_uri` (fixed username `monitor`) — no manual server step needed, unlike Prometheus's nginx auth.
+- **Local debug:** create `deploy/secrets/frontend_status_htpasswd` yourself (e.g. `openssl passwd -apr1 <password>` prefixed with `monitor:`) and export `FRONTEND_STATUS_PASSWORD` (defaults to `monitor` if unset) before starting the debug stack.
 
 ---
 
@@ -199,6 +244,7 @@ Important values:
 - `GOOGLE_API_KEY`
 - `GRAFANA_ADMIN_PASSWORD`
 - `KEYCLOAK_ADMIN_PASSWORD`
+- `FRONTEND_STATUS_PASSWORD`
 
 ### Backend Env
 
@@ -278,6 +324,8 @@ Press `F5` and choose one of:
 - `GRAFANA_BIND`: Grafana host bind address, default `127.0.0.1:3000`
 - `GRAFANA_ADMIN_USER`: local Grafana admin username, default `admin`
 - `GRAFANA_ADMIN_PASSWORD`: local Grafana admin password, default `admin`
+- `FRONTEND_STATUS_HTPASSWD_PATH`: host path to the frontend's `/server-status` htpasswd file, default `./secrets/frontend_status_htpasswd`
+- `FRONTEND_STATUS_PASSWORD`: password `apache-exporter` uses to scrape `/server-status`, default `monitor` (must match the htpasswd file's hash)
 
 ---
 

@@ -103,6 +103,7 @@ jobs:
           GHCR_TOKEN: ${{ secrets.G_TOKEN }}
 
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FRONTEND_STATUS_PASSWORD: ${{ secrets.FRONTEND_STATUS_PASSWORD }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -118,6 +119,7 @@ jobs:
         run: |
           set -euo pipefail
           : "${GRAFANA_ADMIN_PASSWORD:?Set the GRAFANA_ADMIN_PASSWORD GitHub Actions secret}"
+          : "${FRONTEND_STATUS_PASSWORD:?Set the FRONTEND_STATUS_PASSWORD GitHub Actions secret}"
 
           tmpdir="$(mktemp -d)"
           trap 'rm -rf "$tmpdir"' EXIT
@@ -128,6 +130,11 @@ jobs:
           cat > "$tmpdir/gemini_api_key" <<EOF
           ${GEMINI_API_KEY}
           EOF
+
+          # htpasswd file for the frontend's /server-status, scraped by apache-exporter
+          printf 'monitor:%s\n' \
+            "$(openssl passwd -apr1 -salt "$(openssl rand -hex 8)" "${FRONTEND_STATUS_PASSWORD}")" \
+            > "$tmpdir/frontend_status_htpasswd"
 
           # backend env_file (backend/.env)
           cat > "$tmpdir/backend.env" <<EOF
@@ -154,6 +161,7 @@ jobs:
           GOOGLE_API_KEY=${GEMINI_API_KEY}
           GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
           KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+          FRONTEND_STATUS_PASSWORD=${FRONTEND_STATUS_PASSWORD}
           EOF
 
 
@@ -161,6 +169,8 @@ jobs:
 
           scp -p "$tmpdir/gemini_api_key" \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/secrets/gemini_api_key"
+          scp -p "$tmpdir/frontend_status_htpasswd" \
+            "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/secrets/frontend_status_htpasswd"
           scp -p "$tmpdir/backend.env" \
             "${{ secrets.SERVER_USER }}@${{ secrets.IP }}:~/app/backend/.env"
           scp -p "$tmpdir/compose.env" \

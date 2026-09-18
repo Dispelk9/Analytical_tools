@@ -94,6 +94,19 @@ services:
       - keycloak
     ports:
       - "8081:80"
+    volumes:
+      - ${FRONTEND_STATUS_HTPASSWD_PATH:-./secrets/frontend_status_htpasswd}:/run/secrets/frontend_status_htpasswd:ro
+
+  apache-exporter:
+    image: lusotycoon/apache-exporter
+    container_name: apache_exporter
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    command:
+      - --scrape_uri=http://monitor:${FRONTEND_STATUS_PASSWORD:-monitor}@frontend/server-status?auto
+    expose:
+      - "9117"
 
   prometheus:
     image: prom/prometheus:latest
@@ -101,6 +114,7 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+      - apache-exporter
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus

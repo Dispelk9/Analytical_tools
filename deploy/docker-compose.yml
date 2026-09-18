@@ -95,12 +95,25 @@ services:
     volumes:
       - /etc/letsencrypt/live/analytical.dispelk9.de/fullchain.pem:/usr/local/apache2/conf/fullchain.pem:ro
       - /etc/letsencrypt/live/analytical.dispelk9.de/privkey.pem:/usr/local/apache2/conf/privkey.pem:ro
+    secrets:
+      - frontend_status_htpasswd
+
+  apache-exporter:
+    image: lusotycoon/apache-exporter
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    command:
+      - --scrape_uri=http://monitor:${FRONTEND_STATUS_PASSWORD:?set FRONTEND_STATUS_PASSWORD}@frontend/server-status?auto
+    expose:
+      - "9117"
 
   prometheus:
     image: prom/prometheus:latest
     restart: unless-stopped
     depends_on:
       - backend
+      - apache-exporter
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -137,6 +150,8 @@ volumes:
 secrets:
   gemini_api_key:
     file: ./secrets/gemini_api_key
+  frontend_status_htpasswd:
+    file: ./secrets/frontend_status_htpasswd
 
   handbook_deploy_key:
     file: ./secrets/handbook_deploy_key

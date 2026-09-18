@@ -48,6 +48,7 @@ jobs:
           GEMINI_MODEL=gemini-2.5-flash-lite
           EOF
           printf 'test-gemini-api-key\n' > deploy/secrets/gemini_api_key
+          printf 'monitor:$apr1$test$hash\n' > deploy/secrets/frontend_status_htpasswd
           printf 'test-handbook-deploy-key\n' > deploy/secrets/handbook_deploy_key
           printf 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAITestKnownHost\n' > deploy/secrets/handbook_known_hosts
 
@@ -58,6 +59,7 @@ jobs:
           GOOGLE_API_KEY: test-google-api-key
           GRAFANA_ADMIN_PASSWORD: test-grafana-password
           KEYCLOAK_ADMIN_PASSWORD: test-keycloak-password
+          FRONTEND_STATUS_PASSWORD: test-frontend-status-password
         run: |
           tmpdir="$(mktemp -d)"
           trap 'rm -rf "$tmpdir"' EXIT
@@ -67,6 +69,7 @@ jobs:
           cp deploy/handbook-sync.sh "$tmpdir/deploy/handbook-sync.sh"
           cp deploy/backend/.env "$tmpdir/backend/.env"
           cp deploy/secrets/gemini_api_key "$tmpdir/secrets/gemini_api_key"
+          cp deploy/secrets/frontend_status_htpasswd "$tmpdir/secrets/frontend_status_htpasswd"
           cp deploy/secrets/handbook_deploy_key "$tmpdir/secrets/handbook_deploy_key"
           cp deploy/secrets/handbook_known_hosts "$tmpdir/secrets/handbook_known_hosts"
           docker compose -f "$tmpdir/docker-compose.yml" config
