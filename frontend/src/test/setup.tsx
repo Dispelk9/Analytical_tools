@@ -23,6 +23,18 @@ Object.defineProperty(URL, 'createObjectURL', {
   value: vi.fn(() => 'blob:mock'),
 });
 
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+Object.defineProperty(window, 'ResizeObserver', {
+  configurable: true,
+  writable: true,
+  value: MockResizeObserver,
+});
+
 const wrapChildren = (children: React.ReactNode) => (
   <>{children}</>
 );

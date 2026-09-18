@@ -50,14 +50,20 @@
   align-items: flex-start; /* Changed from center */
   justify-content: center;
   min-height: 100vh;
+  width: 100%;
 }
 
-/* Inner container styles the form card */
+/* Inner container styles the form card. Capped and margin-centered so it
+   reads as a card instead of stretching edge-to-edge on wide screens. */
 .inner-container {
   width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  text-align: center;
 }
 
 /* Wrapper for the form to restrict its width to 1000px */
@@ -138,8 +144,6 @@
 }
 
 .dashboard-intro {
-  width: min(100%, 1120px);
-  margin: 0 auto;
   text-align: left;
 }
 
@@ -153,73 +157,12 @@
   color: #94a3b8;
 }
 
-.tool-theme-list {
+.dashboard {
   width: min(100%, 1120px);
-  margin: 2rem auto 0;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  text-align: left;
-}
-
-.tool-theme-section {
-  display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  align-items: start;
-  gap: 1rem;
-}
-
-.tool-theme-title {
-  margin: 0;
-  color: #f8fafc;
-  font-size: 1.25rem;
-  line-height: 1.2;
-}
-
-.tool-theme-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 16px;
-  align-items: stretch;
-  min-width: 0;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-}
-
-.tool-theme-grid p-link-tile,
-.tool-theme-grid a {
-  display: block;
-  flex: 0 0 clamp(180px, 22vw, 240px);
-  width: clamp(180px, 22vw, 240px);
-}
-
-.tool-theme-grid img {
-  display: block;
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-}
-
-@media (max-width: 640px) {
-  .tool-theme-list {
-    margin: 1.5rem auto 3rem;
-    gap: 1.5rem;
-  }
-
-  .tool-theme-section {
-    grid-template-columns: 104px minmax(0, 1fr);
-    gap: 0.75rem;
-  }
-
-  .tool-theme-title {
-    font-size: 1rem;
-  }
-
-  .tool-theme-grid p-link-tile,
-  .tool-theme-grid a {
-    flex-basis: 200px;
-    width: 200px;
-  }
 }
 
 /* Result CSS */

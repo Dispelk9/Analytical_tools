@@ -47,47 +47,49 @@ const CollisionPlot: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Concentration vs Response</h1>
-      <div className="form-wrapper">
-        <form onSubmit={fetchPlot}>
-          <div>
-            <PTextFieldWrapper theme="dark" label="X values (Concentration):" description="Should be a float number">
-              <input
-                type="text"
-                value={xValues}
-                onChange={(e) => setXValues(e.target.value)}
-              />
-            </PTextFieldWrapper>
-          </div>
-          <div>
-            <PTextFieldWrapper theme="dark" label="Y values (Response):" description="Should be a float number">
-              <input
-                type="text"
-                value={yValues}
-                onChange={(e) => setYValues(e.target.value)}
-              />
-            </PTextFieldWrapper>
-          </div>
-          <PButton theme="dark" type="submit" style={{ marginTop: '50px' }}>Plot</PButton>
-        </form>
-        {isCalculating && (
-          <div style={{ marginTop: '1rem' }}>
-            <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
-          </div>
-        )}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {plotUrl && (
-          <div>
-            <img src={plotUrl} alt="Collision Plot" style={{ maxWidth: '100%' }} />
-          </div>
-        )}
-        <PText theme="dark" style={{ textAlign: 'justify' }}>
-          Flask endpoint that generates a scatter plot with <br />
-          the x-axis labeled "Concentration (µg/mL)"<br />
-          the y-axis labeled "Response". <br />
-          This endpoint expects JSON input containing two lists, "x" and "y", and then returns the plot as a PNG image<br />
-        </PText>
+    <div className="outer-container">
+      <div className="inner-container">
+        <h1 className="form-title">Concentration vs Response</h1>
+        <div className="form-wrapper">
+          <form onSubmit={fetchPlot}>
+            <div>
+              <PTextFieldWrapper theme="dark" label="X values (Concentration):" description="Should be a float number">
+                <input
+                  type="text"
+                  value={xValues}
+                  onChange={(e) => setXValues(e.target.value)}
+                />
+              </PTextFieldWrapper>
+            </div>
+            <div>
+              <PTextFieldWrapper theme="dark" label="Y values (Response):" description="Should be a float number">
+                <input
+                  type="text"
+                  value={yValues}
+                  onChange={(e) => setYValues(e.target.value)}
+                />
+              </PTextFieldWrapper>
+            </div>
+            <PButton theme="dark" type="submit" style={{ marginTop: '50px' }}>Plot</PButton>
+          </form>
+          {isCalculating && (
+            <div style={{ marginTop: '1rem' }}>
+              <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
+            </div>
+          )}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {plotUrl && (
+            <div>
+              <img src={plotUrl} alt="Collision Plot" style={{ maxWidth: '100%' }} />
+            </div>
+          )}
+          <PText theme="dark" style={{ textAlign: 'justify' }}>
+            Flask endpoint that generates a scatter plot with <br />
+            the x-axis labeled "Concentration (µg/mL)"<br />
+            the y-axis labeled "Response". <br />
+            This endpoint expects JSON input containing two lists, "x" and "y", and then returns the plot as a PNG image<br />
+          </PText>
+        </div>
       </div>
     </div>
   );

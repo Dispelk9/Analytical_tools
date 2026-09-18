@@ -1,6 +1,6 @@
 import React, { FormEvent, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PButton, PSpinner } from '@porsche-design-system/components-react'
+import { PSpinner } from '@porsche-design-system/components-react'
 import { toolThemes, isExternalHref } from '../data/toolThemes'
 import { logoutFromAuthProvider } from '../auth/auth'
 import './Navbar.css'
@@ -102,7 +102,7 @@ const Navbar: React.FC = () => {
       <form className="navbar-actions" onSubmit={handleLogout}>
         {logoutError && <span className="navbar-logout-error">{logoutError}</span>}
         {isLoggingOut && <PSpinner size="small" aria={{ 'aria-label': 'Logging out' }} />}
-        <PButton type="submit" variant="secondary" compact={true}>Logout</PButton>
+        <button type="submit" className="nav-item-trigger">Logout</button>
       </form>
     </header>
   )

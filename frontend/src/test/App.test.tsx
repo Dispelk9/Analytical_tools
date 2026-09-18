@@ -34,7 +34,7 @@ describe('App.tsx', () => {
     expect(await screen.findByText('Dispelk9 Tools')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
-    expect(screen.getByTestId('infrastructure-theme')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Infrastructure' }).length).toBeGreaterThan(0);
   });
 
   it('redirects an unknown authenticated route back to the dashboard', async () => {

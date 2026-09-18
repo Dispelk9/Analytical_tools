@@ -1,52 +1,49 @@
-import React from 'react'
-import { PLinkTile, PTag } from '@porsche-design-system/components-react'
-import { toolThemes, ToolTheme, ToolTile } from '../data/toolThemes'
+import React, { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import BranchedMenu, { BranchedMenuChild, BranchedMenuItem } from '../components/BranchedMenu'
+import { isExternalHref, toolThemes } from '../data/toolThemes'
 
-const ToolThemeTile: React.FC<{ tile: ToolTile }> = ({ tile }) => (
-  <PLinkTile
-    href={tile.href}
-    label={tile.label}
-    description={tile.description}
-    compact={true}
-  >
-    <PTag slot="header" theme="dark" color="background-frosted" compact={true}>
-      {tile.tags}
-    </PTag>
-    <img src={tile.imageSrc} alt={tile.imageAlt} />
-  </PLinkTile>
-)
+// Menu sections/tools come from src/data/toolThemes.ts. Add a tile there to
+// add a tool to an existing category, or a new theme entry for a new one.
+const Dashboard: React.FC = () => {
+  const navigate = useNavigate()
 
-const ToolThemeSection: React.FC<{ theme: ToolTheme }> = ({ theme }) => (
-  <section
-    className="tool-theme-section"
-    aria-labelledby={`${theme.id}-heading`}
-    data-testid={`${theme.id}-theme`}
-  >
-    <h2 id={`${theme.id}-heading`} className="tool-theme-title">
-      {theme.title}
-    </h2>
-    <div className="tool-theme-grid">
-      {theme.tiles.map(tile => (
-        <ToolThemeTile key={`${theme.id}-${tile.href}`} tile={tile} />
-      ))}
-    </div>
-  </section>
-)
+  const menuItems: BranchedMenuItem[] = useMemo(
+    () =>
+      toolThemes.map(theme => ({
+        label: theme.title,
+        children: theme.tiles.map(tile => ({
+          value: tile.href,
+          label: tile.label,
+        })),
+      })),
+    [],
+  )
 
-// Widgets are driven by src/data/toolThemes.ts. Add a tile there to add a
-// widget to an existing category, or a new theme entry for a new category.
-const Dashboard: React.FC = () => (
-  <div className="dashboard">
-    <div className="dashboard-intro">
-      <h1 className="dashboard-title">Overview</h1>
-      <p className="dashboard-subtitle">Quick access to infrastructure, chemistry and AI tooling.</p>
+  const handleSelect = (value: string, _item: BranchedMenuChild | BranchedMenuItem) => {
+    if (isExternalHref(value)) {
+      window.open(value, '_blank', 'noopener,noreferrer')
+      return
+    }
+    navigate(value)
+  }
+
+  return (
+    <div className="dashboard">
+      <div className="dashboard-intro">
+        <h1 className="dashboard-title">Overview</h1>
+        <p className="dashboard-subtitle">Quick access to infrastructure, chemistry and AI tooling.</p>
+      </div>
+      <BranchedMenu
+        items={menuItems}
+        defaultOpen={menuItems.map((_, index) => index)}
+        onSelect={handleSelect}
+        color="#e2e8f0"
+        accentColor="#38bdf8"
+        lineColor="#334155"
+      />
     </div>
-    <div className="tool-theme-list">
-      {toolThemes.map(theme => (
-        <ToolThemeSection key={theme.id} theme={theme} />
-      ))}
-    </div>
-  </div>
-)
+  )
+}
 
 export default Dashboard

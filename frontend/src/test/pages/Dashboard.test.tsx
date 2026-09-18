@@ -1,65 +1,55 @@
-import { render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Dashboard from '../../pages/Dashboard';
 
+const renderDashboard = () =>
+  render(
+    <MemoryRouter initialEntries={['/']}>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/D9bot" element={<div>D9bot page</div>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+
 describe('pages/Dashboard.tsx', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('renders an overview heading', () => {
-    render(<Dashboard />);
+    renderDashboard();
 
     expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
   });
 
-  it('groups the main tools by theme in the requested row order', () => {
-    render(<Dashboard />);
+  it('renders a section for every tool category', () => {
+    renderDashboard();
 
-    const expectedThemes = [
-      {
-        testId: 'infrastructure-theme',
-        title: 'Infrastructure',
-        labels: ['Checkmk', 'HCP Terraform'],
-      },
-      {
-        testId: 'smtp-theme',
-        title: 'SMTP',
-        labels: ['Certcheck', 'Mailing', 'SMTP Check'],
-      },
-      {
-        testId: 'dns-theme',
-        title: 'DNS',
-        labels: ['Cloudflare'],
-      },
-      {
-        testId: 'ai-agent-theme',
-        title: 'AI / Agent',
-        labels: ['D9bot'],
-      },
-      {
-        testId: 'act-theme',
-        title: 'ACT Chemistry',
-        labels: ['Adduct', 'Compound', 'Math'],
-      },
-    ];
-
-    const headings = expectedThemes.map(theme =>
-      within(screen.getByTestId(theme.testId)).getByRole('heading', { name: theme.title }),
-    );
-
-    expect(headings.map(heading => heading.textContent)).toEqual(
-      expectedThemes.map(theme => theme.title),
-    );
-
-    headings.slice(1).forEach((heading, index) => {
-      expect(
-        headings[index].compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
-      ).toBeTruthy();
+    ['Infrastructure', 'SMTP', 'DNS', 'AI / Agent', 'ACT Chemistry'].forEach(title => {
+      expect(screen.getByRole('button', { name: title })).toBeInTheDocument();
     });
+  });
 
-    expectedThemes.forEach(theme => {
-      const section = within(screen.getByTestId(theme.testId));
+  it('navigates to an internal tool when it is selected', () => {
+    renderDashboard();
 
-      theme.labels.forEach(label => {
-        expect(section.getAllByText(label).length).toBeGreaterThan(0);
-      });
-    });
+    fireEvent.click(screen.getByRole('button', { name: 'D9bot' }));
+
+    expect(screen.getByText('D9bot page')).toBeInTheDocument();
+  });
+
+  it('opens an external tool in a new tab when it is selected', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    renderDashboard();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Checkmk' }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://analytical.dispelk9.de/check_mk/',
+      '_blank',
+      'noopener,noreferrer',
+    );
   });
 });
