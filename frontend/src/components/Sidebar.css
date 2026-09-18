@@ -1,0 +1,17 @@
+.app-sidebar {
+  flex: 0 0 auto;
+  width: 260px;
+  padding: 1.5rem 1.25rem;
+  background: #12161c;
+  border-right: 1px solid #262c36;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 720px) {
+  .app-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #262c36;
+  }
+}

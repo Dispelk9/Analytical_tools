@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PorscheDesignSystemProvider } from '@porsche-design-system/components-react';
 import FullPageSpinner from './components/FullPageSpinner';
 import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 
 import Dashboard from './pages/Dashboard';
 import Adduct from './pages/Adduct';
@@ -52,17 +53,21 @@ const AppLayout: React.FC = () => (
   <div className="app-shell">
     <Navbar />
 
-    <main className="app-main">
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/adduct" element={<Adduct />} />
-        <Route path="/compound" element={<Compound />} />
-        <Route path="/math" element={<CollisionPlot />} />
-        <Route path="/smtpcheck" element={<Smtpcheck />} />
-        <Route path="/D9bot" element={<D9bot />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </main>
+    <div className="app-body">
+      <Sidebar />
+
+      <main className="app-main">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/adduct" element={<Adduct />} />
+          <Route path="/compound" element={<Compound />} />
+          <Route path="/math" element={<CollisionPlot />} />
+          <Route path="/smtpcheck" element={<Smtpcheck />} />
+          <Route path="/D9bot" element={<D9bot />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
 
     <footer className="app-footer">
       <p>Copyright 2025 - Ai Viet Hoang x Dispelk9</p>
