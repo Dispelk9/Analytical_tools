@@ -37,11 +37,12 @@ The platform combines:
 
 The authenticated app shell (`AppLayout` in [frontend/src/App.tsx](frontend/src/App.tsx)) is laid out like a sysadmin admin console:
 
-- A sticky top navbar ([frontend/src/components/Navbar.tsx](frontend/src/components/Navbar.tsx)) with one dropdown per tool category (Infrastructure, SMTP, DNS, AI/Agent, ACT Chemistry). Internal tools navigate via React Router; external tools open in a new tab.
-- A `/` dashboard ([frontend/src/pages/Dashboard.tsx](frontend/src/pages/Dashboard.tsx)) showing the same categories as a widget grid, for a landing overview.
+- A slim top navbar ([frontend/src/components/Navbar.tsx](frontend/src/components/Navbar.tsx)) with just the brand and logout.
+- A persistent left sidebar ([frontend/src/components/Sidebar.tsx](frontend/src/components/Sidebar.tsx)) showing every tool category as a collapsible tree (all collapsed on first load). It sits next to the routed content rather than inside it, so switching tools never remounts it — its open/active state survives navigation. Internal tools navigate via React Router; external tools open in a new tab.
+- The `/` overview ([frontend/src/pages/Dashboard.tsx](frontend/src/pages/Dashboard.tsx)) also lists every external tool as a one-click quick link, for people who land there before exploring the sidebar.
 - The main content area scales its width and padding with the browser window instead of being capped at a fixed width.
 
-Categories and tools are defined once in [frontend/src/data/toolThemes.ts](frontend/src/data/toolThemes.ts), and both the navbar and the dashboard read from it. Adding a new tool means adding a tile there (or a new theme entry for a new category) — no other wiring is required.
+Categories and tools are defined once in [frontend/src/data/toolThemes.ts](frontend/src/data/toolThemes.ts), and both the sidebar and the dashboard read from it. Adding a new tool means adding a tile there (or a new theme entry for a new category) — no other wiring is required.
 
 ---
 
@@ -165,6 +166,8 @@ Main services:
 - `keycloak`: Keycloak 26 identity provider, proxied at `https://auth.dispelk9.de`
 - `postgres`: application database and Keycloak session/realm store
 - `handbook-sync`: sync job for the private handbook repository
+- `prometheus`: scrapes backend `/metrics`, proxied at `https://prometheus.dispelk9.de`
+- `grafana`: dashboards over Prometheus, proxied at `https://grafana.dispelk9.de`
 
 Shared volumes:
 - `postgres_data`: Postgres persistence (application data + Keycloak realm state)
@@ -172,6 +175,14 @@ Shared volumes:
 
 Handbook mounts:
 - backend reads handbook at `/data/vho-handbook`
+
+### Exposing Prometheus and Grafana
+
+Both stay bound to `127.0.0.1` on the host in `docker-compose.yml` (`PROMETHEUS_BIND`/`GRAFANA_BIND`), and [deploy/nginx-proxy/nginx-act.conf](deploy/nginx-proxy/nginx-act.conf) reverse-proxies them from the same host at `grafana.dispelk9.de` and `prometheus.dispelk9.de`, the same pattern used for Checkmk and Certcheck.
+
+One-time setup on the server before the first deploy:
+- Certificates: `certbot certonly --dns-cloudflare ... -d grafana.dispelk9.de` and `-d prometheus.dispelk9.de`
+- Prometheus has no login of its own, so its nginx block requires HTTP Basic Auth: `sudo htpasswd -c /etc/nginx/.htpasswd-prometheus <user>`. Grafana is left without this since it has its own login (`GRAFANA_ADMIN_USER`/`GRAFANA_ADMIN_PASSWORD`).
 
 ---
 
@@ -275,7 +286,7 @@ Press `F5` and choose one of:
 ```text
 backend/    FastAPI service, chat logic, handbook search, analytical tools
 frontend/   React UI
-  src/components/  Shared UI (navbar, ...)
+  src/components/  Shared UI (navbar, sidebar, ...)
   src/pages/        Routed tool pages + the dashboard
   src/data/         Tool/category definitions shared by the navbar and dashboard
 deploy/     Docker Compose, deploy scripts

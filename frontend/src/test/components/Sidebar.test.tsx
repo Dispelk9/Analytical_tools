@@ -59,6 +59,18 @@ describe('components/Sidebar.tsx', () => {
     );
   });
 
+  it('lists Grafana and Prometheus under Infrastructure', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    renderSidebar();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Infrastructure' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Grafana' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Prometheus' }));
+
+    expect(openSpy).toHaveBeenNthCalledWith(1, 'https://grafana.dispelk9.de', '_blank', 'noopener,noreferrer');
+    expect(openSpy).toHaveBeenNthCalledWith(2, 'https://prometheus.dispelk9.de', '_blank', 'noopener,noreferrer');
+  });
+
   it('keeps a category open and the menu mounted after navigating to a different tool', () => {
     renderSidebar();
 
