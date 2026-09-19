@@ -4,7 +4,7 @@ import {
   PButton,
   PText,
 } from "@porsche-design-system/components-react";
-import ThoughtLine from '../components/ThoughtLine'
+import LatticeLoader from '../components/LatticeLoader'
 import {
   completeKeycloakLogin,
   hasKeycloakCallbackParams,
@@ -70,7 +70,7 @@ const Login: React.FC = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
         {isCalculating && (
           <div style={{ marginTop: '1rem' }}>
-            <ThoughtLine working label="Signing in" showTimer={false} collapsible={false} glyph="dot" />
+            <LatticeLoader status="working" label="Signing in" showTimer={false} />
           </div>
         )}
         <PButton type="submit" style={{ marginTop: '50px' }}>Sign in with Keycloak</PButton>

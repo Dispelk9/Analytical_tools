@@ -1,9 +1,10 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import reactLogo from '../../public/vite.svg';
 import '../components/D9bot/d9bot.css';
 
 import ChatList from '../components/D9bot/ChatList';
 import ChatComposer from '../components/D9bot/ChatComposer';
+import { PromptBarModel, PromptBarSendDetail } from '../components/PromptBar';
 import { ChatMessage, D9Response } from '../components/D9bot/type';
 import { authFetch } from '../auth/auth';
 
@@ -12,9 +13,7 @@ function newId(prefix: string) {
 }
 
 export default function D9bot() {
-  const [prompt, setPrompt] = useState('');
   const [recipient, setRecipient] = useState('');
-  const [useGemini, setUseGemini] = useState(true); // ✅ new
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'bot', text: 'Hi! Ask me anything.', createdAt: Date.now() },
@@ -23,13 +22,10 @@ export default function D9bot() {
   const [error, setError] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSend = async (raw: string, detail: PromptBarSendDetail) => {
     setError(null);
 
-    const raw = prompt;
     const check = raw.trim();
-
     if (!check) {
       setError('Please enter a prompt for D9 Bot');
       return;
@@ -40,7 +36,7 @@ export default function D9bot() {
       { id: newId('u'), role: 'user', text: raw, createdAt: Date.now() },
     ]);
 
-    setPrompt('');
+    const useGemini = (detail.model as PromptBarModel | undefined)?.key !== 'handbook';
 
     try {
       setIsThinking(true);
@@ -110,16 +106,11 @@ export default function D9bot() {
         </div>
 
         <ChatComposer
-          prompt={prompt}
           recipient={recipient}
           isThinking={isThinking}
           error={error}
-          onPromptChange={setPrompt}
           onRecipientChange={setRecipient}
-          onSubmit={handleSubmit}
-          // ✅ new props
-          useGemini={useGemini}
-          onUseGeminiChange={setUseGemini}
+          onSend={handleSend}
         />
       </div>
     </div>

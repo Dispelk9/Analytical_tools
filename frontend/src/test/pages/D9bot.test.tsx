@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import D9bot from '../../pages/D9bot';
 
@@ -7,7 +7,7 @@ describe('pages/D9bot.tsx', () => {
     vi.stubGlobal('fetch', vi.fn());
   });
 
-  it('uses the local handbook endpoint when AI mode is disabled', async () => {
+  it('uses the local handbook endpoint when the Handbook model is selected', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -19,9 +19,12 @@ describe('pages/D9bot.tsx', () => {
 
     render(<D9bot />);
 
-    fireEvent.click(screen.getByLabelText('AI Mode'));
-    fireEvent.change(screen.getByRole('textbox', { name: /^Message/ }), { target: { value: 'How do I deploy?' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Prompt' }));
+    const textarea = screen.getByRole('textbox', { name: 'Prompt' }) as HTMLTextAreaElement;
+    textarea.focus();
+    fireEvent.click(screen.getByRole('button', { name: 'Choose model' }));
+    fireEvent.click(screen.getByRole('option', { name: /Handbook/ }));
+    fireEvent.change(textarea, { target: { value: 'How do I deploy?' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
     expect(await screen.findByText('From handbook')).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
@@ -35,7 +38,7 @@ describe('pages/D9bot.tsx', () => {
     );
   });
 
-  it('uses Gemini chat when AI mode is enabled', async () => {
+  it('uses Gemini chat by default', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -47,8 +50,8 @@ describe('pages/D9bot.tsx', () => {
 
     render(<D9bot />);
 
-    fireEvent.change(screen.getByRole('textbox', { name: /^Message/ }), { target: { value: 'Summarize this' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Prompt' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Prompt' }), { target: { value: 'Summarize this' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
     expect(await screen.findByText('From Gemini')).toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
@@ -64,14 +67,10 @@ describe('pages/D9bot.tsx', () => {
     );
   });
 
-  it('shows a validation error for an empty prompt', async () => {
+  it('disables the send button while the prompt is empty', async () => {
     render(<D9bot />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Prompt' }));
-
-    await waitFor(() => {
-      expect(screen.getByText('Please enter a prompt for D9 Bot')).toBeInTheDocument();
-    });
+    expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled();
     expect(fetch).not.toHaveBeenCalled();
   });
 });

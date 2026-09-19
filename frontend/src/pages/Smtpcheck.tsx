@@ -4,7 +4,7 @@ import {
   PTextFieldWrapper,
   PText,
 } from "@porsche-design-system/components-react";
-import ThoughtLine from '../components/ThoughtLine';
+import LatticeLoader from '../components/LatticeLoader';
 import '../App.css';
 import { authFetch } from '../auth/auth';
 
@@ -89,7 +89,7 @@ const SmtpTest: React.FC = () => {
 
         {running && (
           <div style={{ marginTop: '1rem' }}>
-            <ThoughtLine working label="Testing" showTimer={false} collapsible={false} glyph="dot" />
+            <LatticeLoader status="working" label="Testing" showTimer={false} />
           </div>
         )}
 

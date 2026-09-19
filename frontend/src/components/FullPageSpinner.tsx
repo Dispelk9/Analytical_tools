@@ -1,4 +1,4 @@
-import ThoughtLine from './ThoughtLine';
+import LatticeLoader from './LatticeLoader';
 
 const FullPageSpinner = () => (
   <div
@@ -10,7 +10,7 @@ const FullPageSpinner = () => (
       background: '#111', // prevents white flash
     }}
   >
-    <ThoughtLine working label="Loading page" showTimer={false} collapsible={false} fontSize={22} color="#f8fafc" />
+    <LatticeLoader status="working" label="Loading page" showTimer={false} cellSize={8} fontSize={20} color="#f8fafc" />
   </div>
 );
 

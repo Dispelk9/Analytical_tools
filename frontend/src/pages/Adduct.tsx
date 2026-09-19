@@ -8,7 +8,7 @@ import {
   PSelectWrapper,
   PText,
 } from "@porsche-design-system/components-react";
-import ThoughtLine from '../components/ThoughtLine';
+import LatticeLoader from '../components/LatticeLoader';
 import '../App.css';
 import { authFetch } from '../auth/auth';
 
@@ -149,7 +149,7 @@ const Adduct: React.FC = () => {
 
             {isCalculating && (
               <div style={{ marginTop: '1rem' }}>
-                <ThoughtLine working label="Calculating" showTimer={false} collapsible={false} glyph="dot" />
+                <LatticeLoader status="working" label="Calculating" showTimer={false} />
               </div>
             )}
           </form>

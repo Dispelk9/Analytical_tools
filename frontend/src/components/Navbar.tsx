@@ -1,24 +1,10 @@
 import React, { FormEvent, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-import PillNav from './PillNav'
-import ThoughtLine from './ThoughtLine'
+import { Link } from 'react-router-dom'
+import LatticeLoader from './LatticeLoader'
 import { logoutFromAuthProvider } from '../auth/auth'
-import appLogo from '../../public/assets/act.png'
 import './Navbar.css'
 
-// PillNav only supports link items (no onClick actions like logout), so it
-// covers the primary internal pages here and Logout stays a separate control.
-const NAV_ITEMS = [
-  { label: 'Overview', href: '/' },
-  { label: 'D9bot', href: '/D9bot' },
-  { label: 'Adduct', href: '/adduct' },
-  { label: 'Compound', href: '/compound' },
-  { label: 'Math', href: '/math' },
-  { label: 'SMTP Check', href: '/smtpcheck' },
-]
-
 const Navbar: React.FC = () => {
-  const location = useLocation()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [logoutError, setLogoutError] = useState('')
 
@@ -36,29 +22,13 @@ const Navbar: React.FC = () => {
 
   return (
     <header className="navbar">
-      <PillNav
-        logo={appLogo}
-        logoAlt="Dispelk9 Tools"
-        items={NAV_ITEMS}
-        activeHref={location.pathname}
-        baseColor="#12161c"
-        pillColor="#1e2530"
-        hoveredPillTextColor="#f8fafc"
-        pillTextColor="#cbd5e1"
-      />
+      <Link to="/" className="navbar-brand">
+        Dispelk9 Tools
+      </Link>
 
       <form className="navbar-actions" onSubmit={handleLogout}>
         {logoutError && <span className="navbar-logout-error">{logoutError}</span>}
-        {isLoggingOut && (
-          <ThoughtLine
-            working
-            label="Logging out"
-            showTimer={false}
-            collapsible={false}
-            glyph="dot"
-            fontSize={13}
-          />
-        )}
+        {isLoggingOut && <LatticeLoader status="working" label="Logging out" showTimer={false} grid={3} cellSize={5} fontSize={12} />}
         <button type="submit" className="nav-item-trigger">Logout</button>
       </form>
     </header>

@@ -20,21 +20,10 @@ describe('components/Navbar.tsx', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the logo link and the primary tool pills', () => {
+  it('renders the brand link', () => {
     renderNavbar();
 
-    expect(screen.getByRole('menuitem', { name: 'Home' })).toHaveAttribute('href', '/');
-
-    [
-      ['Overview', '/'],
-      ['D9bot', '/D9bot'],
-      ['Adduct', '/adduct'],
-      ['Compound', '/compound'],
-      ['Math', '/math'],
-      ['SMTP Check', '/smtpcheck'],
-    ].forEach(([label, href]) => {
-      expect(screen.getByRole('menuitem', { name: label })).toHaveAttribute('href', href);
-    });
+    expect(screen.getByRole('link', { name: 'Dispelk9 Tools' })).toHaveAttribute('href', '/');
   });
 
   it('renders a logout button', () => {

@@ -4,7 +4,7 @@ import {
   PTextFieldWrapper,
   PText,
 } from "@porsche-design-system/components-react";
-import ThoughtLine from '../components/ThoughtLine';
+import LatticeLoader from '../components/LatticeLoader';
 import { authFetch } from '../auth/auth';
 
 const CollisionPlot: React.FC = () => {
@@ -74,7 +74,7 @@ const CollisionPlot: React.FC = () => {
           </form>
           {isCalculating && (
             <div style={{ marginTop: '1rem' }}>
-              <ThoughtLine working label="Plotting" showTimer={false} collapsible={false} glyph="dot" />
+              <LatticeLoader status="working" label="Plotting" showTimer={false} />
             </div>
           )}
           {error && <p style={{ color: 'red' }}>{error}</p>}
