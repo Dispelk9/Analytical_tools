@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { PSpinner } from '@porsche-design-system/components-react';
+import ThoughtLine from '../ThoughtLine';
 import { ChatMessage } from './type';
 import ChatMessageBubble from './ChatMessageBubble';
 
@@ -25,7 +25,7 @@ export default function ChatList({ messages, isThinking }: { messages: ChatMessa
       {isThinking && (
         <div className="d9-row d9-row-left">
           <div className="d9-bubble d9-bubble-bot">
-            <PSpinner size="small" aria={{ 'aria-label': 'Thinking' }} />
+            <ThoughtLine working showTimer collapsible={false} fontSize={14} />
           </div>
         </div>
       )}

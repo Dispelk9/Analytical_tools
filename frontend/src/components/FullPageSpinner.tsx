@@ -1,4 +1,4 @@
-import { PSpinner } from '@porsche-design-system/components-react';
+import ThoughtLine from './ThoughtLine';
 
 const FullPageSpinner = () => (
   <div
@@ -10,7 +10,7 @@ const FullPageSpinner = () => (
       background: '#111', // prevents white flash
     }}
   >
-    <PSpinner size="large" aria={{ 'aria-label': 'Loading page' }} />
+    <ThoughtLine working label="Loading page" showTimer={false} collapsible={false} fontSize={22} color="#f8fafc" />
   </div>
 );
 

@@ -35,6 +35,20 @@ Object.defineProperty(window, 'ResizeObserver', {
   value: MockResizeObserver,
 });
 
+// Never reports intersection, so components gated on visibility (e.g. SideRays)
+// skip their WebGL setup entirely under jsdom, which has no real GL context.
+class MockIntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+Object.defineProperty(window, 'IntersectionObserver', {
+  configurable: true,
+  writable: true,
+  value: MockIntersectionObserver,
+});
+
 const wrapChildren = (children: React.ReactNode) => (
   <>{children}</>
 );

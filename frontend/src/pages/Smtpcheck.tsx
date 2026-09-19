@@ -1,10 +1,10 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import {
   PButton,
-  PSpinner,
   PTextFieldWrapper,
   PText,
 } from "@porsche-design-system/components-react";
+import ThoughtLine from '../components/ThoughtLine';
 import '../App.css';
 import { authFetch } from '../auth/auth';
 
@@ -89,7 +89,7 @@ const SmtpTest: React.FC = () => {
 
         {running && (
           <div style={{ marginTop: '1rem' }}>
-            <PSpinner size="small" aria={{ 'aria-label': 'Testing...' }} />
+            <ThoughtLine working label="Testing" showTimer={false} collapsible={false} glyph="dot" />
           </div>
         )}
 

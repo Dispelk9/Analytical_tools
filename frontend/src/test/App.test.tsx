@@ -31,7 +31,7 @@ describe('App.tsx', () => {
 
     render(<App />);
 
-    expect(await screen.findByText('Dispelk9 Tools')).toBeInTheDocument();
+    expect(await screen.findByRole('menuitem', { name: 'Home' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Infrastructure' })).toHaveAttribute('aria-expanded', 'false');

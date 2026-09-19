@@ -2,9 +2,9 @@ import React, { useEffect, useState, FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   PButton,
-  PSpinner,
   PText,
 } from "@porsche-design-system/components-react";
+import ThoughtLine from '../components/ThoughtLine'
 import {
   completeKeycloakLogin,
   hasKeycloakCallbackParams,
@@ -70,7 +70,7 @@ const Login: React.FC = () => {
       {error && <p style={{ color: 'red' }}>{error}</p>}
         {isCalculating && (
           <div style={{ marginTop: '1rem' }}>
-            <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
+            <ThoughtLine working label="Signing in" showTimer={false} collapsible={false} glyph="dot" />
           </div>
         )}
         <PButton type="submit" style={{ marginTop: '50px' }}>Sign in with Keycloak</PButton>

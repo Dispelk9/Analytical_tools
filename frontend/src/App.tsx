@@ -5,6 +5,7 @@ import { PorscheDesignSystemProvider } from '@porsche-design-system/components-r
 import FullPageSpinner from './components/FullPageSpinner';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
+import SideRays from './components/SideRays';
 
 import Dashboard from './pages/Dashboard';
 import Adduct from './pages/Adduct';
@@ -79,6 +80,13 @@ function App() {
   const queryClient = new QueryClient();
   return (
     <PorscheDesignSystemProvider>
+      <SideRays
+        className="app-background"
+        speed={1.2}
+        intensity={1.4}
+        opacity={0.6}
+        origin="top-right"
+      />
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
         <Suspense fallback={<FullPageSpinner />}>

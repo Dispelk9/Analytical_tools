@@ -4,11 +4,11 @@ import reactLogo from '../../public/assets/react.svg';
 import RenderObject from './RenderObject';
 import {
   PButton,
-  PSpinner,
   PTextFieldWrapper,
   PSelectWrapper,
   PText,
 } from "@porsche-design-system/components-react";
+import ThoughtLine from '../components/ThoughtLine';
 import '../App.css';
 import { authFetch } from '../auth/auth';
 
@@ -149,7 +149,7 @@ const Adduct: React.FC = () => {
 
             {isCalculating && (
               <div style={{ marginTop: '1rem' }}>
-                <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
+                <ThoughtLine working label="Calculating" showTimer={false} collapsible={false} glyph="dot" />
               </div>
             )}
           </form>

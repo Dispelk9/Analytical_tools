@@ -1,10 +1,10 @@
 import React, { useState, FormEvent } from 'react';
 import {
   PButton,
-  PSpinner,
   PTextFieldWrapper,
   PText,
 } from "@porsche-design-system/components-react";
+import ThoughtLine from '../components/ThoughtLine';
 import { authFetch } from '../auth/auth';
 
 const CollisionPlot: React.FC = () => {
@@ -74,7 +74,7 @@ const CollisionPlot: React.FC = () => {
           </form>
           {isCalculating && (
             <div style={{ marginTop: '1rem' }}>
-              <PSpinner size="small" aria={{ 'aria-label': 'Loading result' }} />
+              <ThoughtLine working label="Plotting" showTimer={false} collapsible={false} glyph="dot" />
             </div>
           )}
           {error && <p style={{ color: 'red' }}>{error}</p>}
