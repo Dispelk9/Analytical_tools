@@ -70,3 +70,49 @@ def test_file_404_for_missing_file(client, handbook_root):
     response = client.get("/api/handbook/file", params={"path": "guides/missing.md"})
 
     assert response.status_code == 404
+
+
+def test_search_finds_matching_file_and_line(client, handbook_root):
+    response = client.get("/api/handbook/search", params={"q": "welcome"})
+
+    assert response.status_code == 200
+    results = response.json()
+    assert len(results) == 1
+    assert results[0]["path"] == "guides/onboarding.md"
+    assert results[0]["line"] == 2
+    assert "Welcome" in results[0]["snippet"]
+
+
+def test_search_is_case_insensitive(client, handbook_root):
+    response = client.get("/api/handbook/search", params={"q": "ONBOARDING"})
+
+    assert response.status_code == 200
+    assert any(result["path"] == "guides/onboarding.md" for result in response.json())
+
+
+def test_search_ignores_pdf_and_unsupported_files(client, handbook_root):
+    response = client.get("/api/handbook/search", params={"q": "PDF-1.4"})
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_search_rejects_empty_query(client, handbook_root):
+    response = client.get("/api/handbook/search", params={"q": "   "})
+
+    assert response.status_code == 400
+
+
+def test_search_returns_empty_list_for_no_matches(client, handbook_root):
+    response = client.get("/api/handbook/search", params={"q": "nonexistent-term-xyz"})
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_search_errors_when_root_missing(client, monkeypatch):
+    monkeypatch.setenv("HANDBOOK_ROOT", "/no/such/directory")
+
+    response = client.get("/api/handbook/search", params={"q": "welcome"})
+
+    assert response.status_code == 500

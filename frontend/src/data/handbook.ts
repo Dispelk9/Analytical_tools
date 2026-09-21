@@ -36,6 +36,23 @@ export const buildHandbookMenuItems = (tree: HandbookNode[]): BranchedMenuItem[]
 
 export const handbookFileHref = (path: string): string => `/handbook?path=${encodeURIComponent(path)}`
 
+export const handbookSearchHref = (query: string): string => `/handbook/search?q=${encodeURIComponent(query)}`
+
+export interface HandbookSearchResult {
+  path: string
+  name: string
+  line: number
+  snippet: string
+}
+
+export const searchHandbook = async (query: string): Promise<HandbookSearchResult[]> => {
+  const response = await authFetch(`/api/handbook/search?q=${encodeURIComponent(query)}`)
+  if (!response.ok) {
+    throw new Error('Failed to search handbook')
+  }
+  return response.json()
+}
+
 export type HandbookFileKind = 'markdown' | 'text' | 'pdf' | 'unsupported'
 
 export const getHandbookFileKind = (path: string): HandbookFileKind => {

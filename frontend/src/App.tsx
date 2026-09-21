@@ -15,6 +15,7 @@ import Smtpcheck from './pages/Smtpcheck';
 import Login from './login/Login'
 import D9bot from './pages/D9bot'
 import HandbookViewer from './pages/HandbookViewer'
+import HandbookSearch from './pages/HandbookSearch'
 import { authFetch } from './auth/auth'
 
 interface RequireAuthProps {
@@ -67,6 +68,7 @@ const AppLayout: React.FC = () => (
           <Route path="/smtpcheck" element={<Smtpcheck />} />
           <Route path="/D9bot" element={<D9bot />} />
           <Route path="/handbook" element={<HandbookViewer />} />
+          <Route path="/handbook/search" element={<HandbookSearch />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

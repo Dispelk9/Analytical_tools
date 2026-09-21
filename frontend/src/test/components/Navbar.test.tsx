@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { logoutFromAuthProvider } from '../../auth/auth';
 import Navbar from '../../components/Navbar';
@@ -10,8 +10,12 @@ vi.mock('../../auth/auth', () => ({
 
 const renderNavbar = () =>
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/']}>
       <Navbar />
+      <Routes>
+        <Route path="/" element={<div>Home page</div>} />
+        <Route path="/handbook/search" element={<div>Search results page</div>} />
+      </Routes>
     </MemoryRouter>,
   );
 
@@ -47,5 +51,24 @@ describe('components/Navbar.tsx', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
 
     expect(await screen.findByText('Failed to logout')).toBeInTheDocument();
+  });
+
+  it('navigates to the handbook search page when a query is submitted', () => {
+    renderNavbar();
+
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search handbook' }), {
+      target: { value: 'onboarding' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(screen.getByText('Search results page')).toBeInTheDocument();
+  });
+
+  it('does not navigate when the search query is empty', () => {
+    renderNavbar();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(screen.getByText('Home page')).toBeInTheDocument();
   });
 });

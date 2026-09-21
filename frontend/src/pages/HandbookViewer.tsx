@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import LatticeLoader from '../components/LatticeLoader'
+import BackToTop from '../components/BackToTop'
 import { authFetch } from '../auth/auth'
 import { getHandbookFileKind } from '../data/handbook'
 import './HandbookViewer.css'
@@ -83,6 +84,8 @@ const HandbookViewer: React.FC = () => {
       {!loading && !error && kind === 'unsupported' && (
         <p className="handbook-viewer-error">This file type isn't supported for preview yet.</p>
       )}
+
+      <BackToTop />
     </div>
   )
 }

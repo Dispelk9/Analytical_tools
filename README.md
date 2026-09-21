@@ -129,11 +129,13 @@ This is the path that uses external model quota.
 
 ## Handbook Browser
 
-The sidebar's second menu lists the synced handbook repo as a file tree, read directly from `HANDBOOK_ROOT`.
+The sidebar's second menu lists the synced handbook repo as a file tree, read directly from `HANDBOOK_ROOT`. A search box in the navbar searches the same content by keyword.
 
 - `GET /api/handbook/tree`: nested folder/file listing (`.md`/`.txt`/`.pdf` only; hidden files and other extensions are filtered out)
 - `GET /api/handbook/file?path=...`: returns the raw content of one file (rejects paths that escape `HANDBOOK_ROOT`)
+- `GET /api/handbook/search?q=...`: case-insensitive line search over `.md`/`.txt` files (pure Python, no subprocess/`rg` — PDFs aren't text-searchable without a PDF parsing library, so they're skipped), capped at 20 results, one match per file
 - The frontend viewer (`/handbook?path=...`) renders Markdown/text as plain text and PDFs via an embedded viewer — read-only for now; editing is a possible future addition
+- The search results page (`/handbook/search?q=...`) lists each match's file, line number, and snippet; clicking a result opens that file in the viewer
 - BranchedMenu only supports one level of section nesting, so folders deeper than the top level are flattened into the file's label as a relative path (e.g. `setup/install.md`)
 
 ---
@@ -325,7 +327,7 @@ docs/       Project documentation
 
 Important backend endpoints:
 - `/api/chat`: Gemini-backed D9bot chat
-- `/api/handbook/tree`, `/api/handbook/file`: handbook browser (see [Handbook Browser](#handbook-browser))
+- `/api/handbook/tree`, `/api/handbook/file`, `/api/handbook/search`: handbook browser (see [Handbook Browser](#handbook-browser))
 - `/health/handbook`
 - `/health/gemini`
 - `/metrics`
