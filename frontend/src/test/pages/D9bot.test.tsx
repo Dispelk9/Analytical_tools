@@ -7,38 +7,7 @@ describe('pages/D9bot.tsx', () => {
     vi.stubGlobal('fetch', vi.fn());
   });
 
-  it('uses the local handbook endpoint when the Handbook model is selected', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          candidates: [{ content: { parts: [{ text: 'From handbook' }] } }],
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      ),
-    );
-
-    render(<D9bot />);
-
-    const textarea = screen.getByRole('textbox', { name: 'Prompt' }) as HTMLTextAreaElement;
-    textarea.focus();
-    fireEvent.click(screen.getByRole('button', { name: 'Choose model' }));
-    fireEvent.click(screen.getByRole('option', { name: /Handbook/ }));
-    fireEvent.change(textarea, { target: { value: 'How do I deploy?' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
-
-    expect(await screen.findByText('From handbook')).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledWith(
-      '/api/handbook',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          Prompt_string: 'How do I deploy?',
-        }),
-      }),
-    );
-  });
-
-  it('uses Gemini chat by default', async () => {
+  it('sends the prompt to Gemini', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -61,13 +30,18 @@ describe('pages/D9bot.tsx', () => {
         body: JSON.stringify({
           Prompt_string: 'Summarize this',
           Email: '',
-          Mode: 'gemini',
         }),
       }),
     );
   });
 
-  it('disables the send button while the prompt is empty', async () => {
+  it('does not show a model picker since D9bot only talks to Gemini', () => {
+    render(<D9bot />);
+
+    expect(screen.queryByRole('button', { name: 'Choose model' })).not.toBeInTheDocument();
+  });
+
+  it('disables the send button while the prompt is empty', () => {
     render(<D9bot />);
 
     expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled();

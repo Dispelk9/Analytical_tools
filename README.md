@@ -9,9 +9,8 @@ The platform combines:
 - infrastructure and mail diagnostics
 - authenticated dashboard-style frontend
 - backend API services
-- D9bot chat with two operating modes:
-  - local handbook search
-  - Gemini-powered AI chat
+- D9bot: Gemini-powered AI chat
+- Handbook browser: browse and read the synced handbook (Markdown, text, PDF) from the sidebar
 
 ---
 
@@ -23,8 +22,8 @@ The platform combines:
 - **ACT Math**
 
 ### Chat & Knowledge Access
-- **D9bot Handbook Mode**: local handbook lookup through backend `rg` search, no Gemini usage
-- **D9bot AI Mode**: backend forwards prompts directly to Gemini for responses, optionally enriched with handbook context
+- **D9bot**: backend forwards prompts directly to Gemini for responses
+- **Handbook Browser**: sidebar file tree over the synced handbook repo, read-only viewer for `.md`/`.txt`/`.pdf` files
 
 ### Infrastructure & Diagnostics
 - **SMTP Check**
@@ -75,7 +74,7 @@ Backend API (FastAPI)
     |
     +---------------------------> Local analytical / SMTP / utility endpoints
     |
-    +---------------------------> Handbook search endpoint
+    +---------------------------> Handbook browser endpoints (tree/file)
     |                               |
     |                               v
     |                         handbook_data volume
@@ -105,23 +104,12 @@ Grafana
     +--> uses Prometheus as the default provisioned data source
 ```
 
-### D9bot Request Paths
+### D9bot Request Path
 
 ```text
-Handbook Mode
-
-Frontend
-  -> POST /api/handbook
-  -> Backend searches HANDBOOK_ROOT with ripgrep
-  -> Backend returns local matches
-  -> No Gemini quota usage
-
-
-AI Mode
-
 Frontend
   -> POST /api/chat
-  -> Backend calls Gemini directly (with handbook context when in handbook mode)
+  -> Backend calls Gemini directly
   -> Backend returns response
 ```
 
@@ -129,30 +117,24 @@ Frontend
 
 ## D9bot Behavior
 
-### Handbook Mode
-
-Handbook mode is intentionally local-first.
-
-- Frontend calls `/api/handbook`
-- Backend searches the synced handbook under `HANDBOOK_ROOT`
-- Results are returned directly to the UI
-- This path does **not** consume Gemini quota
-
-Current implementation:
-- search is keyword-based via `rg`
-- results depend on text matches in the handbook
-- semantically similar wording may still miss relevant sections
-
-### AI Mode
-
-AI mode calls Gemini directly.
+D9bot calls Gemini directly.
 
 - Frontend calls `/api/chat`
 - Backend calls Gemini using `GOOGLE_API_KEY` / `GEMINI_MODEL`
-- In handbook mode with matches, the handbook context is included in the prompt sent to Gemini
 - Each request is stateless; there is no server-side conversation memory
 
-This mode is the one that uses external model quota.
+This is the path that uses external model quota.
+
+---
+
+## Handbook Browser
+
+The sidebar's second menu lists the synced handbook repo as a file tree, read directly from `HANDBOOK_ROOT`.
+
+- `GET /api/handbook/tree`: nested folder/file listing (`.md`/`.txt`/`.pdf` only; hidden files and other extensions are filtered out)
+- `GET /api/handbook/file?path=...`: returns the raw content of one file (rejects paths that escape `HANDBOOK_ROOT`)
+- The frontend viewer (`/handbook?path=...`) renders Markdown/text as plain text and PDFs via an embedded viewer — read-only for now; editing is a possible future addition
+- BranchedMenu only supports one level of section nesting, so folders deeper than the top level are flattened into the file's label as a relative path (e.g. `setup/install.md`)
 
 ---
 
@@ -332,7 +314,7 @@ Press `F5` and choose one of:
 ## Project Structure
 
 ```text
-backend/    FastAPI service, chat logic, handbook search, analytical tools
+backend/    FastAPI service, chat logic, handbook browser, analytical tools
 frontend/   React UI
   src/components/  Shared UI (navbar, sidebar, ...)
   src/pages/        Routed tool pages + the dashboard
@@ -342,12 +324,12 @@ docs/       Project documentation
 ```
 
 Important backend endpoints:
-- `/api/chat`: Gemini-backed AI mode
-- `/api/handbook`: local handbook search mode
+- `/api/chat`: Gemini-backed D9bot chat
+- `/api/handbook/tree`, `/api/handbook/file`: handbook browser (see [Handbook Browser](#handbook-browser))
 - `/health/handbook`
 - `/health/gemini`
 - `/metrics`
-- `/api/gemini`: direct Gemini path used without handbook context
+- `/api/gemini`: direct Gemini path used by other tools
 
 ---
 
@@ -363,7 +345,6 @@ Important backend endpoints:
 - Python
 - FastAPI
 - PostgreSQL
-- ripgrep for handbook lookup
 
 ### Auth
 - Keycloak 26 (OIDC / PKCE)
@@ -394,9 +375,7 @@ Useful references for the main technologies used in this stack:
 
 ## Notes
 
-- Handbook mode uses backend-side handbook retrieval before Gemini answer generation.
-- The handbook is synced from the private `vho-handbook` repository into the Docker volume `handbook_data`.
-- If handbook mode returns no relevant results, that is currently a retrieval limitation rather than an AI limitation.
+- The handbook is synced from the private `vho-handbook` repository into the Docker volume `handbook_data`, and browsed read-only from the sidebar (see [Handbook Browser](#handbook-browser)).
 
 ---
 

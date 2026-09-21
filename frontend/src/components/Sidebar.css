@@ -8,6 +8,27 @@
   box-sizing: border-box;
 }
 
+.app-sidebar-section {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #262c36;
+}
+
+.app-sidebar-heading {
+  margin: 0 0 0.5rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.app-sidebar-note {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
 @media (max-width: 720px) {
   .app-sidebar {
     width: 100%;

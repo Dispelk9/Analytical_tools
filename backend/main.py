@@ -13,6 +13,7 @@ from api.chatbot.health_routes import router as health_router
 from api.tools.act_math import router as math_router
 from api.tools.adduct import router as adduct_router
 from api.tools.compound import router as compound_router
+from api.tools.handbook_browser import router as handbook_browser_router
 from api.tools.smtp_handler import router as smtp_router
 from services.utils.db_connection import DB_CONNECT
 from services.utils.metrics import configure_metrics
@@ -80,6 +81,7 @@ def create_app(
     app.include_router(adduct_router, dependencies=protected_dependencies)
     app.include_router(math_router, dependencies=protected_dependencies)
     app.include_router(smtp_router, dependencies=protected_dependencies)
+    app.include_router(handbook_browser_router, dependencies=protected_dependencies)
     app.include_router(chatbot_api_router, dependencies=protected_dependencies)
     app.include_router(health_router)
     configure_metrics(app)

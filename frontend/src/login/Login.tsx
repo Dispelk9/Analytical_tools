@@ -78,7 +78,7 @@ const Login: React.FC = () => {
 
     {/* Footer */}
     <footer className="h-16 flex items-center justify-center bg-gray-800" style={{ marginTop: '200px' }}>
-      <p className="text-sm text-white">Copyright 2025 - Porsche Design x Dispelk9</p>
+      <p className="text-sm text-white">Copyright 2026 - Ai Viet Hoang x Dispelk9</p>
     </footer>
     </div>
     </div>

@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BranchedMenu, { BranchedMenuChild, BranchedMenuItem } from './BranchedMenu'
 import { isExternalHref, toolThemes } from '../data/toolThemes'
+import { buildHandbookMenuItems, fetchHandbookTree, handbookFileHref, HandbookNode } from '../data/handbook'
 import './Sidebar.css'
 
 // Menu sections/tools come from src/data/toolThemes.ts. Add a tile there to
@@ -33,6 +34,32 @@ const Sidebar: React.FC = () => {
     navigate(value)
   }
 
+  const [handbookTree, setHandbookTree] = useState<HandbookNode[] | null>(null)
+  const [handbookError, setHandbookError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchHandbookTree()
+      .then(tree => {
+        if (!cancelled) setHandbookTree(tree)
+      })
+      .catch(() => {
+        if (!cancelled) setHandbookError('Could not load handbook')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handbookMenuItems = useMemo(
+    () => (handbookTree ? buildHandbookMenuItems(handbookTree) : []),
+    [handbookTree],
+  )
+
+  const handleHandbookSelect = (value: string) => {
+    navigate(handbookFileHref(value))
+  }
+
   return (
     <aside className="app-sidebar" aria-label="Tool navigation">
       <BranchedMenu
@@ -44,6 +71,25 @@ const Sidebar: React.FC = () => {
         lineColor="#334155"
         width={220}
       />
+
+      <div className="app-sidebar-section">
+        <h2 className="app-sidebar-heading">Handbook</h2>
+        {handbookError && <p className="app-sidebar-note">{handbookError}</p>}
+        {!handbookError && handbookTree && handbookMenuItems.length === 0 && (
+          <p className="app-sidebar-note">No handbook files found.</p>
+        )}
+        {!handbookError && handbookMenuItems.length > 0 && (
+          <BranchedMenu
+            items={handbookMenuItems}
+            defaultOpen={-1}
+            onSelect={handleHandbookSelect}
+            color="#e2e8f0"
+            accentColor="#a78bfa"
+            lineColor="#334155"
+            width={220}
+          />
+        )}
+      </div>
     </aside>
   )
 }

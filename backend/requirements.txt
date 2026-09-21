@@ -12,5 +12,4 @@ matplotlib
 SQLAlchemy>=2.0
 Werkzeug>=2.0
 PyJWT[crypto]>=2.3
-ripgrep
 prometheus-client>=0.20

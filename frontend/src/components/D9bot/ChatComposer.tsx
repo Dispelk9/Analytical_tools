@@ -1,17 +1,12 @@
 import { ChangeEvent } from 'react';
-import PromptBar, { PromptBarModel, PromptBarSendDetail } from '../PromptBar';
-
-const MODELS: PromptBarModel[] = [
-  { key: 'gemini', name: 'Gemini', tag: 'AI' },
-  { key: 'handbook', name: 'Handbook', tag: 'Local' },
-];
+import PromptBar from '../PromptBar';
 
 type Props = {
   recipient: string;
   isThinking: boolean;
   error: string | null;
   onRecipientChange: (v: string) => void;
-  onSend: (text: string, detail: PromptBarSendDetail) => void;
+  onSend: (text: string) => void;
 };
 
 export default function ChatComposer({
@@ -39,8 +34,7 @@ export default function ChatComposer({
         placeholder="Ask D9bot anything…"
         sources={[]}
         commands={[]}
-        models={MODELS}
-        defaultModel="gemini"
+        models={[]}
         efforts={[]}
         busy={isThinking}
         onSend={onSend}

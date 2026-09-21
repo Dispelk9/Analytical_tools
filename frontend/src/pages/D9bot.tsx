@@ -4,7 +4,6 @@ import '../components/D9bot/d9bot.css';
 
 import ChatList from '../components/D9bot/ChatList';
 import ChatComposer from '../components/D9bot/ChatComposer';
-import { PromptBarModel, PromptBarSendDetail } from '../components/PromptBar';
 import { ChatMessage, D9Response } from '../components/D9bot/type';
 import { authFetch } from '../auth/auth';
 
@@ -22,7 +21,7 @@ export default function D9bot() {
   const [error, setError] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
 
-  const handleSend = async (raw: string, detail: PromptBarSendDetail) => {
+  const handleSend = async (raw: string) => {
     setError(null);
 
     const check = raw.trim();
@@ -36,26 +35,13 @@ export default function D9bot() {
       { id: newId('u'), role: 'user', text: raw, createdAt: Date.now() },
     ]);
 
-    const useGemini = (detail.model as PromptBarModel | undefined)?.key !== 'handbook';
-
     try {
       setIsThinking(true);
 
-      const endpoint = useGemini ? '/api/chat' : '/api/handbook';
-      const body = useGemini
-        ? {
-            Prompt_string: raw,
-            Email: recipient,
-            Mode: 'gemini',
-          }
-        : {
-            Prompt_string: raw,
-          };
-
-      const response = await authFetch(endpoint, {
+      const response = await authFetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ Prompt_string: raw, Email: recipient }),
       });
 
       if (!response.ok) throw new Error('Server error');

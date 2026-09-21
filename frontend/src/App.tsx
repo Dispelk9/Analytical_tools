@@ -14,6 +14,7 @@ import CollisionPlot from './pages/ACT_Math';
 import Smtpcheck from './pages/Smtpcheck';
 import Login from './login/Login'
 import D9bot from './pages/D9bot'
+import HandbookViewer from './pages/HandbookViewer'
 import { authFetch } from './auth/auth'
 
 interface RequireAuthProps {
@@ -37,7 +38,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
       })
   }, [])
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <FullPageSpinner />
   return authed ? (
     <>{children}</>
   ) : (
@@ -65,6 +66,7 @@ const AppLayout: React.FC = () => (
           <Route path="/math" element={<CollisionPlot />} />
           <Route path="/smtpcheck" element={<Smtpcheck />} />
           <Route path="/D9bot" element={<D9bot />} />
+          <Route path="/handbook" element={<HandbookViewer />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
