@@ -22,7 +22,12 @@ const transformIndexHtmlPlugin = () => ({
       getMetaTagsAndIconLinks({ appTitle: 'Dispelk9 Tools' }),
     ].join('');
 
-    return html.replace(/<\/head>/, `${headPartials}</head>`);
+    // getMetaTagsAndIconLinks() injects its own <link rel="icon"> tags, which are
+    // appended after index.html's own favicon link and win the tab icon in most
+    // browsers. Strip them so our act.png favicon (see index.html) isn't shadowed.
+    const headPartialsWithoutIcon = headPartials.replace(/<link rel=icon[^>]*>/g, '');
+
+    return html.replace(/<\/head>/, `${headPartialsWithoutIcon}</head>`);
   },
 });
 

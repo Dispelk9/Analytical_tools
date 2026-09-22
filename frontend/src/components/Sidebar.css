@@ -1,11 +1,45 @@
+body.sidebar-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
 .app-sidebar {
+  position: relative;
   flex: 0 0 auto;
-  width: 260px;
   padding: 1.5rem 1.25rem;
   background: #12161c;
   border-right: 1px solid #262c36;
   overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
+}
+
+.app-sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 2;
+  background: transparent;
+  touch-action: none;
+}
+
+.app-sidebar-resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 2px;
+  width: 2px;
+  height: 100%;
+  background: transparent;
+  transition: background 150ms ease;
+}
+
+.app-sidebar-resizer:hover::after,
+.app-sidebar[data-resizing] .app-sidebar-resizer::after {
+  background: #38bdf8;
 }
 
 .app-sidebar-section {
@@ -31,8 +65,12 @@
 
 @media (max-width: 720px) {
   .app-sidebar {
-    width: 100%;
+    width: 100% !important;
     border-right: none;
     border-bottom: 1px solid #262c36;
+  }
+
+  .app-sidebar-resizer {
+    display: none;
   }
 }

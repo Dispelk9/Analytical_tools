@@ -15,7 +15,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  width: fit-content;
+  width: 100%;
   max-width: min(var(--bm-w), 100%);
   padding-left: 14px;
   color: var(--bm-ink);
@@ -145,10 +145,12 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-width: 0;
   height: var(--bm-row);
   margin: 0;
-  padding: 0 0 0 var(--bm-indent);
+  padding: 0 8px 0 var(--bm-indent);
   border: 0;
+  border-radius: 6px;
   background: none;
   color: var(--bm-muted);
   font: inherit;
@@ -157,7 +159,7 @@
   outline: none;
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
-  transition: color 200ms ease;
+  transition: color 200ms ease, background-color 200ms ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -169,6 +171,7 @@
 .branched-menu__item[data-active] {
   color: var(--bm-accent);
   font-weight: 500;
+  background: color-mix(in srgb, var(--bm-accent) 14%, transparent);
 }
 
 .branched-menu__icon {
@@ -177,7 +180,10 @@
 }
 
 .branched-menu__label {
+  min-width: 0;
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 @media (prefers-reduced-motion: reduce) {

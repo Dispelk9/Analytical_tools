@@ -222,6 +222,7 @@ const BranchedMenu: React.FC<BranchedMenuProps> = ({
                         key={kid.value}
                         type="button"
                         className="branched-menu__item"
+                        title={kid.label}
                         aria-current={kid.value === active ? 'true' : undefined}
                         data-active={kid.value === active ? '' : undefined}
                         tabIndex={isOpen ? 0 : -1}

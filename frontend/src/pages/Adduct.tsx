@@ -1,6 +1,5 @@
 // src/Adduct.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
-import reactLogo from '../../public/assets/react.svg';
 import RenderObject from './RenderObject';
 import {
   PButton,
@@ -84,10 +83,6 @@ const Adduct: React.FC = () => {
   return (
     <div className="outer-container">
       <div className="inner-container">
-        <a href="https://info.dispelk9.de" target="_blank">
-          <img src={reactLogo} className="logo react" alt="Act logo" />
-        </a>
-
         <h1 className="form-title">Adduct Calculation</h1>
         <div className="form-wrapper">
           <form onSubmit={handleSubmit}>
