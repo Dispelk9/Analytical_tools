@@ -6,14 +6,14 @@
 
 .handbook-search-title {
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-strong);
   font-size: 1.1rem;
   word-break: break-word;
 }
 
 .handbook-search-error,
 .handbook-search-empty {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -31,31 +31,31 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.9rem 1rem;
-  background: #12161c;
-  border: 1px solid #262c36;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  color: #e2e8f0;
+  color: var(--text-body);
   text-decoration: none;
 }
 
 .handbook-search-result:hover,
 .handbook-search-result:focus-visible {
-  border-color: #38bdf8;
+  border-color: var(--accent);
 }
 
 .handbook-search-result-path {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.85rem;
-  color: #f8fafc;
+  color: var(--text-strong);
   font-weight: 600;
 }
 
 .handbook-search-result-line {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-subtle);
 }
 
 .handbook-search-result-snippet {
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: var(--text-soft);
 }

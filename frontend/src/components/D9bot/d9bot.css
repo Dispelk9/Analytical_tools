@@ -2,8 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #111;
-  color: #fff;
+  background: var(--bg-sunken);
+  color: var(--text-strong);
 }
 
 .d9-chat-header {
@@ -11,7 +11,7 @@
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--overlay-border);
 }
 
 .d9-title { margin: 0; font-size: 20px; }
@@ -39,8 +39,8 @@
   padding: 12px 14px;
   border-radius: 16px;
   line-height: 1.35;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 20px var(--shadow);
+  border: 1px solid var(--overlay-border);
 
   /* Keep everything left */
   text-align: left;
@@ -68,17 +68,17 @@
 }
 
 .d9-bubble-bot {
-  background: rgba(255,255,255,0.06);
+  background: var(--bubble-bot);
   border-top-left-radius: 6px;
 }
 
 .d9-bubble-user {
-  background: rgba(0, 140, 255, 0.25);
+  background: var(--bubble-user);
   border-top-right-radius: 6px;
 }
 
 .d9-bubble-system {
-  background: rgba(255, 170, 0, 0.18);
+  background: var(--bubble-system);
 }
 
 /* ✅ Code: do NOT wrap code, scroll horizontally instead */
@@ -90,8 +90,8 @@
   overflow-x: auto;
   overflow-y: hidden;
 
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--code-bg);
+  border: 1px solid var(--overlay-border);
 
   /* prevent code from wrapping weirdly */
   white-space: pre;
@@ -104,8 +104,8 @@
 
 .d9-composer {
   padding: 14px 16px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  background: #0f0f0f;
+  border-top: 1px solid var(--overlay-border);
+  background: var(--bg-sunken);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -119,7 +119,7 @@
   width: 100%;
   max-width: 720px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
 }
 
 .d9-composer-recipient .form-input {
@@ -127,7 +127,7 @@
   min-width: 0;
 }
 
-.d9-error { margin-top: 10px; color: #ff6b6b; font-size: 13px; }
+.d9-error { margin-top: 10px; color: var(--danger); font-size: 13px; }
 
 /*Scroll bar in chatbox*/
 /* Full height layout */
@@ -152,4 +152,10 @@
 /* Composer stays at bottom */
 .d9-composer {
   flex: 0 0 auto;
+}
+/* In light mode the white prompt field sits on a near-white composer; outline it. */
+@media (prefers-color-scheme: light) {
+  .d9-composer .prompt-bar__field:not([data-max]) {
+    box-shadow: 0 0 0 1px var(--border-strong);
+  }
 }

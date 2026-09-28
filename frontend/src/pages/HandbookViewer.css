@@ -7,7 +7,7 @@
 
 .handbook-viewer-title {
   margin: 0;
-  color: #f8fafc;
+  color: var(--text-strong);
   font-size: 1.1rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   word-break: break-all;
@@ -17,10 +17,10 @@
   flex: 1 1 auto;
   margin: 0;
   padding: 1.25rem;
-  background: #12161c;
-  border: 1px solid #262c36;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  color: #e2e8f0;
+  color: var(--text-body);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9rem;
   white-space: pre-wrap;
@@ -32,11 +32,11 @@
   flex: 1 1 auto;
   width: 100%;
   min-height: 70vh;
-  border: 1px solid #262c36;
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
 .handbook-viewer-error {
-  color: #f87171;
+  color: var(--danger);
   font-size: 0.9rem;
 }

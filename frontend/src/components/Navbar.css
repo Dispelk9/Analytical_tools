@@ -7,13 +7,13 @@
   gap: 1.5rem;
   height: 60px;
   padding: 0 1.5rem;
-  background: #12161c;
-  border-bottom: 1px solid #262c36;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 
 .navbar-brand {
   flex: 0 0 auto;
-  color: #f8fafc;
+  color: var(--text-strong);
   font-size: 1.05rem;
   font-weight: 600;
   text-decoration: none;
@@ -35,20 +35,20 @@
   min-width: 0;
   height: 34px;
   padding: 0 0.75rem;
-  background: #1a1f28;
-  border: 1px solid #262c36;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
   border-radius: 8px;
-  color: #e2e8f0;
+  color: var(--text-body);
   font-size: 0.85rem;
 }
 
 .navbar-search-input::placeholder {
-  color: #64748b;
+  color: var(--text-subtle);
 }
 
 .navbar-search-input:focus {
   outline: none;
-  border-color: #38bdf8;
+  border-color: var(--accent);
 }
 
 .nav-item-trigger {
@@ -59,7 +59,7 @@
   padding: 0 0.75rem;
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: var(--text-soft);
   font-size: 0.9rem;
   cursor: pointer;
   border-radius: 6px;
@@ -67,8 +67,8 @@
 
 .nav-item-trigger:hover,
 .nav-item-trigger[aria-expanded='true'] {
-  background: #1e2530;
-  color: #f8fafc;
+  background: var(--surface-hover);
+  color: var(--text-strong);
 }
 
 .navbar-actions {
@@ -80,7 +80,7 @@
 }
 
 .navbar-logout-error {
-  color: #f87171;
+  color: var(--danger);
   font-size: 0.8rem;
 }
 

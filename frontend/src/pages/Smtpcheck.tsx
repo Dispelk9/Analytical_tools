@@ -67,7 +67,7 @@ const SmtpTest: React.FC = () => {
       <h1 className="form-title">SMTP Connectivity Test</h1>
 
       <form onSubmit={handleSubmit} className="form-wrapper">
-        <PTextFieldWrapper theme="dark" label="Mail server host:">
+        <PTextFieldWrapper theme="auto" label="Mail server host:">
           <input
             type="text"
             value={host}
@@ -78,7 +78,7 @@ const SmtpTest: React.FC = () => {
         </PTextFieldWrapper>
 
         <PButton
-          theme="dark"
+          theme="auto"
           variant="secondary"
           type="submit"
           style={{ marginTop: 20 }}
@@ -102,7 +102,7 @@ const SmtpTest: React.FC = () => {
 
       {data && (
         <div style={{ marginTop: '2rem' }}>
-          <PText theme="dark">Results for {data.host}:</PText>
+          <PText theme="auto">Results for {data.host}:</PText>
           <table className="result-table" style={{ width: '100%', marginTop: '0.5rem' }}>
             <thead>
               <tr>

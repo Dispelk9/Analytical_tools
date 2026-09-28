@@ -67,7 +67,7 @@ const Compound: React.FC = () => {
         <h1 className="form-title">Compound Calculation</h1>
 
         <form onSubmit={handleSubmit} className="form-wrapper">
-          <PTextFieldWrapper theme="dark" label="Adduct:" description="Should be a float number">
+          <PTextFieldWrapper theme="auto" label="Adduct:" description="Should be a float number">
             <input
               type="number"
               value={adduct}
@@ -77,7 +77,7 @@ const Compound: React.FC = () => {
             />
           </PTextFieldWrapper>
 
-          <PTextFieldWrapper theme="dark" label="Observed m/z:" description="Measured mass-to-charge ratio">
+          <PTextFieldWrapper theme="auto" label="Observed m/z:" description="Measured mass-to-charge ratio">
             <input
               type="number"
               value={observed}
@@ -87,7 +87,7 @@ const Compound: React.FC = () => {
             />
           </PTextFieldWrapper>
 
-          <PTextFieldWrapper theme="dark" label="Mass error (ppm):" description="Allowed error of mass">
+          <PTextFieldWrapper theme="auto" label="Mass error (ppm):" description="Allowed error of mass">
             <input
               type="number"
               value={massError}
@@ -97,7 +97,7 @@ const Compound: React.FC = () => {
             />
           </PTextFieldWrapper>
 
-          <PButton theme="dark"  variant="secondary" type="submit" style={{ marginTop: '50px' }}>
+          <PButton theme="auto"  variant="secondary" type="submit" style={{ marginTop: '50px' }}>
             Calculate
           </PButton>
         </form>
@@ -105,26 +105,26 @@ const Compound: React.FC = () => {
         {error && <div className="response-message response-error">{error}</div>}
 
         {compounds.length > 0 && (
-          <PTable caption="Compound Search Results">
+          <PTable theme="auto" caption="Compound Search Results">
             <PTableHead>
               <PTableHeadRow>
-                <PTableHeadCell style={{ color: 'white' }}>Molecular Formula</PTableHeadCell>
-                <PTableHeadCell style={{ color: 'white' }}>CID</PTableHeadCell>
-                <PTableHeadCell style={{ color: 'white' }}>Exact Mass</PTableHeadCell>
-                <PTableHeadCell style={{ color: 'white' }}>IUPAC Name</PTableHeadCell>
-                <PTableHeadCell style={{ color: 'white' }}>Link</PTableHeadCell>
-                <PTableHeadCell style={{ color: 'white' }}>Image</PTableHeadCell>
+                <PTableHeadCell>Molecular Formula</PTableHeadCell>
+                <PTableHeadCell>CID</PTableHeadCell>
+                <PTableHeadCell>Exact Mass</PTableHeadCell>
+                <PTableHeadCell>IUPAC Name</PTableHeadCell>
+                <PTableHeadCell>Link</PTableHeadCell>
+                <PTableHeadCell>Image</PTableHeadCell>
               </PTableHeadRow>
             </PTableHead>
             <PTableBody>
               {compounds.map((item) => (
                 <PTableRow key={item.cid}>
-                  <PTableCell style={{ color: 'white' }}>{item.molecular_formula}</PTableCell>
-                  <PTableCell style={{ color: 'white' }}>{item.cid}</PTableCell>
-                  <PTableCell style={{ color: 'white' }}>{item.exact_mass}</PTableCell>
-                  <PTableCell style={{ color: 'white' }}>{item.iupac_name}</PTableCell>
-                  <PTableCell style={{ color: 'white' }}>
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
+                  <PTableCell>{item.molecular_formula}</PTableCell>
+                  <PTableCell>{item.cid}</PTableCell>
+                  <PTableCell>{item.exact_mass}</PTableCell>
+                  <PTableCell>{item.iupac_name}</PTableCell>
+                  <PTableCell>
+                    <a href={item.link} target="_blank" rel="noopener noreferrer">
                       View Compound
                     </a>
                   </PTableCell>
@@ -137,7 +137,7 @@ const Compound: React.FC = () => {
           </PTable>
         )}
 
-        <PText theme="dark" style={{ textAlign: 'justify' }}>
+        <PText theme="auto" style={{ textAlign: 'justify' }}>
           This tool is designed to help getting the compounds from Pubchem
           <br />
           How to use:

@@ -8,23 +8,23 @@
   justify-content: center;
   width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid #262c36;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: #12161c;
-  color: #f8fafc;
+  background: var(--surface);
+  color: var(--text-strong);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 12px var(--shadow);
   transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .back-to-top:hover {
-  background: #1b212b;
+  background: var(--surface-hover);
   transform: translateY(-2px);
 }
 
 .back-to-top:focus-visible {
-  outline: 2px solid #f8fafc;
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }

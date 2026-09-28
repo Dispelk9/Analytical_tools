@@ -53,7 +53,7 @@ const CollisionPlot: React.FC = () => {
         <div className="form-wrapper">
           <form onSubmit={fetchPlot}>
             <div>
-              <PTextFieldWrapper theme="dark" label="X values (Concentration):" description="Should be a float number">
+              <PTextFieldWrapper theme="auto" label="X values (Concentration):" description="Should be a float number">
                 <input
                   type="text"
                   value={xValues}
@@ -62,7 +62,7 @@ const CollisionPlot: React.FC = () => {
               </PTextFieldWrapper>
             </div>
             <div>
-              <PTextFieldWrapper theme="dark" label="Y values (Response):" description="Should be a float number">
+              <PTextFieldWrapper theme="auto" label="Y values (Response):" description="Should be a float number">
                 <input
                   type="text"
                   value={yValues}
@@ -70,20 +70,20 @@ const CollisionPlot: React.FC = () => {
                 />
               </PTextFieldWrapper>
             </div>
-            <PButton theme="dark" type="submit" style={{ marginTop: '50px' }}>Plot</PButton>
+            <PButton theme="auto" type="submit" style={{ marginTop: '50px' }}>Plot</PButton>
           </form>
           {isCalculating && (
             <div style={{ marginTop: '1rem' }}>
               <LatticeLoader status="working" label="Plotting" showTimer={false} />
             </div>
           )}
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && <p className="response-error">{error}</p>}
           {plotUrl && (
             <div>
               <img src={plotUrl} alt="Collision Plot" style={{ maxWidth: '100%' }} />
             </div>
           )}
-          <PText theme="dark" style={{ textAlign: 'justify' }}>
+          <PText theme="auto" style={{ textAlign: 'justify' }}>
             Flask endpoint that generates a scatter plot with <br />
             the x-axis labeled "Concentration (µg/mL)"<br />
             the y-axis labeled "Response". <br />

@@ -1,11 +1,84 @@
+/*
+ * Theme tokens. Dark values are the default; the light block below redefines
+ * every token. Components must use these variables instead of hardcoded
+ * colors so they stay readable in both modes (see AGENTS.md).
+ */
+:root {
+  --bg: #242424;
+  --bg-sunken: #111111;
+  --text: rgba(255, 255, 255, 0.87);
+  --text-strong: #f8fafc;
+  --text-body: #e2e8f0;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+  --surface: #12161c;
+  --surface-raised: #1a1f28;
+  --surface-hover: #1e2530;
+  --border: #262c36;
+  --border-strong: #2a323e;
+  --line: #334155;
+  --accent: #38bdf8;
+  --accent-alt: #a78bfa;
+  --link: #646cff;
+  --link-hover: #535bf2;
+  --danger: #f87171;
+  --success: #4ade80;
+  --button-bg: #1a1a1a;
+  --focus-ring: #f8fafc;
+  --shadow: rgba(0, 0, 0, 0.35);
+  --overlay-border: rgba(255, 255, 255, 0.08);
+  --code-bg: rgba(0, 0, 0, 0.35);
+  --result-bg: rgba(37, 10, 10, 0.18);
+  --result-border: #342525;
+  --bubble-bot: rgba(255, 255, 255, 0.06);
+  --bubble-user: rgba(0, 140, 255, 0.25);
+  --bubble-system: rgba(255, 170, 0, 0.18);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --bg-sunken: #f8fafc;
+    --text: #213547;
+    --text-strong: #0f172a;
+    --text-body: #1e293b;
+    --text-soft: #334155;
+    --text-muted: #475569;
+    --text-subtle: #64748b;
+    --surface: #ffffff;
+    --surface-raised: #f1f5f9;
+    --surface-hover: #e2e8f0;
+    --border: #d5dbe3;
+    --border-strong: #cbd5e1;
+    --line: #cbd5e1;
+    --accent: #0369a1;
+    --accent-alt: #7c3aed;
+    --link: #4f46e5;
+    --link-hover: #747bff;
+    --danger: #dc2626;
+    --success: #15803d;
+    --button-bg: #f9f9f9;
+    --focus-ring: #0f172a;
+    --shadow: rgba(15, 23, 42, 0.12);
+    --overlay-border: rgba(15, 23, 42, 0.1);
+    --code-bg: #f1f5f9;
+    --result-bg: rgba(220, 38, 38, 0.04);
+    --result-border: #ead5d5;
+    --bubble-bot: rgba(15, 23, 42, 0.05);
+    --bubble-user: rgba(0, 140, 255, 0.14);
+    --bubble-system: rgba(255, 170, 0, 0.2);
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--text);
+  background-color: var(--bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,11 +88,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--link);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--link-hover);
 }
 
 body {
@@ -40,27 +113,15 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--button-bg);
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--link);
 }
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}

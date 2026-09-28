@@ -20,6 +20,7 @@ Your mission is to:
 - Maintain project consistency
 - Always write test if new infrastructure comes
 - Don't start function with symbol _
+- Always review UI changes for visibility in both light and dark mode
 
 You should behave like a **senior engineer reviewing and contributing to the codebase.**
 
@@ -244,6 +245,53 @@ Avoid:
 
 - unnecessary complexity
 - excessive abstraction
+
+---
+
+# Light & Dark Mode Visibility
+
+The app follows the user's OS theme (`color-scheme: light dark` and
+`@media (prefers-color-scheme: light)` in `frontend/src/index.css`).
+The global background switches to white in light mode, so any component that
+hardcodes dark-mode colors (e.g. white text, `rgba(255,255,255,…)` borders,
+translucent white panels) becomes unreadable for light-mode users.
+
+**Every frontend change must be reviewed for both light and dark mode.**
+
+Rules:
+
+- Never hardcode text, background, or border colors in components. Use shared
+  CSS variables (defined on `:root`) that are redefined for each theme.
+- When adding a color token, define it for **both** themes:
+
+  ```css
+  :root {
+    --text-primary: rgba(255, 255, 255, 0.87);
+    --surface: #1e1e1e;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --text-primary: #213547;
+      --surface: #f5f7fa;
+    }
+  }
+
+  .card { color: var(--text-primary); background: var(--surface); }
+  ```
+
+- Check that text, icons, borders, focus rings, placeholders, disabled states,
+  hover states, charts, code blocks, and third-party components (e.g. Reactbit
+  effects) stay readable in both themes.
+- Aim for WCAG AA contrast (4.5:1 for normal text, 3:1 for large text/UI parts).
+- When touching an existing component that hardcodes dark-only colors, fix it
+  or flag it to the developer.
+
+Before finishing a frontend task:
+
+1. Toggle the OS/browser theme (or use DevTools → Rendering →
+   "Emulate CSS prefers-color-scheme") and view the change in **light** and **dark**.
+2. Confirm no text or control is low-contrast or invisible in either mode.
+3. Mention in your summary that both modes were reviewed, or what could not be verified.
 
 ---
 

@@ -131,9 +131,9 @@ const Sidebar: React.FC = () => {
         items={menuItems}
         defaultOpen={-1}
         onSelect={handleSelect}
-        color="#e2e8f0"
-        accentColor="#38bdf8"
-        lineColor="#334155"
+        color="var(--text-body)"
+        accentColor="var(--accent)"
+        lineColor="var(--line)"
         width={menuWidth}
       />
 
@@ -148,9 +148,9 @@ const Sidebar: React.FC = () => {
             items={handbookMenuItems}
             defaultOpen={-1}
             onSelect={handleHandbookSelect}
-            color="#e2e8f0"
-            accentColor="#a78bfa"
-            lineColor="#334155"
+            color="var(--text-body)"
+            accentColor="var(--accent-alt)"
+            lineColor="var(--line)"
             width={menuWidth}
           />
         )}

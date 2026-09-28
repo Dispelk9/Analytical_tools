@@ -38,9 +38,9 @@ export default function ChatComposer({
         efforts={[]}
         busy={isThinking}
         onSend={onSend}
-        background="#12161c"
-        color="#e2e8f0"
-        menuBackground="#1a1f28"
+        background="var(--surface)"
+        color="var(--text-body)"
+        menuBackground="var(--surface-raised)"
         width={720}
       />
 

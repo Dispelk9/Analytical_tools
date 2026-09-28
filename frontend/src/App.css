@@ -107,11 +107,11 @@
 }
 
 .response-success {
-  color: green;
+  color: var(--success);
 }
 
 .response-error {
-  color: red;
+  color: var(--danger);
 }
 
 .app-shell {
@@ -147,9 +147,9 @@
   flex: 0 0 auto;
   padding: 0.85rem 1.5rem;
   text-align: center;
-  background: #12161c;
-  border-top: 1px solid #262c36;
-  color: #94a3b8;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -163,12 +163,12 @@
 
 .dashboard-title {
   margin: 0 0 0.25rem;
-  color: #f8fafc;
+  color: var(--text-strong);
 }
 
 .dashboard-subtitle {
   margin: 0;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .quick-links {
@@ -180,18 +180,18 @@
 
 .quick-link {
   padding: 0.5rem 0.9rem;
-  border: 1px solid #2a323e;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: #1a1f28;
-  color: #e2e8f0;
+  background: var(--surface-raised);
+  color: var(--text-body);
   font-size: 0.9rem;
   text-decoration: none;
 }
 
 .quick-link:hover,
 .quick-link:focus-visible {
-  border-color: #38bdf8;
-  color: #f8fafc;
+  border-color: var(--accent);
+  color: var(--text-strong);
 }
 
 /* Result CSS */
@@ -199,8 +199,8 @@
 .result-container {
   margin-top: 1rem;
   padding: 1rem;
-  border: 1px solid #342525;
-  background: #250a0a2f;
+  border: 1px solid var(--result-border);
+  background: var(--result-bg);
   border-radius: 4px;
   text-align: left;
   max-width: 1000px;
@@ -238,9 +238,16 @@ html, body {
   z-index: -1;
 }
 
+/* The rays are tuned for a dark page; soften them so they don't wash out text on white. */
+@media (prefers-color-scheme: light) {
+  .app-background.side-rays-container {
+    opacity: 0.45;
+  }
+}
+
 .code-box {
-  background: #0f0f0f;           /* dark card background */
-  border: 1px solid #2a2a2a;
+  background: var(--code-bg);
+  border: 1px solid var(--overlay-border);
   border-radius: 12px;
   padding: 12px 14px;
   margin: 0.5rem 0;

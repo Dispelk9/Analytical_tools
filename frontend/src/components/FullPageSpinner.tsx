@@ -7,10 +7,10 @@ const FullPageSpinner = () => (
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#111', // prevents white flash
+      background: 'var(--bg)', // matches the page background, no flash
     }}
   >
-    <LatticeLoader status="working" label="Loading page" showTimer={false} cellSize={8} fontSize={20} color="#f8fafc" />
+    <LatticeLoader status="working" label="Loading page" showTimer={false} cellSize={8} fontSize={20} color="var(--text-strong)" />
   </div>
 );
 

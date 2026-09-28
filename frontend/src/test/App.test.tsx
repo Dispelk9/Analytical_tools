@@ -22,7 +22,7 @@ describe('App.tsx', () => {
 
     render(<App />);
 
-    expect(await screen.findByText('Welcome to my Playground')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Welcome to my Playground' })).toBeInTheDocument();
   });
 
   it('renders the navbar and dashboard once authenticated', async () => {

@@ -48,7 +48,7 @@ const RenderObjectTable: React.FC<RenderObjectTableProps> = ({ data }) => {
   const entries = Object.entries(data as Record<string, unknown>);
 
   return (
-    <PTable theme="dark">
+    <PTable theme="auto">
       <PTableHead>
         <PTableRow>
           <PTableHeadCell>Mode</PTableHeadCell>

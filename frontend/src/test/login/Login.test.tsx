@@ -22,6 +22,7 @@ describe('login/Login.tsx', () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByRole('heading', { name: 'Welcome to my Playground' })).toBeInTheDocument();
     expect(screen.queryByLabelText('Username')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
 

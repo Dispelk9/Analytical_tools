@@ -86,7 +86,7 @@ const Adduct: React.FC = () => {
         <h1 className="form-title">Adduct Calculation</h1>
         <div className="form-wrapper">
           <form onSubmit={handleSubmit}>
-            <PTextFieldWrapper theme="dark" label="Neutral mass (Da):" description="Should be a float number">
+            <PTextFieldWrapper theme="auto" label="Neutral mass (Da):" description="Should be a float number">
               <input
                 type="number"
                 value={Neutral_mass}
@@ -96,7 +96,7 @@ const Adduct: React.FC = () => {
               />
             </PTextFieldWrapper>
 
-            <PTextFieldWrapper theme="dark" label="Observed m/z:" description="Measured mass-to-charge ratio">
+            <PTextFieldWrapper theme="auto" label="Observed m/z:" description="Measured mass-to-charge ratio">
               <input
                 type="number"
                 value={Observed}
@@ -106,7 +106,7 @@ const Adduct: React.FC = () => {
               />
             </PTextFieldWrapper>
 
-            <PTextFieldWrapper theme="dark" label="Mass error (ppm):" description="Allowed error of mass">
+            <PTextFieldWrapper theme="auto" label="Mass error (ppm):" description="Allowed error of mass">
               <input
                 type="number"
                 value={Mass_error}
@@ -116,7 +116,7 @@ const Adduct: React.FC = () => {
               />
             </PTextFieldWrapper>
 
-            <PTextFieldWrapper theme="dark" label="Recipient address:" description="Allowed send result to your address">
+            <PTextFieldWrapper theme="auto" label="Recipient address:" description="Allowed send result to your address">
               <input
                 type="email"
                 value={Recipient}
@@ -126,7 +126,7 @@ const Adduct: React.FC = () => {
               />
             </PTextFieldWrapper>
 
-            <PSelectWrapper theme="dark" label="Mode:" description="Positive or negative ESI mode">
+            <PSelectWrapper theme="auto" label="Mode:" description="Positive or negative ESI mode">
               <select
                 value={operation}
                 onChange={handleOperationChange}
@@ -138,7 +138,7 @@ const Adduct: React.FC = () => {
               </select>
             </PSelectWrapper>
 
-            <PButton theme="dark"  variant="secondary" type="submit" style={{ marginTop: '50px' }}>
+            <PButton theme="auto"  variant="secondary" type="submit" style={{ marginTop: '50px' }}>
               Calculate
             </PButton>
 
@@ -164,7 +164,7 @@ const Adduct: React.FC = () => {
           </div>
         )}
 
-        <PText theme="dark" style={{ textAlign: 'justify' }}>
+        <PText theme="auto" style={{ textAlign: 'justify' }}>
           This tool is designed to help identify adduct ions in ESI-MS (Electrospray ionization
           in mass spectroscopy) measurements using the Neutral mass and Observed mass m/z data
           obtained from the UNIFI Scientific Information System software.
