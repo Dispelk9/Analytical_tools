@@ -14,7 +14,7 @@ import {
 } from '../auth/auth'
 import './Login.css'
 
-const WELCOME_TEXT = 'Welcome to my Playground'
+const WELCOME_TEXT = 'Welcome to PLAYGROUND'
 
 const Login: React.FC = () => {
   const [error, setError] = useState<string>('')
@@ -67,7 +67,6 @@ const Login: React.FC = () => {
     <div className="login-screen">
       <div className="login-card">
         <form className="login-form" onSubmit={handleSubmit}>
-          <p className="login-eyebrow">Analytical Tools</p>
 
           <h1 className="login-title">
             <span className="login-sr-only">{WELCOME_TEXT}</span>
@@ -86,10 +85,6 @@ const Login: React.FC = () => {
               />
             )}
           </h1>
-
-          <PText theme="auto" color="contrast-high">
-            Sign in with Keycloak to continue to Analytical Tools.
-          </PText>
 
           {error && <p className="response-error" role="alert">{error}</p>}
 
