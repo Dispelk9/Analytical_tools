@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import BranchedMenu, { BranchedMenuChild, BranchedMenuItem } from './BranchedMenu'
+import BranchedMenu, { BranchedMenuItem } from './BranchedMenu'
 import { isExternalHref, toolThemes } from '../data/toolThemes'
 import { buildHandbookMenuItems, fetchHandbookTree, handbookFileHref, HandbookNode } from '../data/handbook'
 import './Sidebar.css'
@@ -85,7 +85,7 @@ const Sidebar: React.FC = () => {
     [],
   )
 
-  const handleSelect = (value: string, _item: BranchedMenuChild | BranchedMenuItem) => {
+  const handleSelect = (value: string) => {
     if (isExternalHref(value)) {
       window.open(value, '_blank', 'noopener,noreferrer')
       return

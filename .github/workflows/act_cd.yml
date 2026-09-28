@@ -5,13 +5,25 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
-concurrency:
-  group: prod-deploy
-  cancel-in-progress: true
-
+# Concurrency is set per job instead of for the whole run: a newer push may
+# cancel an older run's CI and image build, but never a deploy in progress.
+# A queued deploy is still replaced by a newer one, so only the latest runs.
 jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/act_ci.yml
+    permissions:
+      contents: read
+    concurrency:
+      group: prod-ci
+      cancel-in-progress: true
+
   build-and-push:
     runs-on: ubuntu-latest
+    needs: ci
+    concurrency:
+      group: prod-build
+      cancel-in-progress: true
     permissions:
       contents: read
       packages: write
@@ -59,6 +71,9 @@ jobs:
       contents: read
       packages: read
     timeout-minutes: 15
+    concurrency:
+      group: prod-deploy
+      cancel-in-progress: false
 
     steps:
       - name: Checkout deploy folder only
@@ -74,10 +89,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      # SSH_KNOWN_HOSTS holds the server's verified host key line(s), so a
+      # server answering with a different key makes ssh/scp fail instead of
+      # silently trusting it (which ssh-keyscan at deploy time would do).
       - name: Pin server host key
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
+          set -euo pipefail
+          : "${SSH_KNOWN_HOSTS:?Set the SSH_KNOWN_HOSTS GitHub Actions secret to the verified host key of the server}"
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.IP }}" >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          printf 'Host *\n  StrictHostKeyChecking yes\n' >> ~/.ssh/config
 
       - name: Copy compose file and refresh nginx conf to server
         run: |

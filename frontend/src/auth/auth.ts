@@ -130,7 +130,22 @@ export const startKeycloakLogin = async (returnPath = '/'): Promise<void> => {
   window.location.assign(`${getAuthorizationEndpoint()}?${params.toString()}`);
 };
 
-export const completeKeycloakLogin = async (): Promise<string> => {
+// An authorization code can only be exchanged once. React StrictMode (dev) runs
+// the login page's callback effect twice, so a second exchange would fail and
+// clear the tokens the first one just stored. Callers share one in-flight
+// exchange instead.
+let pendingLogin: Promise<string> | null = null;
+
+export const completeKeycloakLogin = (): Promise<string> => {
+  if (!pendingLogin) {
+    pendingLogin = exchangeAuthorizationCode().finally(() => {
+      pendingLogin = null;
+    });
+  }
+  return pendingLogin;
+};
+
+const exchangeAuthorizationCode = async (): Promise<string> => {
   const params = new URLSearchParams(window.location.search);
   const error = params.get('error');
   if (error) {

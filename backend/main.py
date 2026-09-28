@@ -24,8 +24,10 @@ load_dotenv()
 
 def build_database_url() -> str:
     db_config = DB_CONNECT()
+    # Name the driver explicitly: SQLAlchemy 2.1 switched the default for plain
+    # "postgresql://" URLs to psycopg (v3), but only psycopg2 is installed.
     return (
-        "postgresql://"
+        "postgresql+psycopg2://"
         f"{db_config['username']}:{db_config['password']}"
         f"@{db_config['host']}:{db_config['port']}/{db_config['dbname']}"
     )

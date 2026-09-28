@@ -1,0 +1,4 @@
+# Keep host-installed modules and old builds out of the image; `npm ci` in the
+# Dockerfile installs dependencies from package-lock.json instead.
+node_modules
+dist

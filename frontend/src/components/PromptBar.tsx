@@ -609,7 +609,9 @@ const PromptBar: React.FC<PromptBarProps> = ({
                   if (e.button !== 0) return;
                   try {
                     e.currentTarget.setPointerCapture(e.pointerId);
-                  } catch {}
+                  } catch {
+                    // Capture fails if the pointer was already released; dragging still works without it.
+                  }
                   e.currentTarget.focus({ preventScroll: true });
                   effortFromPointer(e);
                 }}
