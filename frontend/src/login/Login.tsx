@@ -1,9 +1,6 @@
 import React, { useEffect, useState, FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  PButton,
-  PText,
-} from "@porsche-design-system/components-react";
+import { PButton } from "@porsche-design-system/components-react";
 import { useReducedMotion } from 'motion/react'
 import LatticeLoader from '../components/LatticeLoader'
 import DecryptedText from '../components/DecryptedText'
