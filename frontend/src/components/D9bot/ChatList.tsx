@@ -6,15 +6,13 @@ import ChatMessageBubble from './ChatMessageBubble';
 export default function ChatList({ messages, isThinking }: { messages: ChatMessage[]; isThinking: boolean }) {
   const listRef = useRef<HTMLDivElement | null>(null);
 
+  // Scroll only the conversation container. scrollIntoView() would also
+  // scroll every scrollable ancestor, dragging the main window down.
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages.length, isThinking]);
-
-
-  const bottomRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const list = listRef.current;
+    if (!list) return;
+    list.scrollTo?.({ top: list.scrollHeight, behavior: 'smooth' });
+  }, [messages, isThinking]);
 
   return (
     <div className="d9-chat-list" ref={listRef}>
@@ -29,7 +27,6 @@ export default function ChatList({ messages, isThinking }: { messages: ChatMessa
           </div>
         </div>
       )}
-      <div ref={bottomRef} />
     </div>
   );
 }

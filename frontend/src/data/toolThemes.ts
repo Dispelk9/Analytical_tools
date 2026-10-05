@@ -20,6 +20,7 @@ export const toolThemes: ToolTheme[] = [
       { href: 'https://app.terraform.io/app/dispelk9_org/workspaces', label: 'HCP Terraform' },
       { href: 'https://grafana.dispelk9.de', label: 'Grafana' },
       { href: 'https://prometheus.dispelk9.de', label: 'Prometheus' },
+      { href: 'https://auth.dispelk9.de', label: 'Keycloak' },
     ],
   },
   {

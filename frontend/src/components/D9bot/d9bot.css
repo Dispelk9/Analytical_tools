@@ -130,9 +130,11 @@
 .d9-error { margin-top: 10px; color: var(--danger); font-size: 13px; }
 
 /*Scroll bar in chatbox*/
-/* Full height layout */
+/* Fit the chat into the viewport below the 60px sticky navbar and the
+   .app-main padding, so the conversation scrolls instead of the window. */
 .d9-chat-page {
-  height: 100vh;
+  height: calc(100dvh - 60px - 2 * clamp(1rem, 3vw, 2.5rem));
+  min-height: 420px;
   display: flex;
   flex-direction: column;
 }
@@ -142,11 +144,17 @@
   flex: 0 0 auto;
 }
 
-/* Scrollable message area */
+/* Message area fills the remaining height; .d9-chat-list is the scroller */
 .d9-chat-body {
   flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.d9-chat-body .d9-chat-list {
+  min-height: 0;
   overflow-y: auto;
-  padding: 16px;
 }
 
 /* Composer stays at bottom */

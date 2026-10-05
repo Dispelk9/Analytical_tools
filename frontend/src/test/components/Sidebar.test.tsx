@@ -76,6 +76,16 @@ describe('components/Sidebar.tsx', () => {
     expect(openSpy).toHaveBeenNthCalledWith(2, 'https://prometheus.dispelk9.de', '_blank', 'noopener,noreferrer');
   });
 
+  it('links Keycloak under Infrastructure', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    renderSidebar();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Infrastructure' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Keycloak' }));
+
+    expect(openSpy).toHaveBeenCalledWith('https://auth.dispelk9.de', '_blank', 'noopener,noreferrer');
+  });
+
   it('keeps a category open and the menu mounted after navigating to a different tool', () => {
     renderSidebar();
 
