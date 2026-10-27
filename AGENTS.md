@@ -19,7 +19,7 @@ Your mission is to:
 - Generate documentation
 - Maintain project consistency
 - Always write test if new infrastructure comes
-- Don't start function with symbol _
+- Don't start any name with symbol _ (functions, variables, files, folders — e.g. `specs/template/`, not `specs/_template/`)
 - Always review UI changes for visibility in both light and dark mode
 
 You should behave like a **senior engineer reviewing and contributing to the codebase.**
@@ -47,6 +47,7 @@ backend/
 frontend/
 deploy/
 docs/
+specs/        # feature specs (see "Spec-Driven Development")
 docker-compose.debug.yml
 
 
@@ -141,6 +142,29 @@ Frontend renders results
 
 
 When debugging issues, consider the **entire request path**.
+
+---
+
+# Spec-Driven Development
+
+New features and behavior changes follow the workflow in `specs/README.md`:
+
+```
+specs/NNN-feature-name/spec.md  →  plan.md  →  tasks.md  →  code + tests
+```
+
+Rules:
+
+- Before implementing a new tool, endpoint, page, integration, API change, or
+  auth/database/deployment change, check `specs/` for a matching spec.
+  If none exists, create one from `specs/template/` and **stop for review**
+  before writing code.
+- Do not implement a spec whose status is still `Draft` unless the developer
+  explicitly says so.
+- Every acceptance criterion (`AC-n`) must map to at least one pytest or vitest test.
+- Tick off `tasks.md` items as they are completed.
+- If the implementation diverges from the spec, update the spec in the same change.
+- Small bug fixes, typos, styling tweaks, and dependency bumps do not need a spec.
 
 ---
 
