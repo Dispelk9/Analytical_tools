@@ -12,6 +12,7 @@ import Adduct from './pages/Adduct';
 import Compound from './pages/Compound';
 import CollisionPlot from './pages/ACT_Math';
 import Smtpcheck from './pages/Smtpcheck';
+import IpLookup from './pages/IpLookup';
 import Login from './login/Login'
 import D9bot from './pages/D9bot'
 import HandbookViewer from './pages/HandbookViewer'
@@ -66,6 +67,7 @@ const AppLayout: React.FC = () => (
           <Route path="/compound" element={<Compound />} />
           <Route path="/math" element={<CollisionPlot />} />
           <Route path="/smtpcheck" element={<Smtpcheck />} />
+          <Route path="/iplookup" element={<IpLookup />} />
           <Route path="/D9bot" element={<D9bot />} />
           <Route path="/handbook" element={<HandbookViewer />} />
           <Route path="/handbook/search" element={<HandbookSearch />} />

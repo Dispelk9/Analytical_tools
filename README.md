@@ -27,6 +27,7 @@ The platform combines:
 
 ### Infrastructure & Diagnostics
 - **SMTP Check**
+- **IP Lookup** (`/iplookup`, sidebar → DNS): owner, network range, registry, origin AS, approximate location, reverse DNS and abuse contact for a public IP or hostname. Uses free, key-less sources only: RDAP (IANA bootstrap → RIR) and RIPEstat (`prefix-overview`, `maxmind-geo-lite` = MaxMind GeoLite2). The backend needs outbound HTTPS to `data.iana.org`, the `rdap.*` RIR servers and `stat.ripe.net`. See [specs/017-ip-lookup](specs/017-ip-lookup/spec.md).
 - **Certificate / mail diagnostics**
 - **Operational and infrastructure dashboard modules**
 

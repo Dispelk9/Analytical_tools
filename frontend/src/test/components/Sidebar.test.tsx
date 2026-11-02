@@ -14,6 +14,7 @@ const renderSidebar = () =>
         <Route path="/" element={<div>Home page</div>} />
         <Route path="/D9bot" element={<div>D9bot page</div>} />
         <Route path="/handbook" element={<div>Handbook page</div>} />
+        <Route path="/iplookup" element={<div>IP Lookup page</div>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -62,6 +63,16 @@ describe('components/Sidebar.tsx', () => {
       '_blank',
       'noopener,noreferrer',
     );
+  });
+
+  // spec 017 AC-10
+  it('lists IP Lookup under DNS and navigates to it', () => {
+    renderSidebar();
+
+    fireEvent.click(screen.getByRole('button', { name: 'DNS' }));
+    fireEvent.click(screen.getByRole('button', { name: 'IP Lookup' }));
+
+    expect(screen.getByText('IP Lookup page')).toBeInTheDocument();
   });
 
   it('lists Grafana and Prometheus under Infrastructure', () => {

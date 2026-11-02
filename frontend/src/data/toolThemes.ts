@@ -35,7 +35,10 @@ export const toolThemes: ToolTheme[] = [
   {
     id: 'dns',
     title: 'DNS',
-    tiles: [{ href: 'https://dash.cloudflare.com/login', label: 'Cloudflare' }],
+    tiles: [
+      { href: 'https://dash.cloudflare.com/login', label: 'Cloudflare' },
+      { href: '/iplookup', label: 'IP Lookup' },
+    ],
   },
   {
     id: 'ai-agent',

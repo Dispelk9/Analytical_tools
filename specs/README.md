@@ -75,6 +75,7 @@ Then, once approved: *"Write plan.md and tasks.md for spec 004"*, and finally
 | 014 | [Compound search: faster, bounded PubChem calls](014-compound-pubchem-hardening/spec.md) | Draft — P3 |
 | 015 | [Liveness, readiness and dependency health](015-health-and-readiness/spec.md) | Draft — P2 |
 | 016 | [Production deployment hardening](016-production-deployment-hardening/spec.md) | Draft — P1, needs approval |
+| 017 | [IP lookup (origin & owner)](017-ip-lookup/spec.md) | Done |
 
 Add a row here for every new spec.
 
